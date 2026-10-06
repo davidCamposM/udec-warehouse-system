@@ -2,10 +2,11 @@
 /config/config.php
 .env
 
-# Datos generados por el servidor: logs y respaldos. Se conservan las carpetas
+# Datos generados por el servidor: logs, sesiones y respaldos. Se conservan las carpetas
 /storage/**
 !/storage/**/
 !/storage/**/.gitkeep
+!/storage/.htaccess
 
 # Dependencias de desarrollo (no se usan en producción)
 /vendor/

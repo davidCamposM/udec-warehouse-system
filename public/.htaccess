@@ -1,0 +1,8 @@
+# Todo lo que no sea un archivo real (CSS, JS, imágenes) lo atiende index.php.
+# Sin mod_rewrite el sistema sigue funcionando con url_mode = query (index.php?r=...).
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^ index.php [L]
+</IfModule>
