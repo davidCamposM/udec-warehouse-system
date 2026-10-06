@@ -1,0 +1,25 @@
+# Configuración real (credenciales). Solo se versiona config.example.php
+/config/config.php
+.env
+
+# Datos generados por el servidor: logs y respaldos. Se conservan las carpetas
+/storage/**
+!/storage/**/
+!/storage/**/.gitkeep
+
+# Dependencias de desarrollo (no se usan en producción)
+/vendor/
+/node_modules/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+*:Zone.Identifier
+
+# Editores
+.vscode/
+.idea/
+*.swp
+~$*
+.~lock.*
