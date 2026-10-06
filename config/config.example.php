@@ -22,12 +22,13 @@ return [
         'https' => false,                       // true si el servidor tiene HTTPS: activa la cookie Secure
     ],
 
+    // Valores por defecto del entorno Docker. En el servidor, los que indique la DTI.
     'db' => [
-        'host' => '127.0.0.1',
+        'host' => 'db',                         // nombre del servicio en docker-compose.yml
         'port' => 3306,
         'name' => 'bodega_fcf',
         'user' => 'bodega',
-        'pass' => '',
+        'pass' => 'bodega',
         'charset' => 'utf8mb4',
     ],
 

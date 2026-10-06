@@ -20,7 +20,7 @@ escribiendo el código o buscando por nombre.
 | Servidor      | PHP 8.5 puro (sin frameworks, sin Composer) |
 | Base de datos | MySQL, InnoDB, utf8mb4                      |
 | Cliente       | JavaScript vanilla y CSS puro               |
-| Desarrollo    | Docker (PHP 8.5 + Apache + MySQL 8)         |
+| Desarrollo    | Docker (PHP 8.5 + Apache + MySQL 8.4)       |
 
 Sin librerías externas, CDNs ni servicios de terceros en producción: el servidor institucional
 solo admite PHP, MySQL y JavaScript sin frameworks.

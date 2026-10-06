@@ -1,0 +1,63 @@
+# Entorno de desarrollo local — Bodega FCF UdeC (no se usa en producción)
+#
+#   docker compose up -d --build   levantar (la primera vez construye la imagen)
+#   docker compose down            detener (los datos de MySQL se conservan)
+#   docker compose down -v         detener y BORRAR la base de datos
+#
+#   Sistema:     http://localhost:8080
+#   phpMyAdmin:  http://localhost:8081  (usuario bodega / clave bodega)
+#   MySQL desde el host: 127.0.0.1:3307
+#
+# Puertos y credenciales se cambian en .env (ver .env.example).
+
+name: bodega-fcf
+
+services:
+  app:
+    build:
+      context: ./docker/php
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+    ports:
+      - "${APP_PORT:-8080}:80"
+    volumes:
+      - ./:/var/www/html
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+      MYSQL_DATABASE: ${DB_NAME:-bodega_fcf}
+      MYSQL_USER: ${DB_USER:-bodega}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-bodega}
+      TZ: America/Santiago
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    ports:
+      - "${DB_PORT:-3307}:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p\"$$MYSQL_ROOT_PASSWORD\" --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    environment:
+      PMA_HOST: db
+    ports:
+      - "${PMA_PORT:-8081}:80"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  db-data:
