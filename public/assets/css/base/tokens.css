@@ -1,0 +1,85 @@
+/* ==========================================================
+   Tokens de diseño — Bodega FCF UdeC
+   Colores, tipografía, espacios, formas y sombras. Todo el CSS
+   usa estas variables: para cambiar el estilo, se cambia aquí.
+   ========================================================== */
+:root {
+  /* Marca: verde forestal */
+  --color-brand-950: #0f2a1c;
+  --color-brand-900: #163a28;
+  --color-brand-800: #1f4a33; /* principal: botones, panel de acceso */
+  --color-brand-700: #2a6044;
+  --color-brand-600: #3a7b58;
+  --color-brand-500: #4f9a72;
+  --color-brand-200: #c2e2cf;
+  --color-brand-100: #e3f1e8;
+  --color-brand-50: #f2f8f4;
+
+  /* Neutros */
+  --color-bg: #f5f8f9; /* fondo de página */
+  --color-surface: #ffffff; /* tarjetas y campos */
+  --color-border: #dce3e7;
+  --color-border-strong: #c2cbd2;
+  --color-text: #15212b;
+  --color-text-muted: #55626d;
+  --color-text-subtle: #6b7781; /* placeholders y notas; contraste AA sobre blanco */
+  --color-on-brand: #ffffff;
+  --color-on-brand-muted: rgba(255, 255, 255, 0.78);
+
+  /* Estados */
+  --color-danger: #b42318;
+  --color-danger-bg: #fef3f2;
+  --color-danger-border: #fecdca;
+  --color-warning: #93370d;
+  --color-warning-bg: #fffaeb;
+  --color-warning-border: #fedf89;
+  --color-success: #067647;
+  --color-success-bg: #ecfdf3;
+  --color-success-border: #abefc6;
+  --color-info: #1849a9;
+  --color-info-bg: #eff8ff;
+  --color-info-border: #b2ddff;
+
+  /* Tipografía */
+  --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace;
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+  --leading-tight: 1.2;
+  --leading-normal: 1.55;
+
+  /* Espacios (múltiplos de 4 px) */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+
+  /* Formas */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 999px;
+
+  /* Sombras */
+  --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.06);
+  --shadow-md: 0 8px 24px -6px rgba(16, 24, 40, 0.12);
+  --shadow-lg: 0 24px 48px -12px rgba(16, 24, 40, 0.28);
+
+  /* Controles: 48 px de alto, cómodos para el dedo en el teléfono */
+  --control-height: 3rem;
+  --focus-ring: 0 0 0 4px rgba(58, 123, 88, 0.25);
+  --transition: 150ms ease;
+}
