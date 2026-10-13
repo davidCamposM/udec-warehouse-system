@@ -8,10 +8,12 @@
 declare(strict_types=1);
 
 use App\Core\App;
+use App\Core\Auth;
 use App\Core\Config;
 use App\Core\ErrorHandler;
 use App\Core\Permission;
 use App\Core\Router;
+use App\Modules\Usuarios\UsuarioService;
 
 defined('APP_ROOT') || exit;
 
@@ -48,6 +50,9 @@ date_default_timezone_set((string) Config::get('app.timezone', 'America/Santiago
 mb_internal_encoding('UTF-8');
 
 Permission::load(APP_ROOT . '/config/permisos.php');
+
+// En cada petición, la sesión se contrasta con la cuenta: si la desactivan, la sesión se cierra.
+Auth::resolveUsing(static fn (int $id): ?array => (new UsuarioService())->buscarParaSesion($id));
 
 // Rutas generales y luego las de cada módulo (app/Modules/<Modulo>/routes.php).
 $router = new Router();

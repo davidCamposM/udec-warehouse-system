@@ -1,18 +1,20 @@
 /* ==========================================================
-   Layout de invitado: contenido centrado (páginas de error)
+   Layout de invitado: una tarjeta centrada (páginas de error)
    ========================================================== */
 .guest {
   display: grid;
   place-items: center;
+  min-height: 100vh;
+  min-height: 100dvh;
   padding: var(--space-6) var(--space-4);
 }
 
-.error-page {
+.guest-card {
   display: grid;
   justify-items: center;
   width: 100%;
-  max-width: 30rem;
-  padding: var(--space-10) var(--space-8);
+  max-width: 32rem;
+  padding: var(--space-10) var(--space-6);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
   background: var(--color-surface);
@@ -25,23 +27,36 @@
   max-width: 60rem;
 }
 
-.error-page__code {
-  margin-top: var(--space-8);
-  font-size: 3.5rem;
-  font-weight: 800;
-  line-height: 1;
-  letter-spacing: -0.03em;
+.error-page__icono {
+  display: grid;
+  place-items: center;
+  width: 4.5rem;
+  height: 4.5rem;
+  margin-top: var(--space-6);
+  border-radius: 50%;
+  background: var(--color-brand-100);
   color: var(--color-brand-800);
 }
 
+.error-page__icono .icon {
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
 .error-page__title {
-  margin-top: var(--space-3);
+  margin-top: var(--space-5);
   font-size: var(--text-2xl);
 }
 
 .error-page__message {
   margin-top: var(--space-3);
   color: var(--color-text-muted);
+}
+
+.error-page__code {
+  margin-top: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--color-text-subtle);
 }
 
 .error-page__detail {
@@ -59,6 +74,8 @@
   overflow-wrap: anywhere;
 }
 
-.error-page .btn {
-  margin-top: var(--space-8);
+.error-page__volver {
+  width: 100%;
+  min-height: 3.25rem;
+  margin-top: var(--space-6);
 }

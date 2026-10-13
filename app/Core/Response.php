@@ -82,29 +82,6 @@ final class Response
         return $texto;
     }
 
-    public function withHeader(string $nombre, string $valor): self
-    {
-        $copia = clone $this;
-        $copia->cabeceras[$nombre] = $valor;
-
-        return $copia;
-    }
-
-    public function status(): int
-    {
-        return $this->estado;
-    }
-
-    public function body(): string
-    {
-        return $this->cuerpo;
-    }
-
-    public function header(string $nombre): ?string
-    {
-        return $this->cabeceras[$nombre] ?? null;
-    }
-
     public function send(): void
     {
         if (!headers_sent()) {

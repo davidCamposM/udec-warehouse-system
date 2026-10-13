@@ -1,0 +1,408 @@
+/* ==========================================================
+   La ventana por etapas (parcial «ventana») con el estilo básico (basico.css, al estilo de Bootstrap): colores de
+   Bootstrap, superficies blancas con borde gris claro, esquinas de 8 px y transiciones cortas. Cambia solo el aspecto
+   de las piezas de simple.css dentro de la ventana; el marcado es el mismo.
+   La carga Inicio::conVentana: rige en todas las tareas que se abren en ventana.
+   ========================================================== */
+
+/* El color de cada tarea, desde tokens.css (el mismo de su tarjeta en el inicio). También en las piezas de adentro
+   que llevan su propio tono (los pasos, el botón «Agregar sector»).
+   --tono: el color tal cual, para bordes, barras, íconos y fondos suaves.
+   --tono-texto: el mismo color con contraste AA (≥ 4,5:1) sobre blanco y con blanco encima: textos y rellenos. */
+.ventana.tono-verde, .ventana .tono-verde { --tono: var(--tarea-verde); --tono-texto: var(--tarea-verde-texto); }
+.ventana.tono-naranja, .ventana .tono-naranja { --tono: var(--tarea-naranja); --tono-texto: var(--tarea-naranja-texto); }
+.ventana.tono-turquesa, .ventana .tono-turquesa { --tono: var(--tarea-turquesa); --tono-texto: var(--tarea-turquesa-texto); }
+.ventana.tono-azul, .ventana .tono-azul { --tono: var(--tarea-azul); --tono-texto: var(--tarea-azul-texto); }
+.ventana.tono-grafito, .ventana .tono-grafito { --tono: var(--tarea-grafito); --tono-texto: var(--tarea-grafito-texto); }
+.ventana.tono-ocre, .ventana .tono-ocre { --tono: var(--tarea-ocre); --tono-texto: var(--tarea-ocre-texto); }
+.ventana.tono-pizarra, .ventana .tono-pizarra { --tono: var(--tarea-pizarra); --tono-texto: var(--tarea-pizarra-texto); }
+
+/* ---------- Fondo y caja ---------- */
+.ventana .ventana__fondo {
+  background: rgba(33, 37, 41, 0.45);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+
+.ventana .ventana__caja {
+  border-color: var(--bs-border);
+  border-radius: 0.75rem;
+  background: #fff;
+  box-shadow: 0 24px 48px rgba(16, 24, 40, 0.18), 0 2px 6px rgba(16, 24, 40, 0.08);
+}
+
+.ventana .ventana__cabecera {
+  align-items: center;
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--bs-gray-200);
+}
+
+.ventana .ventana__icono {
+  border-radius: var(--bs-radius);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--tono) 82%, #fff) 0%, var(--tono) 50%,
+    color-mix(in srgb, var(--tono) 82%, #000) 100%);
+  box-shadow: 0 3px 8px color-mix(in srgb, var(--tono) 30%, transparent);
+}
+
+.ventana .ventana__titulo {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--bs-body);
+}
+
+.ventana .ventana__texto {
+  color: var(--bs-muted);
+}
+
+.ventana .ventana__cerrar {
+  border: 1px solid var(--bs-border);
+  border-radius: var(--bs-radius);
+  color: var(--bs-body);
+  transition: background-color var(--bs-transition), border-color var(--bs-transition);
+}
+
+.ventana .ventana__cerrar:hover {
+  border-color: var(--bs-gray-500);
+  background: var(--bs-gray-100);
+  color: var(--bs-body);
+}
+
+/* ---------- Pasos: una barra fina por paso; los hechos y el actual, en el color de la tarea ---------- */
+.ventana .pasos__paso {
+  border-bottom: 3px solid var(--bs-gray-200);
+  color: var(--bs-muted);
+  font-weight: 500;
+  transition: border-color var(--bs-transition), color var(--bs-transition);
+}
+
+.ventana .pasos__numero {
+  background: var(--bs-gray-200);
+  color: var(--bs-muted);
+  font-weight: 700;
+}
+
+.ventana .pasos__paso.is-actual {
+  border-bottom-color: var(--tono);
+  color: var(--bs-body);
+  font-weight: 700;
+}
+
+.ventana .pasos__paso.is-actual .pasos__numero,
+.ventana .pasos__paso.is-hecho .pasos__numero {
+  background: var(--tono-texto);
+  color: #fff;
+}
+
+.ventana .pasos__paso.is-actual .pasos__numero {
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--tono) 20%, transparent);
+}
+
+.ventana .pasos__paso.is-hecho {
+  border-bottom-color: color-mix(in srgb, var(--tono) 45%, var(--bs-gray-200));
+}
+
+/* ---------- Campos ---------- */
+.ventana .campo__etiqueta {
+  font-weight: 600;
+  color: var(--bs-body);
+}
+
+.ventana .campo__obligatorio {
+  color: var(--bs-danger);
+}
+
+.ventana .campo__ayuda,
+.ventana .campo__etiqueta--suave {
+  color: var(--bs-muted);
+}
+
+/* Campos blancos con borde; al escribir, el borde y un anillo suave en el color de la tarea */
+.ventana .input--relleno,
+.ventana .stepper__input {
+  border: 1px solid var(--bs-border);
+  border-radius: var(--bs-radius);
+  background: #fff;
+  transition: border-color var(--bs-transition), box-shadow var(--bs-transition);
+}
+
+.ventana .input--relleno:hover,
+.ventana .stepper__input:hover {
+  border-color: var(--bs-gray-500);
+}
+
+.ventana .input--relleno:focus,
+.ventana .stepper__input:focus {
+  border-color: var(--tono);
+  background: #fff;
+  box-shadow: 0 0 0 0.25rem color-mix(in srgb, var(--tono) 22%, transparent);
+}
+
+.ventana .input--relleno::placeholder {
+  color: var(--bs-muted);
+}
+
+.ventana .field__icon {
+  color: var(--bs-muted);
+}
+
+/* Cantidad: − y + como botones blancos con borde, a la altura del número */
+.ventana .stepper__button {
+  border: 1px solid var(--bs-border);
+  border-radius: var(--bs-radius);
+  background: #fff;
+  box-shadow: var(--bs-shadow-sm);
+  color: var(--bs-body);
+  transition: background-color var(--bs-transition), border-color var(--bs-transition);
+}
+
+.ventana .stepper__button:hover {
+  border-color: var(--tono);
+  background: color-mix(in srgb, var(--tono) 8%, #fff);
+  color: var(--bs-body);
+  filter: none;
+}
+
+.ventana .quantity__unit {
+  color: var(--bs-muted);
+}
+
+/* Lo ya elegido en una etapa anterior (parcial «campo-fijo»), con «Cambiar» */
+.ventana .campo__fijo {
+  border: 1px solid var(--bs-border);
+  border-radius: var(--bs-radius);
+  background: var(--bs-gray-50);
+}
+
+.ventana .campo__fijo-icono {
+  border-radius: var(--bs-radius);
+  background: color-mix(in srgb, var(--tono) 12%, #fff);
+  color: var(--tono-texto);
+}
+
+.ventana .campo__detalle {
+  color: var(--bs-muted);
+}
+
+.ventana .campo__cambiar {
+  border: 1px solid var(--bs-border);
+  border-radius: var(--bs-radius);
+  background: #fff;
+  box-shadow: none;
+  color: var(--bs-body);
+  transition: background-color var(--bs-transition), border-color var(--bs-transition), color var(--bs-transition);
+}
+
+.ventana .campo__cambiar:hover {
+  border-color: var(--tono);
+  color: var(--tono-texto);
+}
+
+/* ---------- Opciones para marcar (dónde quedó): tarjetas blancas; la elegida, con el borde y fondo suave de la tarea ---------- */
+.ventana .option__box {
+  border: 1px solid var(--bs-border);
+  border-radius: var(--bs-radius);
+  background: #fff;
+  box-shadow: var(--bs-shadow-sm);
+  font-weight: 600;
+  transition: border-color var(--bs-transition), background-color var(--bs-transition), box-shadow var(--bs-transition);
+}
+
+.ventana .option__box .icon {
+  color: var(--bs-muted);
+}
+
+.ventana .option:hover .option__box {
+  border-color: color-mix(in srgb, var(--tono) 55%, var(--bs-border));
+}
+
+.ventana .option__input:checked + .option__box {
+  border-color: var(--tono);
+  background: color-mix(in srgb, var(--tono) 7%, #fff);
+  box-shadow: 0 0 0 1px var(--tono);
+  color: var(--bs-body);
+}
+
+.ventana .option__input:checked + .option__box .icon,
+.ventana .option__input:checked + .option__box::after {
+  color: var(--tono-texto);
+}
+
+.ventana .option__box--detalle small {
+  color: var(--bs-muted);
+}
+
+.ventana .option__input:focus-visible + .option__box {
+  outline: none;
+  box-shadow: var(--bs-focus);
+}
+
+/* ---------- Productos para elegir: tarjetas como las de «Buscar producto», con «Elegir» a la derecha ---------- */
+.ventana .opciones__titulo {
+  color: var(--bs-muted);
+  font-size: var(--text-xs);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.ventana .item-row--elegir {
+  border: 1px solid var(--bs-border);
+  border-radius: var(--bs-radius);
+  background: #fff;
+  box-shadow: var(--bs-shadow-sm);
+  transition: transform var(--bs-transition), box-shadow var(--bs-transition), border-color var(--bs-transition);
+}
+
+.ventana .item-row--elegir:hover {
+  border-color: var(--tono);
+  box-shadow: var(--bs-shadow-md);
+  transform: translateY(-1px);
+}
+
+.ventana .item-row--elegir:focus-visible {
+  outline: none;
+  box-shadow: var(--bs-focus);
+}
+
+.ventana .item-row__meta {
+  color: var(--bs-muted);
+}
+
+/* «Elegir»: con borde en el color de la tarea; se rellena al pasar encima */
+.ventana .item-row__elegir {
+  border: 1px solid var(--tono);
+  border-radius: var(--bs-radius);
+  background: #fff;
+  color: var(--tono-texto);
+  font-weight: 600;
+  transition: background-color var(--bs-transition), color var(--bs-transition);
+}
+
+.ventana .item-row--elegir:hover .item-row__elegir {
+  background: var(--tono-texto);
+  color: #fff;
+}
+
+/* Sin resultados o sin sectores */
+.ventana .vacio {
+  border: 1px solid var(--bs-border);
+  border-radius: var(--bs-radius);
+  background: var(--bs-gray-50);
+  color: var(--bs-muted);
+}
+
+.ventana .vacio__titulo {
+  font-weight: 700;
+  color: var(--bs-body);
+}
+
+.ventana .caja--nota {
+  border: 1px solid var(--bs-border);
+  border-radius: var(--bs-radius);
+  background: var(--bs-gray-50);
+  color: var(--bs-muted);
+}
+
+/* ---------- Botones al final: «Atrás» o «Cancelar» blanco con borde; el principal, verde de Bootstrap ---------- */
+.ventana .formulario__acciones {
+  border-top-color: var(--bs-gray-200);
+}
+
+.ventana .btn--secondary {
+  border-color: var(--bs-border);
+  background: #fff;
+  color: var(--bs-body);
+}
+
+.ventana .btn--secondary:hover {
+  border-color: var(--bs-gray-500);
+  background: var(--bs-gray-100);
+  color: var(--bs-body);
+}
+
+.ventana .btn--si {
+  border-color: var(--color-brand-800);
+  background: var(--gradiente-boton);
+  box-shadow: 0 1px 2px rgba(41, 72, 40, 0.2);
+  font-weight: 600;
+}
+
+.ventana .btn--si:hover {
+  border-color: var(--color-brand-900);
+  background: var(--gradiente-boton-hover);
+  box-shadow: var(--sombra-verde);
+}
+
+/* Botón de otra tarea dentro de la ventana («Agregar sector»): blanco con borde y texto de su color; se rellena al
+   pasar encima */
+.ventana .btn--tarea {
+  border: 1px solid var(--tono);
+  background: #fff;
+  box-shadow: none;
+  color: var(--tono-texto);
+  font-weight: 600;
+}
+
+.ventana .btn--tarea:hover {
+  background: var(--tono-texto);
+  color: #fff;
+  filter: none;
+}
+
+.ventana .btn--secondary,
+.ventana .btn--si,
+.ventana .btn--tarea {
+  border-radius: var(--bs-radius);
+  transition: background-color var(--bs-transition), border-color var(--bs-transition), color var(--bs-transition),
+    transform var(--bs-transition);
+}
+
+.ventana .btn:focus-visible {
+  outline: none;
+  box-shadow: var(--bs-focus);
+}
+
+/* ---------- Mensajes ---------- */
+.ventana .alert {
+  border-radius: var(--bs-radius);
+}
+
+/* ---------- «Listo»: lo que quedó registrado, en una tarjeta verde suave ---------- */
+.ventana .listo {
+  border: 1px solid var(--color-brand-200);
+  border-radius: var(--bs-radius);
+  background: var(--bs-success-subtle);
+}
+
+.ventana .listo__icono {
+  background: var(--bs-success);
+  box-shadow: 0 0 0 4px rgba(83, 148, 82, 0.2);
+}
+
+.ventana .listo__titulo {
+  font-weight: 700;
+  color: var(--color-brand-950);
+}
+
+.ventana .listo__enlaces a {
+  color: var(--bs-success-hover);
+  font-weight: 600;
+}
+
+/* ---------- Sin movimiento si el sistema lo pide ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .ventana .pasos__paso,
+  .ventana .input--relleno,
+  .ventana .stepper__input,
+  .ventana .stepper__button,
+  .ventana .campo__cambiar,
+  .ventana .option__box,
+  .ventana .item-row--elegir,
+  .ventana .item-row__elegir,
+  .ventana .btn {
+    transition: none;
+  }
+
+  .ventana .item-row--elegir:hover {
+    transform: none;
+  }
+}

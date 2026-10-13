@@ -25,6 +25,12 @@ final class Permission
         self::$matriz = require $archivo;
     }
 
+    /** @return list<string> perfiles definidos en config/permisos.php */
+    public static function profiles(): array
+    {
+        return array_keys(self::$matriz);
+    }
+
     /**
      * ¿El perfil (por defecto, el del usuario en sesión) tiene el permiso?
      * Comodines en la matriz: '*' = todo; 'insumos.*' = todo lo del módulo de insumos.
@@ -54,17 +60,5 @@ final class Permission
         }
 
         return false;
-    }
-
-    /**
-     * Para chequeos dentro de un controlador o servicio, además del permiso de la ruta.
-     *
-     * @throws HttpException 403
-     */
-    public static function authorize(string $permiso): void
-    {
-        if (!self::can($permiso)) {
-            throw new HttpException(403);
-        }
     }
 }

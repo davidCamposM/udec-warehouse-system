@@ -13,12 +13,8 @@ use App\Core\Database;
 use App\Core\Logger;
 use App\Core\Permission;
 use App\Core\Response;
-use App\Core\Url;
 
 defined('APP_ROOT') || exit;
-
-// Provisional: mientras no exista el panel de inicio, la raíz lleva al login.
-$router->get('/', static fn (): Response => Response::redirect(Url::to('login')), Permission::PUBLICO);
 
 // Estado del sistema: tras una instalación, confirma que PHP y la base de datos responden.
 $router->get('/estado', static function (): Response {

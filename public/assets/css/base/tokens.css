@@ -4,44 +4,78 @@
    usa estas variables: para cambiar el estilo, se cambia aquí.
    ========================================================== */
 :root {
-  /* Marca: verde forestal */
-  --color-brand-950: #0f2a1c;
-  --color-brand-900: #163a28;
-  --color-brand-800: #1f4a33; /* principal: botones, panel de acceso */
-  --color-brand-700: #2a6044;
-  --color-brand-600: #3a7b58;
-  --color-brand-500: #4f9a72;
-  --color-brand-200: #c2e2cf;
-  --color-brand-100: #e3f1e8;
-  --color-brand-50: #f2f8f4;
-
-  /* Neutros */
-  --color-bg: #f5f8f9; /* fondo de página */
+  /* Color del sistema: verde #539452 (elegido por el usuario, 12/10/2026), con el resto al estilo de Bootstrap 5.3.
+     #539452 va tal cual en las barras superiores, los íconos de encabezado, los detalles, los bordes y el foco (con
+     blanco encima: 3,7:1, elegido así por el usuario). En los botones y textos en verde se usa un tono un poco más
+     oscuro, para que se lean bien (contraste AA ≥ 4,5:1): 800 = 4,8:1, 700 = 5,9:1, 900 = 8:1. */
+  --color-brand-950: #192c19;
+  --color-brand-900: #325931; /* «pasar encima» del principal */
+  --color-brand-800: #477e46; /* principal: botones, barras, panel de acceso */
+  --color-brand-700: #3e6f3e; /* enlaces y textos en verde */
+  --color-brand-600: #539452; /* el verde elegido: íconos, detalles, bordes y foco */
+  --color-brand-500: #75a975;
+  --color-brand-200: #cbdfcb;
+  --color-brand-100: #e5efe5;
+  --color-brand-50: #f1f6f1;
+  /* Neutros: los grises de Bootstrap */
+  --color-bg: #f6f8f6; /* fondo de página: gris con un toque de verde */
   --color-surface: #ffffff; /* tarjetas y campos */
-  --color-border: #dce3e7;
-  --color-border-strong: #c2cbd2;
-  --color-text: #15212b;
-  --color-text-muted: #55626d;
-  --color-text-subtle: #6b7781; /* placeholders y notas; contraste AA sobre blanco */
+  --color-campo: #f8f9fa; /* campos rellenos de los formularios en ventana */
+  --color-border: #dee2e6;
+  --color-border-strong: #ced4da;
+  --color-text: #212529;
+  --color-text-muted: #6c757d;
+  --color-text-subtle: #6c757d; /* placeholders y notas; contraste AA sobre blanco */
   --color-on-brand: #ffffff;
-  --color-on-brand-muted: rgba(255, 255, 255, 0.78);
-
-  /* Estados */
-  --color-danger: #b42318;
-  --color-danger-bg: #fef3f2;
-  --color-danger-border: #fecdca;
-  --color-warning: #93370d;
-  --color-warning-bg: #fffaeb;
-  --color-warning-border: #fedf89;
-  --color-success: #067647;
-  --color-success-bg: #ecfdf3;
-  --color-success-border: #abefc6;
-  --color-info: #1849a9;
-  --color-info-bg: #eff8ff;
-  --color-info-border: #b2ddff;
-
+  --color-on-brand-muted: rgba(255, 255, 255, 0.92); /* sobre el verde: contraste AA */
+  /* Estados: el color de texto de cada alerta de Bootstrap, su fondo y su borde */
+  --color-danger: #b02a37;
+  --color-danger-bg: #f8d7da;
+  --color-danger-border: #f1aeb5;
+  --color-warning: #664d03;
+  --color-warning-bg: #fff3cd;
+  --color-warning-border: #ffe69c;
+  --color-success: #146c43;
+  --color-success-bg: #d1e7dd;
+  --color-success-border: #a3cfbb;
+  --color-info: #192c19; /* la información va en verde suave, como la marca */
+  --color-info-bg: #f1f6f1;
+  --color-info-border: #cbdfcb;
+  /* Colores de las tareas: el mismo en su tarjeta del inicio, en el encabezado de su pantalla, en su ventana y en sus
+     pasos. Acompañan al verde de la marca sin competir con él: tonos terrosos de saturación y luz parecidas,
+     repartidos por la rueda de color, para que cada tarea destaque y se recuerde. Los nombres son los de
+     config/tareas.php. Cada uno, con su versión «-texto» (más oscura) para textos y rellenos con texto blanco.
+     Con un ícono blanco encima: verde 3,7 · terracota 3,6 · petróleo 4,1 · azul 5,1 · grafito 6,8 · ocre 3,4 ·
+     salvia 4,8 (≥ 3:1). Las versiones -texto: todas ≥ 4,8:1. Sin rosados ni morados. */
+  --tarea-verde: #539452; /* el verde de la marca: registrar lo que entra */
+  --tarea-verde-texto: #477e46;
+  --tarea-naranja: #c8702a; /* terracota: corregir una cantidad (atención, sin alarma) */
+  --tarea-naranja-texto: #a65a1f;
+  --tarea-turquesa: #2a8a96; /* petróleo: agregar algo nuevo */
+  --tarea-turquesa-texto: #1f6f79;
+  --tarea-azul: #3f6fae; /* azul: consultar */
+  --tarea-azul-texto: #345d93;
+  --tarea-grafito: #4f5d6b; /* grafito: el punto de retiro */
+  --tarea-grafito-texto: #424e5a;
+  --tarea-ocre: #a8862a; /* ocre */
+  --tarea-ocre-texto: #8a6a1c;
+  --tarea-pizarra: #5d7a5d; /* salvia */
+  --tarea-pizarra-texto: #4f684f;
+  /* Sí / No: la pareja de botones al final de formularios y confirmaciones (verde = sí, rojo = no) */
+  --color-si: #477e46; /* el verde del sistema */
+  --color-no: #dc3545;
+  --color-no-hover: #bb2d3b;
+  /* Foco sobre fondos oscuros (barras verdes) */
+  --color-accent: #cbdfcb;
+  /* Degradados: siempre entre tonos vecinos del mismo verde, a 135° */
+  --gradiente-marca: linear-gradient(135deg, #5fa35e 0%, #539452 45%, #457c44 100%); /* barras y cabeceras */
+  --gradiente-boton: linear-gradient(180deg, #4a8349 0%, #3e6f3e 100%); /* botones con texto blanco (≥ 4,5:1) */
+  --gradiente-boton-hover: linear-gradient(180deg, #437842 0%, #345e34 100%);
+  --gradiente-suave: linear-gradient(180deg, #ffffff 0%, #f1f6f1 100%); /* encabezados de tarjeta */
+  /* Sombra teñida de verde, para lo que está en primer plano */
+  --sombra-verde: 0 6px 16px rgba(71, 126, 70, 0.22);
   /* Tipografía */
-  --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace;
   --text-xs: 0.75rem;
   --text-sm: 0.875rem;
@@ -50,7 +84,6 @@
   --text-xl: 1.25rem;
   --text-2xl: 1.5rem;
   --text-3xl: 1.875rem;
-  --text-4xl: 2.25rem;
   --leading-tight: 1.2;
   --leading-normal: 1.55;
 
@@ -64,22 +97,21 @@
   --space-8: 2rem;
   --space-10: 2.5rem;
   --space-12: 3rem;
-  --space-16: 4rem;
 
   /* Formas */
   --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 16px;
-  --radius-xl: 24px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
   --radius-full: 999px;
 
   /* Sombras */
   --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.06);
-  --shadow-md: 0 8px 24px -6px rgba(16, 24, 40, 0.12);
-  --shadow-lg: 0 24px 48px -12px rgba(16, 24, 40, 0.28);
+  --shadow-md: 0 6px 16px rgba(16, 24, 40, 0.08), 0 1px 3px rgba(16, 24, 40, 0.06);
+  --shadow-lg: 0 24px 48px rgba(16, 24, 40, 0.18), 0 2px 6px rgba(16, 24, 40, 0.08);
 
   /* Controles: 48 px de alto, cómodos para el dedo en el teléfono */
   --control-height: 3rem;
-  --focus-ring: 0 0 0 4px rgba(58, 123, 88, 0.25);
-  --transition: 150ms ease;
+  --focus-ring: 0 0 0 0.25rem rgba(83, 148, 82, 0.35);
+  --transition: 160ms cubic-bezier(0.2, 0, 0, 1);
 }

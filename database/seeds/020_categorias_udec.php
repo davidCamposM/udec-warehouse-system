@@ -3,6 +3,8 @@
 /**
  * Categorías y subcategorías de insumos, tomadas del catálogo de pedidos UdeC
  * (Productos_pedidos_FCF_2026.xlsx). Se corrigen los tildes de los nombres originales.
+ * "Insumos Protocolo COVID-19" no se usa: sus productos van en Ropa de Trabajo y en
+ * Artículos Desinfectantes.
  */
 
 declare(strict_types=1);
@@ -14,7 +16,6 @@ defined('APP_ROOT') || exit;
 
 // categoría => subcategorías
 $categorias = [
-    'Insumos Protocolo COVID-19' => [],
     'Materiales Especializados' => ['Material para Proyección y Sonido', 'Telecomunicaciones'],
     'Materiales y Útiles de Aseo' => [
         'Artículos de Limpieza',

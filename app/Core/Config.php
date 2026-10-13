@@ -46,18 +46,4 @@ final class Config
 
         return $valor;
     }
-
-    public static function set(string $clave, mixed $valor): void
-    {
-        $destino = &self::$valores;
-
-        foreach (explode('.', $clave) as $parte) {
-            if (!isset($destino[$parte]) || !is_array($destino[$parte])) {
-                $destino[$parte] = [];
-            }
-            $destino = &$destino[$parte];
-        }
-
-        $destino = $valor;
-    }
 }

@@ -2,6 +2,9 @@
 /config/config.php
 .env
 
+# Documentación de trabajo (modelo de datos, diagramas): queda fuera del repositorio
+/docs/
+
 # Datos generados por el servidor: logs, sesiones y respaldos. Se conservan las carpetas
 /storage/**
 !/storage/**/

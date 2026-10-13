@@ -12,12 +12,14 @@ declare(strict_types=1);
 defined('APP_ROOT') || exit;
 
 return [
-    // Encargado de bodega: acceso total.
+    // Encargado de bodega: acceso total, incluidos insumos.administrar (crear, editar, desactivar),
+    // insumos.entrada (registrar producto), insumos.ajuste (actualizar cantidad) y sectores.administrar.
     'administrador' => ['*'],
 
     // Ven todo, pero no registran ni modifican (por ahora).
     'administrativa' => [
         'panel.ver',
+        'panel.bodega',     // resumen de toda la bodega; sin él, el inicio muestra solo lo propio
         'insumos.ver',
         'herramientas.ver',
         'historial.ver',

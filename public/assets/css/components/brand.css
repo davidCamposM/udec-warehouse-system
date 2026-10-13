@@ -45,3 +45,18 @@
   font-weight: 500;
   color: var(--color-text-muted);
 }
+
+/* Sobre fondo oscuro (menú lateral): <a class="brand brand--inverse"> */
+.brand--inverse,
+.brand--inverse:hover {
+  color: var(--color-on-brand);
+}
+
+.brand--inverse .brand__mark {
+  background: var(--color-on-brand);
+  color: var(--color-brand-800);
+}
+
+.brand--inverse .brand__sub {
+  color: var(--color-on-brand-muted);
+}

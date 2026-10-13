@@ -47,6 +47,12 @@ final class Url
         return $partes === [] ? $url : $url . '?' . implode('&', $partes);
     }
 
+    /** La URL apunta a este sistema: evita redirigir a otro sitio con una URL manipulada. */
+    public static function isInternal(string $url): bool
+    {
+        return $url === self::base() || str_starts_with($url, self::base() . '/');
+    }
+
     /** URL de un archivo de public/assets. Lleva la fecha de modificación para que el navegador no use una copia vieja. */
     public static function asset(string $ruta): string
     {

@@ -1,0 +1,437 @@
+/* ==========================================================
+   Inicio: el orden de los bloques y sus piezas propias (saludo,
+   tablero, avisos y administración). Lo común (tarjeta, lista, tabla,
+   búsqueda, paginación, tarjetas de tareas) sale de components/basico.css.
+   La página es más ancha que las demás (.pagina--amplia, en app.css).
+   ========================================================== */
+.inicio {
+  display: grid;
+  gap: var(--space-6);
+}
+
+/* ---------- Cabecera: el saludo y la búsqueda sobre una superficie clara ----------
+   Blanco que pasa a un verde muy suave, con un borde verde claro: un fondo tranquilo, propio de un buscador, donde lo
+   que destaca es la barra de búsqueda. Sin recorte: la lista de coincidencias se abre por debajo de la cabecera. */
+.inicio__hero {
+  display: grid;
+  gap: var(--space-5);
+  padding: var(--space-6) var(--space-5);
+  border: 1px solid var(--color-brand-200);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, #ffffff 0%, var(--color-brand-50) 100%);
+  box-shadow: var(--bs-shadow-sm);
+  color: var(--bs-body);
+}
+
+.inicio__encabezado {
+  display: grid;
+  gap: 2px;
+}
+
+.inicio__saludo {
+  font-size: var(--text-3xl);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  color: var(--color-brand-950);
+}
+
+.inicio__fecha {
+  color: var(--bs-muted);
+  font-size: var(--text-lg);
+}
+
+/* La búsqueda: una cápsula blanca con borde y un margen interior; adentro, la lupa como un botón verde (lleva a
+   «Buscar producto») y el campo sin borde propio. Al escribir, el borde se pone verde con un anillo verde claro. */
+.inicio__hero .input-group {
+  align-items: center;
+  gap: var(--space-2);
+  max-width: 48rem;
+  padding: 0.375rem;
+  border: 1px solid var(--bs-border);
+  border-radius: var(--radius-lg);
+  background: #fff;
+  box-shadow: 0 4px 14px rgba(41, 72, 40, 0.08);
+  transition: border-color var(--bs-transition), box-shadow var(--bs-transition);
+}
+
+.inicio__hero .input-group:hover {
+  border-color: var(--color-brand-200);
+}
+
+.inicio__hero .input-group:focus-within {
+  border-color: var(--color-brand-600);
+  box-shadow: 0 0 0 4px var(--color-brand-100), 0 6px 18px rgba(41, 72, 40, 0.12);
+}
+
+/* La lupa, como un botón de verdad: el degradado verde de los botones, ícono blanco y una sombra que lo despega del
+   campo. Al pasar encima se oscurece y sube apenas; al pulsarlo se hunde. */
+.inicio__hero .input-group > .btn-primary {
+  width: 2.75rem;
+  height: 2.75rem;
+  min-height: 0;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--gradiente-boton);
+  box-shadow: 0 2px 6px rgba(41, 72, 40, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  color: #fff;
+  cursor: pointer;
+  transition: box-shadow var(--bs-transition), transform var(--bs-transition);
+}
+
+.inicio__hero .input-group > .btn-primary:hover {
+  background: var(--gradiente-boton-hover);
+  box-shadow: 0 6px 14px rgba(41, 72, 40, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.inicio__hero .input-group > .btn-primary:active {
+  box-shadow: 0 1px 3px rgba(41, 72, 40, 0.35);
+  transform: translateY(0) scale(0.96);
+}
+
+.inicio__hero .input-group > .btn-primary:focus-visible {
+  box-shadow: 0 0 0 3px var(--color-brand-200), 0 2px 6px rgba(41, 72, 40, 0.35);
+}
+
+.inicio__hero .input-group > .btn-primary .icon {
+  width: 1.375rem;
+  height: 1.375rem;
+}
+
+.inicio__hero .input-group > .form-control {
+  height: 2.75rem;
+  padding: 0 var(--space-2);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  font-size: var(--text-lg);
+}
+
+.inicio__hero .input-group > .form-control::placeholder {
+  color: var(--bs-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .inicio__hero .input-group > .btn-primary:hover,
+  .inicio__hero .input-group > .btn-primary:active {
+    transform: none;
+  }
+}
+
+@media (min-width: 48em) {
+  .inicio__hero {
+    padding: var(--space-8);
+  }
+}
+
+.inicio__bienvenida {
+  font-size: var(--text-base);
+}
+
+/* ---------- Tablero: a la izquierda las tareas (2/3), a la derecha los avisos y la administración (1/3) ----------
+   En el teléfono, una columna: primero los avisos (qué pasa), luego las tareas y al final la administración. */
+.tablero {
+  display: grid;
+  grid-template-areas:
+    "avisos"
+    "tareas"
+    "admin";
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-5);
+  align-items: start;
+}
+
+.tablero__tareas { grid-area: tareas; }
+.tablero__avisos { grid-area: avisos; }
+.tablero__admin { grid-area: admin; }
+
+@media (min-width: 64em) {
+  .tablero {
+    grid-template-areas:
+      "tareas avisos"
+      "tareas admin";
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+  }
+
+  /* Sin tareas: avisos y administración, uno al lado del otro */
+  .tablero--una-columna {
+    grid-template-areas: "avisos admin";
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: auto;
+  }
+}
+
+/* «Actualizado a las 12:40»: punto verde mientras se actualiza solo, rojo si falla (panel.js) */
+.inicio__estado {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--bs-muted);
+}
+
+.inicio__estado::before {
+  content: "";
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--bs-success);
+  box-shadow: 0 0 0 3px var(--bs-success-subtle);
+}
+
+.inicio__estado[data-state="error"] {
+  color: var(--bs-danger);
+}
+
+.inicio__estado[data-state="error"]::before {
+  background: var(--bs-danger);
+  box-shadow: 0 0 0 3px var(--bs-danger-subtle);
+}
+
+/* ---------- Avisos: una fila por aviso dentro de su tarjeta ----------
+   El ícono sobre fondo suave y el texto dicen si es un problema (el color nunca va solo). Si tiene a dónde ir, toda la
+   fila es el enlace: se marca al pasar encima y la flecha avanza un poco. */
+.avisos-lista {
+  padding: 0;
+  list-style: none;
+}
+
+.avisos-lista > li + li {
+  border-top: 1px solid var(--bs-gray-200);
+}
+
+.aviso-fila {
+  --r: var(--bs-secondary);
+  --r-bg: var(--bs-gray-100);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 4rem;
+  padding: var(--space-3) var(--space-4);
+  color: var(--bs-body);
+  font-weight: 400;
+  text-decoration: none;
+  transition: background-color var(--bs-transition);
+}
+
+.aviso-fila--danger { --r: var(--bs-danger); --r-bg: var(--bs-danger-subtle); }
+.aviso-fila--warning { --r: var(--bs-warning-text); --r-bg: var(--bs-warning-subtle); }
+.aviso-fila--ok { --r: var(--bs-success); --r-bg: var(--bs-success-subtle); }
+.aviso-fila--info { --r: var(--bs-blue); --r-bg: var(--bs-blue-subtle); }
+
+a.aviso-fila:hover {
+  background: var(--bs-gray-100);
+  color: var(--bs-body);
+}
+
+a.aviso-fila:focus-visible {
+  outline: none;
+  box-shadow: inset var(--bs-focus);
+}
+
+.aviso-fila__icono {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--bs-radius);
+  background: var(--r-bg);
+  color: var(--r);
+}
+
+.aviso-fila__icono .icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.aviso-fila__texto {
+  flex: 1;
+  display: grid;
+  min-width: 0;
+  line-height: 1.3;
+}
+
+.aviso-fila__texto strong {
+  font-weight: 600;
+}
+
+/* El número, en el color del aviso y un poco más grande que el texto */
+.aviso-fila__numero {
+  color: var(--r);
+  font-size: var(--text-lg);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.aviso-fila__detalle {
+  font-size: var(--text-sm);
+  color: var(--bs-muted);
+}
+
+.aviso-fila__ver {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--bs-primary);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.aviso-fila__ver .icon {
+  width: 1rem;
+  height: 1rem;
+  transition: transform var(--bs-transition);
+}
+
+a.aviso-fila:hover .aviso-fila__ver .icon {
+  transform: translateX(3px);
+}
+
+/* ---------- Administración: una lista simple (se usa poco), cada tarea con su ícono relleno en su color
+   (--c, de .accion--…); al pasar encima, el ícono crece apenas y la flecha avanza ---------- */
+.ajuste__icono {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--bs-radius);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--c) 82%, #fff) 0%, var(--c) 50%,
+    color-mix(in srgb, var(--c) 82%, #000) 100%);
+  box-shadow: 0 2px 6px color-mix(in srgb, var(--c) 28%, transparent);
+  color: #fff;
+  transition: transform var(--bs-transition), box-shadow var(--bs-transition);
+}
+
+.ajuste__icono .icon {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.ajuste:hover .ajuste__icono {
+  box-shadow: 0 4px 10px color-mix(in srgb, var(--c) 36%, transparent);
+  transform: scale(1.05);
+}
+
+.ajuste__texto {
+  flex: 1;
+  display: grid;
+  min-width: 0;
+  line-height: 1.3;
+}
+
+.ajuste__texto strong {
+  font-weight: 600;
+}
+
+.ajuste__detalle {
+  font-size: var(--text-sm);
+  color: var(--bs-muted);
+  font-weight: 400;
+}
+
+.ajuste__flecha {
+  flex: none;
+  color: color-mix(in srgb, var(--c) 80%, #000);
+  transition: transform var(--bs-transition), color var(--bs-transition);
+}
+
+.ajuste__flecha .icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.ajuste:hover .ajuste__flecha {
+  transform: translateX(3px);
+}
+
+/* ---------- Inventario: categorías a la izquierda, tabla a la derecha (en el teléfono, una debajo de la otra) ---------- */
+.inventario {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+  /* Al elegir una categoría la página vuelve aquí: que la barra superior no tape los títulos */
+  scroll-margin-top: 5rem;
+}
+
+.inventario__total {
+  font-size: var(--text-sm);
+}
+
+.inventario__tabla {
+  min-width: 40rem;
+}
+
+/* Código en letra de ancho fijo: los dígitos quedan alineados */
+.inventario__codigo {
+  font-family: var(--font-mono);
+  color: var(--bs-muted);
+  white-space: nowrap;
+}
+
+/* El nombre abre la ficha del producto */
+.inventario__nombre {
+  color: var(--bs-body);
+  font-weight: 600;
+  text-decoration: none;
+  transition: color var(--bs-transition);
+}
+
+.inventario__nombre:hover {
+  color: var(--bs-primary);
+  text-decoration: underline;
+}
+
+.inventario__numero {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.inventario__vacio {
+  padding-block: var(--space-6);
+  text-align: center;
+}
+
+@media (min-width: 56em) {
+  .inventario {
+    grid-template-columns: 15rem minmax(0, 1fr);
+    align-items: start;
+  }
+}
+
+/* ---------- Al abrir una ventana sobre el inicio (como «Registrar producto»), al cambiar de etapa y al cerrarla, el
+   paso de una página a otra es un fundido suave, en los navegadores que lo permiten. Rige solo entre páginas que cargan
+   esta hoja: el inicio y sus ventanas. ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition {
+    navigation: auto;
+  }
+
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 180ms;
+  }
+}
+
+/* ---------- Sin movimiento si el sistema lo pide ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .aviso-fila,
+  .aviso-fila__ver .icon,
+  .ajuste__icono,
+  .ajuste__flecha,
+  .inventario__nombre {
+    transition: none;
+  }
+
+  .ajuste:hover .ajuste__flecha,
+  .ajuste:hover .ajuste__icono,
+  a.aviso-fila:hover .aviso-fila__ver .icon {
+    transform: none;
+  }
+}

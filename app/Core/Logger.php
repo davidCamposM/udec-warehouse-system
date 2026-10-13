@@ -26,12 +26,6 @@ final class Logger
         self::escribir('WARNING', $mensaje, $contexto);
     }
 
-    /** @param array<string, mixed> $contexto */
-    public static function info(string $mensaje, array $contexto = []): void
-    {
-        self::escribir('INFO', $mensaje, $contexto);
-    }
-
     public static function exception(Throwable $e): void
     {
         self::escribir(

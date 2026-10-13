@@ -1,0 +1,796 @@
+/* ==========================================================
+   Componentes básicos, al estilo de Bootstrap 5 (CSS propio, sin librerías):
+   tarjeta, lista, tabla, campo con botón, botones y paginación.
+   Superficies calmas: fondo blanco, borde gris claro, sombra apenas visible,
+   esquinas de 8 px. Color intenso solo donde hay que actuar; fondos suaves
+   (los «subtle» de Bootstrap 5.3) para todo lo demás. Movimiento corto y
+   suave, solo como respuesta a lo que hace la persona; sin movimiento si
+   el sistema lo pide (prefers-reduced-motion). Se carga en todas las páginas.
+
+   <div class="card"> <div class="card-header"><h2 class="card-title"> </div> <div class="card-body"> </div>
+   <ul class="list-group"> <li><a class="list-group-item active">
+   <table class="table table-hover">
+   <form class="input-group input-group-lg"> <a class="btn btn-primary btn-icon"> <input class="form-control">
+   <div class="input-group input-group-lg"> <input class="form-control"> <button class="btn btn-primary">Buscar
+   <nav class="nav-pills"> <a class="nav-link active">Todos <span class="nav-count">63</span>
+   <nav class="pagination"> <a class="page-link"> <p class="page-info"> <span class="page-link disabled">
+   ========================================================== */
+
+:root {
+  /* Principal: el verde del sistema (tokens.css). El intenso, el de «pasar encima», el fondo suave y su borde */
+  --bs-primary: var(--color-brand-800);
+  --bs-primary-hover: var(--color-brand-900);
+  --bs-primary-subtle: var(--color-brand-50);
+  --bs-primary-border: var(--color-brand-200);
+  /* «Información»: en verde, como la marca */
+  --bs-blue: var(--color-brand-700);
+  --bs-blue-subtle: var(--color-brand-50);
+  /* Otros colores de Bootstrap 5.3: el intenso, el de «pasar encima» y el fondo suave */
+  --bs-success: var(--color-brand-800); /* «sí», «agregar» y «todo bien»: el verde del sistema */
+  --bs-success-hover: var(--color-brand-900);
+  --bs-success-subtle: var(--color-brand-50);
+  --bs-warning-text: #997404;
+  --bs-warning-subtle: #fff8e1;
+  --bs-danger: #dc3545;
+  --bs-danger-subtle: #fcebec;
+  --bs-secondary: #6c757d;
+
+  /* Grises de Bootstrap */
+  --bs-gray-50: #f8faf8;
+  --bs-gray-100: #f8f9fa;
+  --bs-gray-200: #e9ecef;
+  --bs-border: #dee2e6;
+  --bs-gray-500: #adb5bd;
+  --bs-muted: #6c757d;
+  --bs-body: #212529;
+
+  --bs-radius: 0.5rem;
+  --bs-shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.06);
+  --bs-shadow-md: 0 8px 20px rgba(41, 72, 40, 0.10), 0 1px 3px rgba(16, 24, 40, 0.06);
+  --bs-focus: var(--focus-ring);
+  --bs-transition: var(--transition);
+}
+
+/* ---------- Tarjeta ---------- */
+.card {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--bs-border);
+  border-radius: var(--bs-radius);
+  background: #fff;
+  box-shadow: var(--bs-shadow-sm);
+}
+
+.card-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--bs-border);
+  background: var(--gradiente-suave);
+}
+
+.card-title {
+  font-size: var(--text-base);
+  font-weight: 700;
+  color: var(--bs-body);
+}
+
+.card-body {
+  padding: var(--space-4);
+}
+
+/* ---------- Lista: la elegida, con fondo verde suave ---------- */
+.list-group {
+  padding: var(--space-2);
+  list-style: none;
+}
+
+.list-group-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 2.75rem;
+  padding: var(--space-2) var(--space-3);
+  border-radius: calc(var(--bs-radius) - 2px);
+  box-shadow: inset 3px 0 0 transparent;
+  color: var(--bs-body);
+  font-weight: 500;
+  text-decoration: none;
+  transition: background-color var(--bs-transition), color var(--bs-transition), box-shadow var(--bs-transition);
+}
+
+a.list-group-item:hover {
+  background: var(--bs-gray-100);
+  color: var(--bs-body);
+}
+
+.list-group-item.active {
+  background: var(--bs-primary-subtle);
+  box-shadow: inset 3px 0 0 var(--bs-primary);
+  color: var(--bs-primary-hover);
+  font-weight: 700;
+}
+
+/* ---------- Tabla: encabezado gris claro, filas separadas por una línea, la fila se marca al pasar encima ---------- */
+.table-responsive {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+
+.table th,
+.table td {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--bs-gray-200);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.table thead th {
+  background: var(--color-brand-50);
+  border-bottom-color: var(--bs-border);
+  color: var(--bs-muted);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.table-hover tbody tr {
+  transition: background-color var(--bs-transition);
+}
+
+.table-hover tbody tr:hover {
+  background: color-mix(in srgb, var(--color-brand-50) 70%, #fff);
+}
+
+/* ---------- Campo con botón pegado (la búsqueda). Al escribir, todo el grupo toma el anillo verde ---------- */
+.input-group {
+  display: flex;
+  align-items: stretch;
+  border-radius: var(--bs-radius);
+  box-shadow: var(--bs-shadow-sm);
+  transition: box-shadow var(--bs-transition);
+}
+
+.input-group:focus-within {
+  box-shadow: var(--bs-focus);
+}
+
+.input-group > .btn {
+  flex: none;
+}
+
+.input-group > .form-control {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Botón a la izquierda (la lupa del inicio) o a la derecha («Buscar»): las esquinas que se tocan quedan rectas */
+.input-group > .btn:first-child {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.input-group > .btn:first-child ~ .form-control {
+  border-left: 0;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.input-group > .form-control:first-child {
+  border-right: 0;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.input-group > .form-control + .btn {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.input-group > .form-control:focus {
+  box-shadow: none;
+}
+
+.input-group-lg > .btn,
+.input-group-lg > .form-control {
+  height: 3.25rem;
+  font-size: var(--text-lg);
+}
+
+.input-group-lg > .btn {
+  padding: 0 var(--space-5);
+}
+
+/* Botón solo con ícono: cuadrado */
+.input-group-lg > .btn-icon {
+  width: 3.5rem;
+  padding: 0;
+}
+
+.form-control {
+  height: var(--control-height);
+  padding: 0 var(--space-4);
+  border: 1px solid var(--bs-border);
+  border-radius: var(--bs-radius);
+  background: #fff;
+  color: var(--bs-body);
+  font-size: var(--text-base);
+  transition: border-color var(--bs-transition), box-shadow var(--bs-transition);
+}
+
+.form-control:focus {
+  border-color: var(--color-brand-600);
+  outline: none;
+  box-shadow: var(--bs-focus);
+}
+
+.form-control::placeholder {
+  color: var(--bs-muted);
+  opacity: 1;
+}
+
+/* ---------- Botones (sobre .btn de button.css) ---------- */
+.btn-primary { --b: var(--bs-primary); --b-hover: var(--bs-primary-hover); }
+.btn-success { --b: var(--bs-success); --b-hover: var(--bs-success-hover); }
+
+/* Los botones verdes, con un degradado corto y una sombra teñida de verde */
+.btn-primary,
+.btn-success {
+  background-image: var(--gradiente-boton);
+  box-shadow: 0 1px 2px rgba(41, 72, 40, 0.2);
+  transition: box-shadow var(--bs-transition), transform var(--bs-transition), filter var(--bs-transition);
+}
+
+.btn-primary:hover,
+.btn-success:hover {
+  background-image: var(--gradiente-boton-hover);
+  box-shadow: var(--sombra-verde);
+}
+
+.btn-primary,
+.btn-success {
+  border-color: var(--b);
+  background-color: var(--b);
+  color: #fff;
+}
+
+.btn-primary:hover,
+.btn-success:hover {
+  border-color: var(--b-hover);
+  background-color: var(--b-hover);
+  color: #fff;
+}
+
+/* Con borde: blanco, con el borde y el texto de color; al pasar encima se rellena (para lo delicado, como desactivar) */
+.btn-outline-danger {
+  border-color: var(--bs-danger);
+  background: #fff;
+  color: var(--bs-danger);
+}
+
+.btn-outline-danger:hover {
+  background: var(--bs-danger);
+  color: #fff;
+}
+
+.btn-outline-secondary {
+  border-color: var(--bs-border);
+  background: #fff;
+  color: var(--bs-body);
+}
+
+.btn-outline-secondary:hover {
+  border-color: var(--bs-secondary);
+  background: var(--bs-gray-100);
+  color: var(--bs-body);
+}
+
+.btn-sm {
+  min-height: 2.25rem;
+  padding: 0 var(--space-3);
+  font-size: var(--text-sm);
+}
+
+/* ---------- Tareas: una tarjeta por tarea, con su ícono, su nombre, para qué sirve y una flecha ----------
+   <ul class="lista-acciones"> <li><a class="accion accion--verde"> <span class="accion__icono"> <span class="accion__texto">
+     <strong class="accion__titulo"> <span class="accion__detalle"> </span> <span class="accion__flecha">
+   Cada tarea conserva su color (config/tareas.php): el mismo del encabezado de la pantalla a la que lleva. El ícono
+   va relleno con ese color, y el borde y la flecha lo llevan suave; la tarjeta es blanca. Al pasar encima sube un
+   poco, el borde toma el color entero y el ícono se oscurece. */
+.lista-acciones {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+  padding: 0;
+  list-style: none;
+}
+
+.accion {
+  --c: var(--bs-secondary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  height: 100%;
+  min-height: 5.5rem;
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid color-mix(in srgb, var(--c) 45%, var(--bs-border));
+  border-radius: var(--bs-radius);
+  background: #fff;
+  box-shadow: var(--bs-shadow-sm);
+  color: var(--bs-body);
+  font-weight: 400;
+  text-decoration: none;
+  transition: transform var(--bs-transition), box-shadow var(--bs-transition), border-color var(--bs-transition);
+}
+
+/* El color de cada tarea sale de tokens.css (verde, terracota, petróleo, azul, grafito, ocre, salvia) */
+.accion--azul { --c: var(--tarea-azul); }
+.accion--verde { --c: var(--tarea-verde); }
+.accion--naranja { --c: var(--tarea-naranja); }
+.accion--turquesa { --c: var(--tarea-turquesa); }
+.accion--grafito { --c: var(--tarea-grafito); }
+
+.accion--pizarra { --c: var(--tarea-pizarra); }
+.accion--ocre { --c: var(--tarea-ocre); }
+
+.accion:hover {
+  border-color: var(--c);
+  box-shadow: 0 10px 24px color-mix(in srgb, var(--c) 18%, transparent), 0 1px 3px rgba(16, 24, 40, 0.06);
+  color: var(--bs-body);
+  transform: translateY(-2px);
+}
+
+.accion:active {
+  box-shadow: var(--bs-shadow-sm);
+  transform: translateY(0);
+}
+
+.accion:focus-visible {
+  outline: none;
+  box-shadow: var(--bs-focus);
+}
+
+.accion__icono {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: var(--bs-radius);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--c) 82%, #fff) 0%, var(--c) 50%,
+    color-mix(in srgb, var(--c) 82%, #000) 100%);
+  box-shadow: 0 3px 8px color-mix(in srgb, var(--c) 30%, transparent);
+  color: #fff;
+  transition: transform var(--bs-transition), box-shadow var(--bs-transition);
+}
+
+/* Al pasar encima el ícono crece apenas */
+.accion:hover .accion__icono {
+  box-shadow: 0 5px 12px color-mix(in srgb, var(--c) 38%, transparent);
+  transform: scale(1.05);
+}
+
+.accion__icono .icon {
+  width: 1.375rem;
+  height: 1.375rem;
+}
+
+.accion__texto {
+  flex: 1;
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  line-height: 1.3;
+}
+
+.accion__titulo {
+  font-weight: 650;
+}
+
+.accion__detalle {
+  font-size: var(--text-sm);
+  color: var(--bs-muted);
+}
+
+.accion__flecha {
+  flex: none;
+  color: color-mix(in srgb, var(--c) 80%, #000);
+  transition: transform var(--bs-transition);
+}
+
+.accion__flecha .icon {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.accion:hover .accion__flecha {
+  transform: translateX(3px);
+}
+
+/* Una debajo de otra: en el teléfono, o dentro de una ventana (.lista-acciones--una-columna) */
+.lista-acciones--una-columna {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (max-width: 40em) {
+  .lista-acciones {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Título de un bloque, como una pregunta: «¿Qué quieres hacer?» */
+.titulo-seccion {
+  margin-bottom: var(--space-3);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--bs-body);
+}
+
+/* ---------- Filtros como pastillas: la elegida en verde; cada una con su cantidad ----------
+   <nav class="nav-pills"> <a class="nav-link active">Todos <span class="nav-count">63</span></a> */
+.nav-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 2.75rem;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--bs-border);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--bs-body);
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color var(--bs-transition), border-color var(--bs-transition), color var(--bs-transition);
+}
+
+a.nav-link:hover {
+  border-color: var(--bs-primary-border);
+  background: var(--bs-primary-subtle);
+  color: var(--bs-primary-hover);
+}
+
+.nav-link.active,
+a.nav-link.active:hover {
+  border-color: var(--bs-primary);
+  background: var(--gradiente-boton);
+  box-shadow: 0 2px 6px rgba(41, 72, 40, 0.2);
+  color: #fff;
+}
+
+.nav-count {
+  min-width: 1.75rem;
+  padding: 0 var(--space-2);
+  border-radius: 999px;
+  background: var(--bs-gray-200);
+  color: var(--bs-muted);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  transition: background-color var(--bs-transition), color var(--bs-transition);
+}
+
+.nav-link.active .nav-count {
+  background: rgba(255, 255, 255, 0.25);
+  color: #fff;
+}
+
+/* ---------- Estado de un producto (parcial Insumos::partials/estado): etiqueta redonda con fondo suave ---------- */
+.status {
+  border-radius: 999px;
+  box-shadow: none;
+  font-size: var(--text-xs);
+}
+
+.status--ok {
+  background: var(--color-brand-100);
+  color: var(--color-brand-950);
+}
+
+.status--low {
+  background: #fff3cd;
+  color: #664d03;
+}
+
+.status--out {
+  background: #f8d7da;
+  color: #58151c;
+}
+
+.status--off {
+  background: var(--bs-gray-200);
+  color: #343a40;
+}
+
+/* ---------- Nada que mostrar: ícono, título, qué hacer y, si corresponde, un botón ----------
+   <div class="card card-body vacio-simple"> <span class="vacio-simple__icono"> <p class="vacio-simple__titulo"> */
+.vacio-simple {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-2);
+  padding-block: var(--space-6);
+  text-align: center;
+}
+
+.vacio-simple__icono {
+  display: grid;
+  place-items: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  margin-bottom: var(--space-1);
+  border-radius: 50%;
+  background: var(--bs-gray-100);
+  color: var(--bs-muted);
+}
+
+.vacio-simple__icono .icon {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.vacio-simple__titulo {
+  font-size: var(--text-lg);
+  font-weight: 700;
+}
+
+.vacio-simple__pregunta {
+  margin-top: var(--space-3);
+  font-weight: 600;
+}
+
+/* ---------- Registros administrados (sectores, personas): una tarjeta por registro ----------
+   <ul class="registros"> <li class="registro">
+     <div class="registro__cabecera"> <span class="registro__icono"> <div> <p class="registro__nombre"> <p class="registro__detalle">
+     <span class="registro__etiqueta"> ícono <span class="registro__codigo">SEC001</span>   (el código, como etiqueta impresa)
+     <div class="registro__acciones"> botones pequeños
+   Debajo, si hay, una tarjeta con los desactivados: <li class="list-group-item desactivado"> código · nombre · botón */
+.registros {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(19rem, 1fr));
+  gap: var(--space-3);
+  padding: 0;
+  list-style: none;
+}
+
+.registro {
+  display: grid;
+  align-content: start;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  border: 1px solid var(--bs-border);
+  border-radius: var(--bs-radius);
+  background: #fff;
+  box-shadow: var(--bs-shadow-sm);
+  transition: box-shadow var(--bs-transition), border-color var(--bs-transition);
+}
+
+.registro:hover {
+  border-color: color-mix(in srgb, var(--tono, var(--tarea-pizarra)) 45%, var(--bs-border));
+  box-shadow: var(--bs-shadow-md);
+}
+
+.registro__cabecera {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.registro__cabecera > div {
+  min-width: 0;
+}
+
+.registro__icono {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: var(--bs-radius);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--tono, var(--tarea-pizarra)) 82%, #fff) 0%,
+    var(--tono, var(--tarea-pizarra)) 50%, color-mix(in srgb, var(--tono, var(--tarea-pizarra)) 82%, #000) 100%);
+  box-shadow: 0 3px 8px color-mix(in srgb, var(--tono, var(--tarea-pizarra)) 30%, transparent);
+  color: #fff;
+  font-weight: 700;
+}
+
+.registro__icono .icon {
+  width: 1.375rem;
+  height: 1.375rem;
+}
+
+.registro__nombre {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.registro__detalle {
+  font-size: var(--text-sm);
+  color: var(--bs-muted);
+}
+
+/* El código, con aspecto de etiqueta impresa: borde punteado y letra de ancho fijo */
+.registro__etiqueta {
+  display: inline-flex;
+  justify-self: start;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  border: 1px dashed var(--bs-gray-500);
+  border-radius: var(--bs-radius);
+  background: var(--bs-gray-50);
+  color: var(--bs-muted);
+}
+
+.registro__etiqueta .icon {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.registro__codigo {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--bs-body);
+}
+
+.registro__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--bs-gray-200);
+}
+
+/* Los desactivados: una tarjeta aparte, con una lista simple y más discreta */
+.desactivados {
+  margin-top: var(--space-6);
+}
+
+.desactivados__ayuda {
+  font-size: var(--text-sm);
+}
+
+.desactivado {
+  flex-wrap: wrap;
+}
+
+.desactivado__codigo {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  color: var(--bs-muted);
+}
+
+.desactivado__nombre {
+  flex: 1;
+  min-width: 8rem;
+  color: var(--bs-muted);
+}
+
+/* ---------- Aviso informativo, en verde suave: <p class="nota-info"> ícono <span>texto</span> ---------- */
+.nota-info {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-brand-200);
+  border-radius: var(--bs-radius);
+  background: var(--gradiente-suave);
+  color: var(--color-brand-950);
+}
+
+.nota-info .icon {
+  flex: none;
+  margin-top: 0.15em;
+  color: var(--bs-blue);
+}
+
+/* ---------- Paginación ---------- */
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--bs-border);
+  background: var(--bs-gray-50);
+}
+
+.page-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 2.5rem;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--bs-border);
+  border-radius: var(--bs-radius);
+  background: #fff;
+  color: var(--bs-primary);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color var(--bs-transition), border-color var(--bs-transition), color var(--bs-transition);
+}
+
+a.page-link:hover {
+  border-color: var(--bs-primary-border);
+  background: var(--bs-primary-subtle);
+  color: var(--bs-primary-hover);
+}
+
+.page-link.disabled {
+  color: var(--bs-gray-500);
+  pointer-events: none;
+}
+
+.page-info {
+  font-size: var(--text-sm);
+  color: var(--bs-muted);
+}
+
+/* ---------- Foco con teclado: el anillo verde del sistema en todo lo que se puede tocar ---------- */
+.btn:focus-visible,
+.list-group-item:focus-visible,
+.nav-link:focus-visible,
+.page-link:focus-visible {
+  outline: none;
+  box-shadow: var(--bs-focus);
+}
+
+/* ---------- Texto auxiliar ---------- */
+.text-end,
+.table th.text-end {
+  text-align: right;
+}
+
+.text-muted {
+  color: var(--bs-muted);
+}
+
+/* ---------- Sin movimiento si el sistema lo pide ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .list-group-item,
+  .table-hover tbody tr,
+  .input-group,
+  .form-control,
+  .registro,
+  .accion,
+  .accion__icono,
+  .accion__flecha,
+  .nav-link,
+  .nav-count,
+  .page-link {
+    transition: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .accion:hover,
+  .accion:hover .accion__icono,
+  .accion:hover .accion__flecha {
+    transform: none;
+  }
+}

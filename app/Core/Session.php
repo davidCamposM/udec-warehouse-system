@@ -125,6 +125,16 @@ final class Session
         $_SESSION[self::FLASH_NUEVO][$clave] = $valor;
     }
 
+    /**
+     * Guarda lo escrito en un formulario para rellenarlo en la próxima página (helper old()).
+     *
+     * @param array<string, mixed> $datos
+     */
+    public static function flashInput(array $datos): void
+    {
+        self::flash('_old', $datos);
+    }
+
     public static function getFlash(string $clave, mixed $porDefecto = null): mixed
     {
         return $_SESSION[self::FLASH][$clave] ?? $porDefecto;

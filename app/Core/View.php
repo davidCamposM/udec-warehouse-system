@@ -17,6 +17,18 @@ defined('APP_ROOT') || exit;
  */
 final class View
 {
+    /** @var array<string, mixed> datos disponibles en todas las plantillas (ver share()) */
+    private static array $compartidos = [];
+
+    /**
+     * Dato disponible en todas las plantillas, layouts y fragmentos, como la ruta actual que usa
+     * la barra superior. Lo que pase el controlador tiene prioridad.
+     */
+    public static function share(string $clave, mixed $valor): void
+    {
+        self::$compartidos[$clave] = $valor;
+    }
+
     /**
      * Renderiza una plantilla y, si se indica, la envuelve en un layout de app/views/layouts/.
      * El layout recibe el HTML de la plantilla en $contenido, además de los mismos $datos.
@@ -35,13 +47,13 @@ final class View
     }
 
     /**
-     * Fragmento reutilizable de app/views/partials/.
+     * Fragmento reutilizable de app/views/partials/ ('flash') o de un módulo ('Insumos::partials/estado').
      *
      * @param array<string, mixed> $datos
      */
     public static function partial(string $nombre, array $datos = []): string
     {
-        return self::renderArchivo(self::ruta('partials/' . $nombre), $datos);
+        return self::renderArchivo(self::ruta(str_contains($nombre, '::') ? $nombre : 'partials/' . $nombre), $datos);
     }
 
     private static function ruta(string $plantilla): string
@@ -68,7 +80,7 @@ final class View
      */
     private static function renderArchivo(string $__archivo, array $__datos): string
     {
-        extract($__datos, EXTR_SKIP);
+        extract($__datos + self::$compartidos, EXTR_SKIP);
         ob_start();
 
         try {

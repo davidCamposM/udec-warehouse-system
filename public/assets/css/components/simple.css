@@ -1,0 +1,1567 @@
+/* ==========================================================
+   Componentes del modo simple (páginas internas)
+   Pensados para personas con poca experiencia en computadores,
+   como la app de un banco: botones grandes con ícono y palabra,
+   una tarea por pantalla, el estado escrito (no solo un color)
+   y siempre una salida visible.
+   ========================================================== */
+
+/* ---------- Tonos: el color de cada tarea ----------
+   class="tono-azul" deja el color en --tono; los componentes lo usan (botón de tarea, encabezado).
+   Valores en tokens.css (--tarea-*). --rojo es para confirmar algo delicado. */
+.tono-azul {
+  --tono: var(--tarea-azul);
+  --tono-texto: var(--tarea-azul-texto);
+}
+
+.tono-verde {
+  --tono: var(--tarea-verde);
+  --tono-texto: var(--tarea-verde-texto);
+}
+
+.tono-naranja {
+  --tono: var(--tarea-naranja);
+  --tono-texto: var(--tarea-naranja-texto);
+}
+
+.tono-turquesa {
+  --tono: var(--tarea-turquesa);
+  --tono-texto: var(--tarea-turquesa-texto);
+}
+
+.tono-grafito {
+  --tono: var(--tarea-grafito);
+  --tono-texto: var(--tarea-grafito-texto);
+}
+
+.tono-pizarra {
+  --tono: var(--tarea-pizarra);
+  --tono-texto: var(--tarea-pizarra-texto);
+}
+
+.tono-ocre {
+  --tono: var(--tarea-ocre);
+  --tono-texto: var(--tarea-ocre-texto);
+}
+
+/* Degradados del color de la tarea (--tono): para íconos (el color tal cual, como en las tarjetas del inicio) y para
+   rellenos con texto blanco (desde --tono-texto, que cumple el contraste AA) */
+.tono-azul, .tono-verde, .tono-naranja, .tono-turquesa, .tono-grafito, .tono-pizarra, .tono-ocre, .tono-rojo {
+  --tono-degradado: linear-gradient(135deg, color-mix(in srgb, var(--tono) 82%, #fff) 0%, var(--tono) 50%,
+    color-mix(in srgb, var(--tono) 82%, #000) 100%);
+  --tono-relleno: linear-gradient(180deg, var(--tono-texto) 0%, color-mix(in srgb, var(--tono-texto) 85%, #000) 100%);
+}
+
+.tono-rojo {
+  --tono: var(--color-no);
+  --tono-texto: #b02a37;
+}
+
+/* ---------- Encabezado de pantalla (parcial «encabezado») ----------
+   <header class="encabezado tono-azul">
+     <a class="back-link">← Volver al inicio</a>
+     <div class="encabezado__fila"><span class="encabezado__icono"> <div> h1 + p </div></div>
+     <div class="encabezado__acciones"> botones (opcional)
+   </header> */
+.encabezado {
+  display: grid;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+}
+
+.encabezado__fila {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.encabezado__icono {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--tono, var(--color-brand-600)) 82%, #fff) 0%,
+    var(--tono, var(--color-brand-600)) 50%, color-mix(in srgb, var(--tono, var(--color-brand-600)) 82%, #000) 100%);
+  box-shadow: 0 4px 10px color-mix(in srgb, var(--tono, var(--color-brand-600)) 30%, transparent);
+  color: #fff;
+}
+
+.encabezado__icono .icon {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.encabezado__textos {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.encabezado__titulo {
+  font-size: var(--text-xl);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  overflow-wrap: anywhere;
+}
+
+.encabezado__texto {
+  max-width: 48rem;
+  color: var(--color-text-muted);
+}
+
+.encabezado__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+@media (min-width: 40em) {
+  .encabezado__icono {
+    width: 3rem;
+    height: 3rem;
+  }
+
+  .encabezado__icono .icon {
+    width: 1.625rem;
+    height: 1.625rem;
+  }
+
+  .encabezado__titulo {
+    font-size: var(--text-2xl);
+  }
+}
+
+/* "← Volver a …": parece un botón, para que se note que se puede tocar */
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  justify-self: start;
+  min-height: 2.5rem;
+  padding: 0 var(--space-4) 0 var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color var(--transition), border-color var(--transition), color var(--transition);
+}
+
+.back-link:hover {
+  background: var(--color-brand-50);
+  border-color: var(--color-brand-600);
+  color: var(--color-brand-900);
+}
+
+/* ---------- Botones ----------
+   .btn--lg grande · .btn--si verde (✓ aceptar) · .btn--no rojo (✕ cancelar)
+   .btn--tarea con un tono: <a class="btn btn--tarea tono-turquesa"> */
+.btn--lg {
+  min-height: 3.25rem;
+  padding: 0 var(--space-6);
+}
+
+.btn--si,
+.btn--no,
+.btn--tarea {
+  color: #fff;
+  font-weight: 700;
+  box-shadow: var(--shadow-sm);
+}
+
+.btn--si {
+  background: var(--gradiente-boton);
+}
+
+.btn--si:hover {
+  background: var(--gradiente-boton-hover);
+  box-shadow: var(--sombra-verde);
+  color: #fff;
+}
+
+.btn--no {
+  background: var(--color-no);
+}
+
+.btn--no:hover {
+  background: var(--color-no-hover);
+  color: #fff;
+}
+
+.btn--tarea {
+  background: var(--tono-relleno, var(--tono));
+}
+
+.btn--tarea:hover {
+  color: #fff;
+  filter: brightness(0.94);
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--tono) 30%, transparent);
+}
+
+/* ---------- Pareja ✕ / ✓ al final de formularios y confirmaciones ----------
+   Como en las máquinas de pago con tarjeta: a la izquierda «✕ Cancelar» en rojo, a la derecha «✓ Guardar»
+   en verde. En el teléfono queda fija abajo, siempre a mano.
+   <div class="acciones"><a class="btn btn--lg btn--no">✕ Cancelar</a><button class="btn btn--lg btn--si">✓ Guardar */
+.acciones {
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin: var(--space-6) calc(-1 * var(--space-4)) 0;
+  padding: var(--space-3) var(--space-4) calc(var(--space-3) + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--color-border);
+  background: rgba(245, 248, 249, 0.96);
+  box-shadow: 0 -8px 20px -12px rgba(16, 24, 40, 0.3);
+}
+
+.acciones .btn {
+  padding: 0 var(--space-3);
+  line-height: 1.2;
+  text-align: center;
+}
+
+@media (min-width: 40em) {
+  .acciones {
+    position: static;
+    display: flex;
+    margin: var(--space-6) 0 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    box-shadow: none;
+  }
+
+  .acciones .btn {
+    min-width: 12rem;
+    padding: 0 var(--space-6);
+  }
+}
+
+/* ---------- Botón de tarea: rectángulo vertical de color, con ícono, nombre y una línea que explica ----------
+   <button class="tarea tono-grafito"><span class="tarea__icono"> <span class="tarea__texto"> <span class="tarea__descripcion">
+   Se usa en el punto de retiro, para elegir entre retirar y registrar una entrada (Retiro::modo). */
+
+/* Más alto que ancho; si el nombre no cabe, crece. Toda la fila queda del mismo alto. */
+.tarea {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  height: 100%;
+  aspect-ratio: 4 / 5;
+  padding: var(--space-4) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--tono-relleno, var(--tono, var(--color-brand-800)));
+  color: #fff;
+  text-align: center;
+  text-decoration: none;
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--tono, var(--color-brand-800)) 25%, transparent);
+  transition: transform var(--transition), box-shadow var(--transition), filter var(--transition);
+}
+
+.tarea:hover {
+  color: #fff;
+  filter: brightness(0.95);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px color-mix(in srgb, var(--tono, var(--color-brand-800)) 32%, transparent);
+}
+
+.tarea:active {
+  transform: translateY(1px);
+  box-shadow: var(--shadow-sm);
+}
+
+.tarea:focus-visible {
+  outline: 4px solid var(--color-text);
+  outline-offset: 3px;
+}
+
+.tarea__icono {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.tarea__icono .icon {
+  width: 2.25rem;
+  height: 2.25rem;
+}
+
+/* Espacio para dos líneas: con nombres cortos y largos, los íconos de una fila quedan a la misma altura */
+.tarea__texto {
+  min-height: 2.5em;
+  font-size: var(--text-lg);
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.tarea__descripcion {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+/* ---------- Lista bajo una barra de búsqueda: los productos que coinciden con lo escrito ----------
+   <div class="sugerencias"> <input data-sugerencias> … </div>; insumos.js agrega al final <div class="sugerencias__panel">
+   con <a class="sugerencia" role="option"> (nombre y cantidad; código, tipo, sector y estado). Va encima de lo que
+   sigue en la página y llega, como mucho, al borde de abajo de la pantalla (--alto-libre, que calcula insumos.js).
+   Toma el tono de la pantalla; si no hay, el verde de «Buscar producto». */
+.sugerencias {
+  position: relative;
+}
+
+.sugerencias__panel {
+  --sug: var(--tono, var(--tarea-verde));
+  position: absolute;
+  top: calc(100% + var(--space-2));
+  right: 0;
+  left: 0;
+  z-index: 15; /* sobre la barra fija de acciones (10) y bajo la barra superior (20) */
+  max-height: min(34rem, var(--alto-libre, 70vh));
+  padding: var(--space-2);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-lg);
+  text-align: left;
+}
+
+/* Aparece con un fundido corto, bajando un poco desde la barra (sin movimiento si el sistema lo pide) */
+@media (prefers-reduced-motion: no-preference) {
+  .sugerencias__panel:not([hidden]) {
+    animation: sugerencias-aparece 140ms cubic-bezier(0.2, 0, 0, 1);
+  }
+}
+
+@keyframes sugerencias-aparece {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+.sugerencias__lista {
+  display: grid;
+  gap: 2px;
+  padding: 0;
+  list-style: none;
+}
+
+.sugerencia {
+  display: grid;
+  grid-template-areas:
+    "nombre cantidad"
+    "meta estado";
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.125rem var(--space-3);
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text);
+  font: inherit;
+  font-weight: 400;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.sugerencia:hover,
+.sugerencia[aria-selected="true"] {
+  background: color-mix(in srgb, var(--sug) 9%, var(--color-surface));
+  color: var(--color-text);
+}
+
+/* La marcada con las flechas lleva además un contorno, que también se ve en alto contraste */
+.sugerencia[aria-selected="true"] {
+  outline: 2px solid var(--sug);
+  outline-offset: -2px;
+}
+
+.sugerencia__nombre {
+  grid-area: nombre;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.sugerencia__cantidad {
+  grid-area: cantidad;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.sugerencia__cantidad small {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+
+.sugerencia__meta {
+  grid-area: meta;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  overflow-wrap: anywhere;
+}
+
+.sugerencia .status {
+  grid-area: estado;
+  justify-self: end;
+}
+
+/* En el teléfono el nombre usa todo el ancho; la cantidad y el estado van debajo */
+@media (max-width: 30em) {
+  .sugerencia {
+    grid-template-areas:
+      "nombre nombre"
+      "meta meta"
+      "cantidad estado";
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.125rem var(--space-2);
+    padding-block: var(--space-3);
+  }
+
+  .sugerencia__cantidad {
+    text-align: left;
+  }
+
+  .sugerencia .status {
+    justify-self: start;
+  }
+}
+
+/* Lo escrito, marcado en el nombre y los datos */
+.sugerencia mark {
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--sug) 20%, transparent);
+  color: inherit;
+}
+
+/* Coinciden más de los que caben: envía la búsqueda para verlos todos */
+.sugerencias__todos {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: 2.75rem;
+  margin-top: var(--space-2);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--sug) 8%, var(--color-surface));
+  color: var(--sug);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.sugerencias__todos:hover {
+  background: color-mix(in srgb, var(--sug) 15%, var(--color-surface));
+}
+
+.sugerencias__vacio {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-3);
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.sugerencias__titulo {
+  font-weight: 700;
+  color: var(--color-text);
+  overflow-wrap: anywhere;
+}
+
+/* ---------- Cuadro de lectura: escanear con la pistola o escribir ----------
+   <form class="scan-box">
+     <label class="scan-box__label"><span class="scan-box__icono"> Escanea el código o escribe el nombre</label>
+     <div class="scan-box__fila"><input class="scan-box__input"> <button class="btn scan-box__boton">
+   Toma el tono de la pantalla (la tarea); si no hay, el verde del sistema. */
+.scan-box {
+  --scan: var(--tono, var(--color-brand-700));
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+  padding: var(--space-4);
+  border: 1px dashed color-mix(in srgb, var(--scan) 55%, transparent);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--scan) 7%, var(--color-surface));
+}
+
+.scan-box__label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--text-lg);
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.scan-box__o {
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+
+.scan-box__icono {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: var(--radius-md);
+  background: var(--tono-degradado, var(--scan));
+  box-shadow: 0 3px 8px color-mix(in srgb, var(--scan) 30%, transparent);
+  color: #fff;
+}
+
+.scan-box__icono .icon {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.scan-box__fila {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.scan-box__input {
+  width: 100%;
+  min-width: 0;
+  height: 3.25rem;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--text-lg);
+}
+
+.scan-box__input:focus {
+  outline: 2px solid transparent;
+  border-color: var(--scan);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--scan) 25%, transparent);
+}
+
+.scan-box__boton {
+  flex: 1 0 auto;
+  min-height: 3.25rem;
+  background: var(--tono-relleno, var(--scan));
+  color: #fff;
+  font-weight: 700;
+  box-shadow: var(--shadow-sm);
+}
+
+.scan-box__boton:hover {
+  color: #fff;
+  filter: brightness(0.94);
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--scan) 30%, transparent);
+}
+
+@media (min-width: 40em) {
+  .scan-box__boton {
+    flex-grow: 0;
+  }
+}
+
+/* ---------- Lista de productos: una tarjeta grande por producto ----------
+   <ul class="item-list"><li><a class="item-row"> nombre | cantidad | estado </a></li></ul> */
+.item-list {
+  display: grid;
+  gap: var(--space-2);
+  padding: 0;
+  list-style: none;
+}
+
+.item-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "name qty"
+    "meta status";
+  align-items: center;
+  gap: 2px var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-weight: 400;
+  text-decoration: none;
+  box-shadow: var(--shadow-sm);
+  transition: border-color var(--transition), box-shadow var(--transition), transform var(--transition);
+}
+
+a.item-row:hover {
+  border-color: var(--color-brand-500);
+  box-shadow: var(--shadow-md);
+  color: var(--color-text);
+  transform: translateY(-1px);
+}
+
+.item-row__name {
+  grid-area: name;
+  font-size: var(--text-base);
+  font-weight: 700;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.item-row__meta {
+  grid-area: meta;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.item-row .status {
+  grid-area: status;
+  justify-self: end;
+}
+
+/* Teléfono: el nombre ocupa todo el ancho, y abajo van la cantidad y el estado */
+@media (max-width: 29.99em) {
+  .item-row {
+    grid-template-areas:
+      "name name"
+      "meta meta"
+      "qty status";
+    row-gap: var(--space-1);
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .item-row__name {
+    overflow-wrap: break-word;
+  }
+}
+
+/* ---------- Estado escrito, con ícono y color ----------
+   <span class="status status--ok">✓ Hay</span>  --low "Queda poco" · --out "No queda" · --off "Desactivado" */
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 0.125rem var(--space-3) 0.125rem var(--space-2);
+  border-radius: var(--radius-full);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.status .icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.status--ok {
+  background: var(--color-success-bg);
+  color: var(--color-success);
+}
+
+.status--low {
+  background: var(--color-warning-bg);
+  color: var(--color-warning);
+}
+
+.status--out {
+  background: var(--color-danger-bg);
+  color: var(--color-danger);
+}
+
+.status--off {
+  background: var(--color-bg);
+  color: var(--color-text-muted);
+  box-shadow: inset 0 0 0 1px var(--color-border);
+}
+
+/* ---------- Opciones grandes en lugar de listas desplegables ----------
+   <div class="options"><label class="option"><input type="radio" class="option__input">
+     <span class="option__box">Aseo</span></label> … </div> */
+.options {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+  gap: var(--space-2);
+  min-width: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* Opciones con textos largos (categorías) */
+.options--wide {
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+}
+
+.options__group {
+  margin-top: var(--space-3);
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.option {
+  position: relative;
+  display: block;
+  cursor: pointer;
+}
+
+.option__input {
+  position: absolute;
+  opacity: 0;
+}
+
+.option__box {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 3rem;
+  height: 100%;
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  font-weight: 600;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+  transition: border-color var(--transition), background-color var(--transition);
+}
+
+.option:hover .option__box {
+  border-color: var(--color-brand-500);
+}
+
+.option__input:checked + .option__box {
+  border-color: var(--color-brand-700);
+  background: var(--color-brand-50);
+  color: var(--color-brand-900);
+}
+
+/* Opción con una línea que explica: <span class="option__box option__box--detalle"><span>Nombre<small>… */
+.option__box--detalle > span {
+  display: grid;
+  gap: 2px;
+}
+
+.option__box--detalle small {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+
+/* El ✓ deja claro cuál está elegida, sin depender del color */
+.option__input:checked + .option__box::after {
+  content: "✓";
+  margin-left: auto;
+  font-weight: 800;
+}
+
+.option__input:focus-visible + .option__box {
+  outline: 3px solid var(--color-brand-600);
+  outline-offset: 2px;
+}
+
+/* ---------- Cantidad con − y + ----------
+   <div class="stepper" data-stepper><button data-step="-1">−</button><input><button data-step="1">+</button></div> */
+.stepper {
+  display: inline-flex;
+  align-items: stretch;
+  gap: var(--space-2);
+}
+
+.stepper__button {
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--tarea-pizarra);
+  color: #fff;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+}
+
+.stepper__button:hover {
+  filter: brightness(1.15);
+}
+
+.stepper__button .icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  stroke-width: 2.4;
+}
+
+.stepper__input {
+  width: 5.5rem;
+  height: 3rem;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+  font-size: var(--text-xl);
+  font-weight: 800;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.stepper__input:focus {
+  outline: 2px solid transparent;
+  border-color: var(--color-brand-600);
+  box-shadow: var(--focus-ring);
+}
+
+/* Cantidad con su palabra al lado: [− 5 +] unidades */
+.quantity {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.quantity__unit {
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+/* ---------- Formulario por preguntas ----------
+   Cada pregunta va en su propia caja, numerada, con una ayuda debajo:
+   <div class="question"><label class="question__label"><span class="question__number">1</span>¿…?</label>
+     <p class="question__hint"> <input class="input"> </div>
+   Con opciones: <div class="question"><fieldset class="question__set"><legend class="question__label"> … */
+.form-simple {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.question {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.question.has-error {
+  border-color: var(--color-danger);
+  box-shadow: 0 0 0 1px var(--color-danger);
+}
+
+.question__set {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* El número queda a la izquierda y el texto se acomoda a su lado, aunque ocupe varias líneas */
+.question__label {
+  position: relative;
+  display: block;
+  min-height: 2rem;
+  padding: 0.2rem 0 0 2.75rem;
+  font-size: var(--text-lg);
+  font-weight: 700;
+}
+
+.question__number {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: var(--color-brand-800);
+  color: var(--color-on-brand);
+  font-size: var(--text-sm);
+}
+
+.question__optional {
+  margin-left: var(--space-1);
+  font-size: var(--text-base);
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+
+.question__hint {
+  color: var(--color-text-muted);
+}
+
+/* Un segundo campo dentro de la misma pregunta (el detalle de un motivo) */
+
+/* Códigos leídos con la pistola: letra de ancho fijo, más fácil de comparar con la etiqueta */
+.input--code {
+  font-family: var(--font-mono);
+  letter-spacing: 0.04em;
+}
+
+.question .field__error {
+  font-size: var(--text-base);
+  font-weight: 600;
+}
+
+.form-simple__note {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-text-muted);
+}
+
+/* ---------- Pantalla de confirmación (antes de una acción que cuesta deshacer) ---------- */
+.confirm {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.confirm__intro {
+  font-weight: 700;
+}
+
+.confirm__list {
+  display: grid;
+  gap: var(--space-2);
+  padding-left: var(--space-6);
+}
+
+/* ---------- Pantalla de resultado (el «Listo» del punto de retiro) ----------
+   <div class="result"><span class="result__icon">✓</span><h1 class="result__title">Listo</h1> <p> resumen y botones */
+.result {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-3);
+  max-width: 36rem;
+  margin: var(--space-6) auto;
+  padding: var(--space-8) var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-md);
+  text-align: center;
+}
+
+.result__icon {
+  display: grid;
+  place-items: center;
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 50%;
+  background: var(--color-si);
+  color: #fff;
+}
+
+.result__icon .icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  stroke-width: 2.4;
+}
+
+.result__title {
+  font-size: var(--text-2xl);
+  font-weight: 800;
+}
+
+/* ---------- Pasos de una tarea: <ol class="pasos tono-verde"> (parcial Insumos::partials/pasos) ---------- */
+/* Una columna igual por paso, sean 3 o 4 */
+.pasos {
+  display: grid;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-5);
+  padding: 0;
+  list-style: none;
+  counter-reset: none;
+}
+
+.pasos__paso {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-2);
+  border-bottom: 4px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  line-height: 1.25;
+  text-align: center;
+}
+
+.pasos__numero {
+  display: grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  background: var(--color-border);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  font-weight: 800;
+}
+
+.pasos__numero .icon {
+  width: 1rem;
+  height: 1rem;
+  stroke-width: 2.6;
+}
+
+.pasos__paso.is-actual {
+  border-bottom-color: var(--tono, var(--tarea-verde));
+  color: var(--color-text);
+  font-weight: 800;
+}
+
+.pasos__paso.is-actual .pasos__numero,
+.pasos__paso.is-hecho .pasos__numero {
+  background: var(--tono, var(--tarea-verde));
+  color: #fff;
+}
+
+.pasos__paso.is-hecho {
+  border-bottom-color: color-mix(in srgb, var(--tono, var(--tarea-verde)) 45%, var(--color-border));
+}
+
+@media (min-width: 40em) {
+  .pasos__paso {
+    flex-direction: row;
+    justify-content: center;
+    gap: var(--space-2);
+  }
+}
+
+/* ---------- Pregunta sin número ---------- */
+.question__label--sin-numero {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 0;
+  padding: 0;
+}
+
+/* ---------- Producto que se elige de una lista: toda la tarjeta es el botón ---------- */
+.item-row--elegir {
+  width: 100%;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.item-row--elegir:hover {
+  border-color: var(--tono, var(--tarea-verde));
+  box-shadow: var(--shadow-md);
+}
+
+.item-row__elegir {
+  display: inline-flex;
+  grid-area: qty;
+  align-items: center;
+  gap: var(--space-2);
+  justify-self: end;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-si);
+  color: #fff;
+  font-weight: 700;
+}
+
+/* ---------- Resultado: textos ---------- */
+.result__texto {
+  font-size: var(--text-lg);
+}
+
+.result__detalle {
+  color: var(--color-text-muted);
+}
+
+/* ---------- Bloques, cajas y estado vacío ---------- */
+.block + .block {
+  margin-top: var(--space-8);
+}
+
+.block__title {
+  margin-bottom: var(--space-3);
+  font-size: var(--text-lg);
+  font-weight: 800;
+}
+
+/* Caja blanca simple */
+.caja {
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.caja--nota {
+  color: var(--color-text-muted);
+}
+
+/* Nada que mostrar: <div class="vacio"><p class="vacio__titulo"> <p> */
+.vacio {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-2);
+  padding: var(--space-6) var(--space-5);
+  border: 2px dashed var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.vacio__titulo {
+  font-size: var(--text-lg);
+  font-weight: 800;
+  color: var(--color-text);
+}
+
+/* Dentro de un formulario: más bajo, sin ícono */
+.vacio--compacto {
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+}
+
+.vacio--compacto .btn {
+  margin-top: var(--space-2);
+}
+
+/* ---------- Ventana sobre la página, con el fondo difuminado (parcial «ventana») ----------
+   <div class="ventana tono-verde" data-ventana data-cerrar="…">
+     <div class="ventana__fondo"> <section class="ventana__caja" role="dialog"> cabecera + formulario
+   La página de atrás queda inactiva (inert) y sin desplazarse; si la ventana es más alta que la pantalla, se baja
+   dentro de ella. */
+body.con-ventana {
+  overflow: hidden;
+}
+
+.ventana {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-3);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* La página se sigue viendo detrás, suave y difuminada */
+.ventana__fondo {
+  position: fixed;
+  inset: 0;
+  background: rgba(21, 33, 43, 0.32);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+
+/* margin-block: auto la centra; si no cabe, empieza arriba y se puede bajar */
+.ventana__caja {
+  position: relative;
+  width: 100%;
+  max-width: 38rem;
+  margin-block: auto;
+  padding: var(--space-5) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-lg);
+  view-transition-name: ventana;
+}
+
+.ventana__cabecera {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+}
+
+.ventana__icono {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: var(--radius-md);
+  background: var(--tono, var(--color-brand-800));
+  color: #fff;
+}
+
+.ventana__icono .icon {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.ventana__textos {
+  flex: 1;
+  min-width: 0;
+}
+
+.ventana__titulo {
+  font-size: var(--text-xl);
+  font-weight: 800;
+}
+
+.ventana__texto {
+  color: var(--color-text-muted);
+}
+
+.ventana__cerrar {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 2.5rem;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.ventana__cerrar:hover {
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.ventana .flash {
+  margin-bottom: var(--space-4);
+}
+
+.ventana .pasos {
+  margin-bottom: var(--space-5);
+}
+
+/* Dentro de la ventana las tarjetas de opción van una debajo de otra */
+
+@media (min-width: 40em) {
+  .ventana {
+    padding: var(--space-8) var(--space-6);
+  }
+
+  .ventana__caja {
+    padding: var(--space-6) var(--space-8) var(--space-8);
+  }
+
+  .ventana__titulo {
+    font-size: var(--text-2xl);
+  }
+}
+
+/* ---------- Formulario de la ventana: cada campo con su nombre arriba y relleno en gris ----------
+   <form class="formulario"> <div class="campo"><label class="campo__etiqueta">Producto<span class="campo__obligatorio">*
+     <input class="input input--relleno"> … <div class="formulario__acciones"> Atrás · Siguiente */
+.formulario {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-5);
+}
+
+.campo {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.campo__etiqueta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+/* El * de los campos que hay que llenar */
+.campo__obligatorio {
+  margin-left: calc(-1 * var(--space-1));
+  color: var(--color-no);
+}
+
+/* «(opcional)» junto al nombre de un campo que se puede dejar en blanco */
+.campo__opcional {
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+
+.campo__ayuda {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+/* Etiqueta de un campo secundario (opcional): más suave, con ícono */
+.campo__etiqueta--suave {
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+/* Búsqueda dentro de un campo: el texto y, al lado, «Buscar» */
+.campo__busqueda {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.campo__busqueda .field__control {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Error en un grupo de opciones */
+.campo.has-error .option__box {
+  border-color: var(--color-danger-border);
+}
+
+/* Fieldset: la etiqueta (legend) no es parte de la grilla, así que lleva su propio espacio */
+fieldset.campo > .campo__etiqueta {
+  margin-bottom: var(--space-2);
+}
+
+/* Campo relleno: gris claro y sin borde; al escribir queda blanco, con el borde del color de la tarea */
+.input--relleno {
+  border-color: transparent;
+  background: var(--color-campo);
+}
+
+.input--relleno:hover {
+  border-color: var(--color-border-strong);
+}
+
+.input--relleno:focus {
+  border-color: var(--tono, var(--color-brand-600));
+  background: var(--color-surface);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--tono, var(--color-brand-600)) 20%, transparent);
+}
+
+.input--relleno::placeholder {
+  color: var(--color-text-muted);
+}
+
+.ventana .stepper__input {
+  border-color: transparent;
+  background: var(--color-campo);
+}
+
+.ventana .stepper__input:focus {
+  border-color: var(--tono, var(--color-brand-600));
+  background: var(--color-surface);
+}
+
+/* La opción elegida toma el color de la tarea (verde al registrar, naranja al actualizar) */
+.ventana .option:hover .option__box {
+  border-color: color-mix(in srgb, var(--tono, var(--color-brand-500)) 60%, var(--color-border));
+}
+
+.ventana .option__input:checked + .option__box {
+  border-color: var(--tono, var(--color-brand-700));
+  background: color-mix(in srgb, var(--tono, var(--color-brand-700)) 8%, var(--color-surface));
+  color: var(--color-text);
+}
+
+/* Lo ya elegido en una etapa anterior (parcial «campo-fijo»): un campo lleno, con «Cambiar» */
+.campo__fijo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: var(--control-height);
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-campo);
+}
+
+.campo__fijo-icono {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--tono, var(--color-brand-700)) 14%, var(--color-surface));
+  color: var(--tono, var(--color-brand-700));
+}
+
+.campo__fijo-datos {
+  flex: 1;
+  min-width: 0;
+}
+
+.campo__valor {
+  font-weight: 700;
+  line-height: 1.3;
+  overflow-wrap: break-word;
+}
+
+.campo__detalle {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+.campo__cambiar {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: 2.5rem;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: var(--shadow-sm);
+}
+
+.campo__cambiar:hover {
+  color: var(--tono, var(--color-brand-700));
+}
+
+/* Al final: «Atrás» o «Cancelar» a la izquierda y el botón principal, más ancho, a la derecha */
+.formulario__acciones {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  gap: var(--space-3);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-border);
+}
+
+.formulario__acciones .btn {
+  padding: 0 var(--space-3);
+  line-height: 1.2;
+  text-align: center;
+}
+
+.formulario__acciones .btn:only-child {
+  grid-column: 1 / -1;
+}
+
+/* ---------- «Listo» (parcial «listo»): lo que se acaba de hacer, arriba de la primera etapa o solo con sus botones ---------- */
+.listo {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+  padding: var(--space-4);
+  border: 1px solid var(--color-success-border);
+  border-radius: var(--radius-md);
+  background: var(--color-success-bg);
+  color: var(--color-text);
+}
+
+.listo__icono {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  background: var(--color-si);
+  color: #fff;
+}
+
+.listo__icono .icon {
+  width: 1.375rem;
+  height: 1.375rem;
+  stroke-width: 2.6;
+}
+
+.listo__datos {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.listo__titulo {
+  font-size: var(--text-lg);
+  font-weight: 800;
+  color: var(--color-success);
+}
+
+.listo__enlaces {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+}
+
+.listo__enlaces a {
+  color: var(--color-success);
+}
+
+/* ---------- Productos para elegir en la ventana (parcial Insumos::partials/buscar-producto) ---------- */
+.opciones {
+  display: grid;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.opciones__titulo {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.opciones__lista {
+  display: grid;
+  gap: var(--space-2);
+  padding: 0;
+  list-style: none;
+}
+
+/* Más bajas que en la lista de productos, para que quepan varias en la ventana */
+.opciones__lista .item-row {
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  box-shadow: none;
+}
+
+.opciones__lista .item-row__elegir {
+  padding: var(--space-1) var(--space-3);
+}
+
+/* ---------- Mensajes: con la letra del texto (en el login van más chicos) ---------- */
+.app .alert,
+.kiosco .alert,
+.ventana .alert {
+  align-items: center;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
+  font-weight: 600;
+}
+
+.app .alert > .icon,
+.kiosco .alert > .icon,
+.ventana .alert > .icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  margin: 0;
+}
+

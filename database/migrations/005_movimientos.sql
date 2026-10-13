@@ -38,13 +38,15 @@ CREATE TABLE movimiento_items (
     id INT UNSIGNED NOT NULL AUTO_INCREMENT,
     movimiento_id INT UNSIGNED NOT NULL,
     insumo_id INT UNSIGNED NOT NULL,
-    cantidad DECIMAL(10,2) NOT NULL,
-    stock_resultante DECIMAL(10,2) NOT NULL,
+    cantidad INT NOT NULL,
+    stock_resultante INT NOT NULL,
+    sector_id INT UNSIGNED NULL COMMENT 'Sector donde se guardó (en las entradas)',
     PRIMARY KEY (id),
     UNIQUE KEY uq_movimiento_items (movimiento_id, insumo_id),
     KEY ix_movimiento_items_insumo (insumo_id, movimiento_id),
     CONSTRAINT fk_movimiento_items_movimiento FOREIGN KEY (movimiento_id) REFERENCES movimientos (id),
     CONSTRAINT fk_movimiento_items_insumo FOREIGN KEY (insumo_id) REFERENCES insumos (id),
+    CONSTRAINT fk_movimiento_items_sector FOREIGN KEY (sector_id) REFERENCES sectores (id),
     CONSTRAINT ck_movimiento_items_cantidad CHECK (cantidad <> 0),
     CONSTRAINT ck_movimiento_items_stock CHECK (stock_resultante >= 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci

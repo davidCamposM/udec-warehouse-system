@@ -23,8 +23,8 @@ CREATE TABLE pedido_items (
     id INT UNSIGNED NOT NULL AUTO_INCREMENT,
     pedido_id INT UNSIGNED NOT NULL,
     insumo_id INT UNSIGNED NOT NULL,
-    stock_al_generar DECIMAL(10,2) NOT NULL COMMENT 'Cantidad disponible al armar el pedido',
-    cantidad_solicitada DECIMAL(10,2) NOT NULL COMMENT 'Necesidad de reposición',
+    stock_al_generar INT NOT NULL COMMENT 'Cantidad disponible al armar el pedido',
+    cantidad_solicitada INT NOT NULL COMMENT 'Necesidad de reposición',
     PRIMARY KEY (id),
     UNIQUE KEY uq_pedido_items (pedido_id, insumo_id),
     KEY ix_pedido_items_insumo (insumo_id),
@@ -38,7 +38,7 @@ CREATE TABLE pedido_items (
 -- Al aplicar el conteo se genera un movimiento de ajuste por las diferencias.
 CREATE TABLE conteos (
     id INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    ubicacion VARCHAR(60) NULL COMMENT 'Estante o sector contado. Null = bodega completa',
+    sector_id INT UNSIGNED NULL COMMENT 'Sector contado. Null = bodega completa',
     estado ENUM('abierto', 'aplicado', 'descartado') NOT NULL DEFAULT 'abierto',
     usuario_id INT UNSIGNED NULL,
     persona_id INT UNSIGNED NULL COMMENT 'Auxiliar que contó',
@@ -47,6 +47,7 @@ CREATE TABLE conteos (
     cerrado_en DATETIME NULL,
     PRIMARY KEY (id),
     KEY ix_conteos_estado (estado, creado_en),
+    CONSTRAINT fk_conteos_sector FOREIGN KEY (sector_id) REFERENCES sectores (id),
     CONSTRAINT fk_conteos_usuario FOREIGN KEY (usuario_id) REFERENCES usuarios (id),
     CONSTRAINT fk_conteos_persona FOREIGN KEY (persona_id) REFERENCES personas (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
@@ -56,8 +57,8 @@ CREATE TABLE conteo_items (
     id INT UNSIGNED NOT NULL AUTO_INCREMENT,
     conteo_id INT UNSIGNED NOT NULL,
     insumo_id INT UNSIGNED NOT NULL,
-    cantidad_sistema DECIMAL(10,2) NOT NULL COMMENT 'Stock del sistema al contar',
-    cantidad_contada DECIMAL(10,2) NOT NULL,
+    cantidad_sistema INT NOT NULL COMMENT 'Stock del sistema al contar',
+    cantidad_contada INT NOT NULL,
     PRIMARY KEY (id),
     UNIQUE KEY uq_conteo_items (conteo_id, insumo_id),
     KEY ix_conteo_items_insumo (insumo_id),

@@ -37,11 +37,20 @@ return [
         'idle_minutes' => 30,                   // cierre de sesión por inactividad
     ],
 
-    'estacion' => [
-        'idle_seconds' => 60,                   // la identificación se cierra tras este tiempo sin actividad (por definir)
+    // Límite de intentos de inicio de sesión. Si el servidor está detrás de un proxy, todas las
+    // peticiones llegan con la misma IP: por eso el límite por IP es más alto.
+    'auth' => [
+        'max_intentos' => 5,                    // fallos seguidos por correo antes del bloqueo
+        'max_intentos_ip' => 30,                // fallos desde una misma IP antes del bloqueo
+        'bloqueo_minutos' => 15,                // ventana en que se cuentan los fallos
+        'retencion_intentos_dias' => 90,        // el registro de accesos se borra pasado este plazo
     ],
 
     'panel' => [
         'poll_seconds' => 30,                   // cada cuánto se actualiza el panel de inicio
+    ],
+
+    'retiro' => [
+        'inactividad_segundos' => 90,           // punto de retiro: tras este tiempo sin uso se cierra la identificación
     ],
 ];

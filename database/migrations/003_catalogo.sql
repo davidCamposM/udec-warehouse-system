@@ -1,22 +1,24 @@
 -- =====================================================================
 -- 003 · Catálogo configurable
--- Unidades de medida y categorías que el encargado administra sin
+-- Categorías y sectores de la bodega, que el encargado administra sin
 -- tocar el código.
 -- =====================================================================
 
--- permite_decimales: Litro o Kilogramo admiten 0,5. Unidad, Caja o Rollo, solo enteros.
-CREATE TABLE unidades_medida (
+-- Sectores de la bodega (un estante, una repisa, un rincón). Cada uno tiene un código que se
+-- imprime como QR y se pega en el lugar: al guardar un producto se escanea el producto y
+-- después el sector donde queda.
+CREATE TABLE sectores (
     id INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    nombre VARCHAR(40) NOT NULL,
-    abreviatura VARCHAR(10) NOT NULL,
-    permite_decimales TINYINT(1) NOT NULL DEFAULT 0,
+    codigo VARCHAR(20) NOT NULL COMMENT 'Código del QR pegado en el lugar: SEC001',
+    nombre VARCHAR(80) NOT NULL COMMENT 'Ej. Estante A, repisa 2',
     activo TINYINT(1) NOT NULL DEFAULT 1,
     creado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     actualizado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
-    UNIQUE KEY uq_unidades_medida_nombre (nombre)
+    UNIQUE KEY uq_sectores_codigo (codigo),
+    UNIQUE KEY uq_sectores_nombre (nombre)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-  COMMENT='Unidades de medida de los insumos';
+  COMMENT='Sectores de la bodega';
 
 -- Dos niveles, como el catálogo de pedidos UdeC: categoría y subcategoría (padre_id).
 -- ambito separa las categorías de insumos de las de herramientas.

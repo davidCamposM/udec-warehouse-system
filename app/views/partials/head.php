@@ -20,7 +20,7 @@ $hojas = [
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<meta name="theme-color" content="#1f4a33">
+<meta name="theme-color" content="#539452">
 <meta name="csrf-token" content="<?= e(csrf_token()) ?>">
 <title><?= e(isset($titulo) ? $titulo . ' · ' . config('app.name') : config('app.name')) ?></title>
 <link rel="icon" href="<?= e(asset('img/favicon.svg')) ?>" type="image/svg+xml">

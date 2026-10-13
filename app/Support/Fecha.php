@@ -14,6 +14,13 @@ defined('APP_ROOT') || exit;
  */
 final class Fecha
 {
+    private const DIAS = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+
+    private const MESES = [
+        1 => 'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+        'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre',
+    ];
+
     /** '2026-10-06' → '06/10/2026'; '2026-10-06 14:30:00' → '06/10/2026 14:30'; vacío → ''. */
     public static function mostrar(?string $valor): string
     {
@@ -29,6 +36,24 @@ final class Fecha
         }
 
         return $fecha->format($conHora ? 'd/m/Y H:i' : 'd/m/Y');
+    }
+
+    /** '2026-10-07' → 'miércoles 7 de octubre de 2026'. Sin argumento, la fecha de hoy. */
+    public static function larga(?string $valor = null): string
+    {
+        $fecha = DateTimeImmutable::createFromFormat('!Y-m-d', substr($valor ?? self::hoy(), 0, 10));
+
+        if ($fecha === false) {
+            return (string) $valor;
+        }
+
+        return sprintf(
+            '%s %d de %s de %d',
+            self::DIAS[(int) $fecha->format('w')],
+            (int) $fecha->format('j'),
+            self::MESES[(int) $fecha->format('n')],
+            (int) $fecha->format('Y')
+        );
     }
 
     /**
@@ -53,10 +78,5 @@ final class Fecha
     public static function hoy(): string
     {
         return date('Y-m-d');
-    }
-
-    public static function ahora(): string
-    {
-        return date('Y-m-d H:i:s');
     }
 }

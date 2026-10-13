@@ -5,25 +5,21 @@
     <?= partial('head', ['titulo' => $titulo ?? null, 'estilos' => ['css/layout/auth.css']]) ?>
     <script src="<?= e(asset('js/core/ui.js')) ?>" defer></script>
 </head>
-<body>
-    <div class="auth">
-        <div class="auth__panel">
-            <header>
-                <?= partial('brand') ?>
+<body class="auth">
+    <main class="auth__main">
+        <div class="auth__card">
+            <header class="auth__brand">
+                <span class="auth__logo"><?= icon('tree') ?></span>
+                <h1 class="auth__name">Bodega FCF</h1>
             </header>
+            <p class="auth__tagline">Ingresa a tu cuenta</p>
 
-            <main class="auth__main">
-                <div class="auth__content">
-                    <?= $contenido ?>
-                </div>
-            </main>
-
-            <footer class="auth__footer">
-                © <?= e(date('Y')) ?> Facultad de Ciencias Forestales · Universidad de Concepción
-            </footer>
+            <?= $contenido ?>
         </div>
+    </main>
 
-        <?= partial('auth-showcase') ?>
-    </div>
+    <footer class="auth__footer">
+        © <?= e(date('Y')) ?> Facultad de Ciencias Forestales · Universidad de Concepción
+    </footer>
 </body>
 </html>

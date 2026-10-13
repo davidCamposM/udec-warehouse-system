@@ -4,14 +4,21 @@ defined('APP_ROOT') || exit;
 
 $errorEmail = error_de('email');
 $errorPassword = error_de('password');
-?>
-<h1 class="auth__title">Iniciar sesión</h1>
-<p class="auth__lead">¿No tienes cuenta? Pídela al encargado de bodega.</p>
 
+// Tras un intento fallido el correo ya viene escrito: el cursor parte en la contraseña.
+$enfocarPassword = old('email') !== '' && $errorEmail === null;
+?>
 <?php if ($aviso !== null) : ?>
     <div class="alert alert--warning auth__alert" role="status">
         <?= icon('info') ?>
         <p><?= e($aviso) ?></p>
+    </div>
+<?php endif; ?>
+
+<?php if ($exito !== null) : ?>
+    <div class="alert alert--success auth__alert" role="status">
+        <?= icon('check') ?>
+        <p><?= e($exito) ?></p>
     </div>
 <?php endif; ?>
 
@@ -22,24 +29,30 @@ $errorPassword = error_de('password');
     </div>
 <?php endif; ?>
 
-<form class="form auth__form" method="post" action="<?= e(url('login')) ?>">
+<form class="form" method="post" action="<?= e(url('login')) ?>" data-submit-once>
     <?= csrf_field() ?>
 
     <div class="field">
         <label class="field__label" for="email">Correo electrónico</label>
-        <input class="input" id="email" name="email" type="email" inputmode="email"
-            autocomplete="username" placeholder="nombre@udec.cl" value="<?= e(old('email')) ?>" required autofocus
-            <?php if ($errorEmail !== null) : ?>aria-invalid="true" aria-describedby="email-error"<?php endif; ?>>
+        <div class="field__control field__control--with-icon">
+            <span class="field__icon"><?= icon('mail') ?></span>
+            <input class="input" id="email" name="email" type="email" inputmode="email"
+                autocomplete="username" placeholder="nombre@udec.cl" value="<?= e(old('email')) ?>" required
+                <?= $enfocarPassword ? '' : 'autofocus' ?>
+                <?php if ($errorEmail !== null) : ?>aria-invalid="true" aria-describedby="email-error"<?php endif; ?>>
+        </div>
         <?php if ($errorEmail !== null) : ?>
-            <p class="field__error" id="email-error"><?= e($errorEmail) ?></p>
+            <p class="field__error" id="email-error"><?= icon('alert') ?><?= e($errorEmail) ?></p>
         <?php endif; ?>
     </div>
 
     <div class="field">
         <label class="field__label" for="password">Contraseña</label>
-        <div class="field__control field__control--with-action">
+        <div class="field__control field__control--with-icon field__control--with-action">
+            <span class="field__icon"><?= icon('lock') ?></span>
             <input class="input" id="password" name="password" type="password"
-                autocomplete="current-password" placeholder="Ingresa tu contraseña" required
+                autocomplete="current-password" placeholder="Escribe tu contraseña" required
+                <?= $enfocarPassword ? 'autofocus' : '' ?>
                 <?php if ($errorPassword !== null) : ?>aria-invalid="true" aria-describedby="password-error"<?php endif; ?>>
             <button class="field__action" type="button" data-toggle-password="password"
                 aria-label="Mostrar contraseña" aria-pressed="false">
@@ -48,26 +61,26 @@ $errorPassword = error_de('password');
             </button>
         </div>
         <?php if ($errorPassword !== null) : ?>
-            <p class="field__error" id="password-error"><?= e($errorPassword) ?></p>
+            <p class="field__error" id="password-error"><?= icon('alert') ?><?= e($errorPassword) ?></p>
         <?php endif; ?>
     </div>
 
-    <details class="auth__forgot">
-        <summary>¿Olvidaste tu contraseña?</summary>
-        <p>Pide al encargado de bodega que la restablezca.</p>
-    </details>
-
-    <button class="btn btn--primary btn--block" type="submit">Ingresar</button>
+    <button class="btn btn--primary auth__submit" type="submit" data-loading-text="Ingresando…">Ingresar</button>
 </form>
 
-<p class="auth__divider">o</p>
+<details class="auth__forgot">
+    <summary>¿Olvidaste tu contraseña?</summary>
+    <p>Pide al encargado de bodega que la restablezca.</p>
+</details>
+
+<p class="auth__account">¿No tienes cuenta? <strong>Pídela al encargado de bodega.</strong></p>
 
 <aside class="auth__station">
     <span class="auth__station-icon"><?= icon('scan') ?></span>
     <div>
         <p class="auth__station-title">¿Retiras sin cuenta?</p>
         <p class="auth__station-text">
-            Auxiliares y personas autorizadas se identifican con su credencial en la estación de retiro.
+            Auxiliares y personas autorizadas se identifican con su credencial en el punto de retiro.
         </p>
     </div>
 </aside>

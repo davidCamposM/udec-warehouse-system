@@ -1,67 +1,100 @@
 /* ==========================================================
-   Layout de acceso (login): pantalla dividida.
-   Izquierda: formulario. Derecha: panel verde de presentación,
-   que se oculta en pantallas angostas (teléfonos y tablets).
+   Layout de acceso (login): una tarjeta blanca con contorno,
+   centrada sobre el degradado verde del sistema. Dentro van el
+   logo y el nombre, el formulario y la ayuda; abajo, el pie.
    ========================================================== */
 .auth {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  min-height: 100vh;
-  min-height: 100dvh;
-}
-
-/* ---------- Columna del formulario ---------- */
-.auth__panel {
   display: flex;
   flex-direction: column;
-  padding: var(--space-6) var(--space-5);
+  align-items: center;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: var(--space-8) var(--space-4) var(--space-6);
+  /* El verde del sistema, de bosque oscuro arriba al verde elegido abajo */
+  background:
+    linear-gradient(170deg, var(--color-brand-950) 0%, var(--color-brand-800) 55%, var(--color-brand-600) 100%) fixed;
 }
 
 .auth__main {
   flex: 1;
   display: flex;
-  align-items: center;
+  flex-direction: column;
   justify-content: center;
-  padding-block: var(--space-10);
-}
-
-.auth__content {
   width: 100%;
   max-width: 26rem;
 }
 
-.auth__title {
-  font-size: var(--text-3xl);
-  font-weight: 800;
+/* ---------- La tarjeta ---------- */
+.auth__card {
+  padding: var(--space-8) var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: 0 24px 48px rgba(25, 44, 25, 0.35), 0 2px 6px rgba(16, 24, 40, 0.1);
 }
 
-.auth__lead {
-  margin-top: var(--space-3);
+/* ---------- Logo, nombre e instrucción ---------- */
+.auth__brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+}
+
+.auth__logo {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: var(--radius-md);
+  background: var(--gradiente-marca);
+  box-shadow: var(--sombra-verde);
+  color: var(--color-on-brand);
+}
+
+.auth__logo .icon {
+  width: 1.625rem;
+  height: 1.625rem;
+}
+
+.auth__name {
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.auth__tagline {
+  margin: var(--space-2) 0 var(--space-6);
   color: var(--color-text-muted);
+  text-align: center;
 }
 
+/* ---------- Avisos (sesión vencida, contraseña cambiada, error) ---------- */
 .auth__alert {
-  margin-top: var(--space-6);
+  margin-bottom: var(--space-5);
 }
 
-.auth__form {
-  margin-top: var(--space-8);
+/* ---------- Formulario ---------- */
+.auth__submit {
+  width: 100%;
+  margin-top: var(--space-1);
+  font-weight: 700;
 }
 
-/* "¿Olvidaste tu contraseña?": <details> nativo, sin JavaScript */
+/* ---------- "¿Olvidaste tu contraseña?": <details> nativo, sin JavaScript ---------- */
 .auth__forgot {
-  margin-top: calc(-1 * var(--space-2));
-  font-size: var(--text-sm);
+  margin-top: var(--space-4);
+  text-align: center;
 }
 
 .auth__forgot summary {
-  width: fit-content;
-  margin-left: auto;
+  display: inline-block;
   list-style: none;
   color: var(--color-brand-700);
   font-weight: 600;
   text-decoration: underline;
-  text-underline-offset: 3px;
+  text-underline-offset: 4px;
   cursor: pointer;
 }
 
@@ -77,35 +110,28 @@
   margin-top: var(--space-3);
   padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-md);
-  background: var(--color-brand-50);
+  background: var(--color-bg);
   color: var(--color-text-muted);
 }
 
-.auth__divider {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
-  margin-block: var(--space-6);
+.auth__account {
+  margin-top: var(--space-3);
   font-size: var(--text-sm);
-  color: var(--color-text-subtle);
+  color: var(--color-text-muted);
+  text-align: center;
 }
 
-.auth__divider::before,
-.auth__divider::after {
-  content: "";
-  flex: 1;
-  height: 1px;
-  background: var(--color-border);
+.auth__account strong {
+  color: var(--color-text);
 }
 
-/* Aviso para quienes retiran sin cuenta */
+/* ---------- Al pie de la tarjeta, separado: quienes retiran sin cuenta ---------- */
 .auth__station {
   display: flex;
-  gap: var(--space-4);
-  padding: var(--space-4);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-border);
 }
 
 .auth__station-icon {
@@ -114,279 +140,28 @@
   place-items: center;
   width: 2.5rem;
   height: 2.5rem;
-  border-radius: 12px;
-  background: var(--color-brand-100);
-  color: var(--color-brand-800);
+  border-radius: var(--radius-md);
+  /* En el color del punto de retiro (grafito), el mismo que verá la persona al llegar ahí */
+  background: linear-gradient(135deg, color-mix(in srgb, var(--tarea-grafito) 82%, #fff) 0%, var(--tarea-grafito) 50%,
+    color-mix(in srgb, var(--tarea-grafito) 82%, #000) 100%);
+  box-shadow: 0 3px 8px color-mix(in srgb, var(--tarea-grafito) 30%, transparent);
+  color: #fff;
 }
 
 .auth__station-title {
-  font-size: var(--text-sm);
   font-weight: 700;
 }
 
 .auth__station-text {
-  margin-top: var(--space-1);
+  margin-top: 2px;
   font-size: var(--text-sm);
   color: var(--color-text-muted);
 }
 
+/* ---------- Pie, fuera de la tarjeta ---------- */
 .auth__footer {
+  margin-top: var(--space-6);
   font-size: var(--text-xs);
-  color: var(--color-text-muted);
+  color: rgba(255, 255, 255, 0.85);
   text-align: center;
-}
-
-/* ---------- Panel de presentación ---------- */
-.showcase {
-  display: none;
-}
-
-@media (min-width: 60em) {
-  .auth {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr);
-  }
-
-  .auth__panel {
-    padding: var(--space-8) var(--space-12);
-  }
-
-  .auth__main {
-    padding-block: var(--space-8);
-  }
-
-  .auth__footer {
-    text-align: left;
-  }
-
-  .auth__title {
-    font-size: var(--text-4xl);
-  }
-
-  .showcase {
-    position: relative;
-    isolation: isolate;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-16);
-    padding: var(--space-16) var(--space-12);
-    background: var(--color-brand-800);
-    color: var(--color-on-brand);
-  }
-
-  /* Gran círculo luminoso de fondo, arriba a la derecha */
-  .showcase::before {
-    content: "";
-    position: absolute;
-    z-index: -1;
-    top: -16rem;
-    right: -14rem;
-    width: 44rem;
-    aspect-ratio: 1;
-    border-radius: 50%;
-    background: radial-gradient(circle at 35% 65%, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.05) 55%, transparent 70%);
-  }
-}
-
-.showcase__eyebrow {
-  position: absolute;
-  top: var(--space-10);
-  right: var(--space-12);
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-size: var(--text-sm);
-  font-weight: 500;
-  color: var(--color-on-brand-muted);
-}
-
-.showcase__visual {
-  position: relative;
-  width: min(100%, 24rem);
-  margin-right: var(--space-8);
-}
-
-/* Tarjeta blanca con la idea central: escanear y confirmar */
-.showcase-card {
-  position: relative;
-  padding: var(--space-8) 9.5rem var(--space-8) var(--space-8);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-  color: var(--color-text);
-  box-shadow: var(--shadow-lg);
-}
-
-.showcase-card__title {
-  font-size: var(--text-2xl);
-  font-weight: 800;
-  line-height: var(--leading-tight);
-  letter-spacing: -0.02em;
-  color: var(--color-brand-800);
-}
-
-.showcase-card__text {
-  margin-top: var(--space-3);
-  font-size: var(--text-sm);
-  color: var(--color-text-muted);
-}
-
-.showcase-card__steps {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  margin-top: var(--space-5);
-  padding: var(--space-2) var(--space-4);
-  border-radius: var(--radius-full);
-  background: var(--color-brand-100);
-  color: var(--color-brand-800);
-  font-size: var(--text-xs);
-  font-weight: 700;
-  white-space: nowrap;
-}
-
-.showcase-card__steps .icon {
-  width: 0.875rem;
-  height: 0.875rem;
-}
-
-/* Etiqueta con código de barras, inclinada y saliendo de la tarjeta */
-.showcase-label {
-  position: absolute;
-  top: var(--space-6);
-  right: -3rem;
-  width: 11.5rem;
-  padding: var(--space-4);
-  border-radius: 14px;
-  background: linear-gradient(150deg, #ffffff 0%, #eef6f1 100%);
-  box-shadow: var(--shadow-lg);
-  color: var(--color-text);
-  transform: rotate(-10deg);
-}
-
-.showcase-label__head {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.625rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-brand-700);
-}
-
-.showcase-label__bars {
-  position: relative;
-  margin-top: var(--space-3);
-}
-
-.showcase-label__barcode {
-  width: 100%;
-  height: 3.25rem;
-  fill: var(--color-text);
-}
-
-/* Línea del lector recorriendo el código */
-.showcase-label__scan {
-  position: absolute;
-  top: 50%;
-  left: -6%;
-  right: -6%;
-  height: 2px;
-  border-radius: 2px;
-  background: #f04438;
-  box-shadow: 0 0 10px 2px rgba(240, 68, 56, 0.55);
-  animation: showcase-scan 2.4s ease-in-out infinite alternate;
-}
-
-@keyframes showcase-scan {
-  from {
-    transform: translateY(-1.4rem);
-  }
-  to {
-    transform: translateY(1.4rem);
-  }
-}
-
-.showcase-label__code {
-  margin-top: var(--space-2);
-  font-family: var(--font-mono);
-  font-size: var(--text-sm);
-  font-weight: 600;
-  letter-spacing: 0.25em;
-  text-align: center;
-}
-
-/* Chip flotante: resultado de confirmar */
-.showcase-chip {
-  position: absolute;
-  right: -2rem;
-  bottom: -2.25rem;
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-3) var(--space-5) var(--space-3) var(--space-3);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-lg);
-  color: var(--color-text);
-}
-
-.showcase-chip__icon {
-  display: grid;
-  place-items: center;
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 12px;
-  background: var(--color-success-bg);
-  color: var(--color-success);
-}
-
-.showcase-chip__text {
-  display: grid;
-  line-height: 1.25;
-}
-
-.showcase-chip__label {
-  font-size: var(--text-xs);
-  color: var(--color-text-muted);
-}
-
-.showcase-chip__value {
-  font-size: var(--text-lg);
-  font-weight: 800;
-}
-
-/* Pantallas medianas: la ilustración se achica para que la etiqueta no toque el borde */
-@media (min-width: 60em) and (max-width: 79.99em) {
-  .showcase {
-    padding-inline: var(--space-10);
-  }
-
-  .showcase__visual {
-    width: min(100%, 22rem);
-  }
-
-  .showcase-card {
-    padding-right: 8.5rem;
-  }
-
-  .showcase-label {
-    right: -2rem;
-    width: 10rem;
-  }
-}
-
-.showcase__copy {
-  max-width: 30rem;
-  text-align: center;
-}
-
-.showcase__title {
-  font-size: var(--text-3xl);
-}
-
-.showcase__text {
-  margin-top: var(--space-4);
-  color: var(--color-on-brand-muted);
 }

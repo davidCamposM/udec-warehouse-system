@@ -25,17 +25,16 @@ final class App
     {
         try {
             Session::start(!$request->isBackground());
+            Auth::refresh();
 
             $ruta = $this->router->match($request->method(), $request->path());
             $request = $request->withParams($ruta['parametros']);
+            View::share('rutaActual', $request->path());
 
             $this->autorizar($ruta['permiso']);
 
             if ($request->method() === 'POST' && !Csrf::verify($request)) {
-                throw new HttpException(
-                    403,
-                    'El formulario venció o no es válido. Recarga la página e inténtalo de nuevo.'
-                );
+                return $this->formularioVencido($request);
             }
 
             return $this->ejecutar($ruta['accion'], $request);
@@ -88,23 +87,57 @@ final class App
         }
 
         Session::flash('_errores', $e->errors());
-        Session::flash('_old', self::sinCamposSensibles($request->post()));
+        Session::flashInput(self::sinCamposSensibles($request->post()));
 
         return Response::redirect($this->paginaAnterior($request));
     }
 
+    /**
+     * El token CSRF no coincide: la página estuvo abierta más que la sesión, se inició sesión en
+     * otra pestaña o el envío viene de otro sitio. En vez de una página de error sin salida, se
+     * vuelve al formulario con el aviso (sin rellenar nada con lo recibido).
+     */
+    private function formularioVencido(Request $request): Response
+    {
+        if ($request->wantsJson()) {
+            return Response::json(
+                ['error' => 'El formulario venció o no es válido. Recarga la página e inténtalo de nuevo.'],
+                403
+            );
+        }
+
+        Session::flash('error', 'El formulario venció. Inténtalo de nuevo.');
+
+        return Response::redirect($this->paginaAnterior($request));
+    }
+
+    /** Página de error (o JSON) según el estado HTTP. Sin sesión: al login, con el aviso que corresponda. */
     private function respuestaError(HttpException $e, Request $request, ?Throwable $causa = null): Response
     {
         $estado = $e->status();
 
         // Sin sesión: al login, recordando a dónde quería ir.
-        if ($estado === 401 && !$request->wantsJson()) {
+        if ($estado === 401) {
+            $aviso = match (true) {
+                Session::expired() => 'Tu sesión se cerró por inactividad. Vuelve a ingresar.',
+                Auth::revoked() => 'Tu cuenta fue desactivada. Habla con el encargado de bodega.',
+                // La raíz es la entrada natural al sistema: ahí el login no necesita explicación.
+                $request->wantsJson(), $request->path() === '/' => null,
+                default => 'Inicia sesión para continuar.',
+            };
+            if ($aviso !== null) {
+                Session::flash('aviso', $aviso);
+            }
+
+            // Una petición de JavaScript (como la actualización del panel) recibe la dirección del
+            // login para llevar ahí al usuario, donde verá el aviso.
+            if ($request->wantsJson()) {
+                return Response::json(['error' => $e->getMessage(), 'login' => Url::to('login')], 401);
+            }
+
             if ($request->method() === 'GET') {
                 Session::put('_url_previa', $request->fullUrl());
             }
-            Session::flash('aviso', Session::expired()
-                ? 'Tu sesión se cerró por inactividad. Vuelve a ingresar.'
-                : 'Inicia sesión para continuar.');
 
             return Response::redirect(Url::to('login'));
         }
@@ -137,7 +170,7 @@ final class App
     {
         $anterior = $request->referer();
 
-        return $anterior !== null && str_starts_with($anterior, Url::base() . '/') ? $anterior : Url::to();
+        return $anterior !== null && Url::isInternal($anterior) ? $anterior : Url::to();
     }
 
     /**

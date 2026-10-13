@@ -3,10 +3,13 @@
    <form class="form">
      <div class="field">
        <label class="field__label">  <input class="input">
-       <p class="field__hint">  /  <p class="field__error">
+       <p class="field__error">
    Campo con botón dentro (mostrar contraseña):
      <div class="field__control field__control--with-action">
        <input class="input"> <button class="field__action">
+   Campo con ícono a la izquierda (correo, candado):
+     <div class="field__control field__control--with-icon">
+       <span class="field__icon"> <input class="input">
    ========================================================== */
 .form {
   display: grid;
@@ -70,6 +73,22 @@
   padding-right: calc(var(--control-height) + var(--space-2));
 }
 
+.field__control--with-icon .input {
+  padding-left: calc(var(--control-height) - var(--space-1));
+}
+
+.field__icon {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  display: grid;
+  place-items: center;
+  width: calc(var(--control-height) - var(--space-1));
+  color: var(--color-text-subtle);
+  pointer-events: none;
+}
+
 .field__action {
   position: absolute;
   top: 1px;
@@ -102,13 +121,15 @@
   display: block;
 }
 
-.field__hint {
-  font-size: var(--text-sm);
-  color: var(--color-text-muted);
-}
-
 .field__error {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
   font-size: var(--text-sm);
   font-weight: 500;
   color: var(--color-danger);
+}
+
+.field__error .icon {
+  margin-top: 0.1em;
 }
