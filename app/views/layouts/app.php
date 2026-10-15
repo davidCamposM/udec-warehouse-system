@@ -15,6 +15,7 @@ $hojas = [
 // difuminada e inactiva (inert): no se puede tocar ni recorrer con el teclado mientras la ventana está abierta.
 $conVentana = isset($ventana);
 // $amplia (opcional): la página usa más ancho (el inicio, por su lista de inventario).
+// Al final va la ventana «¿Sigues ahí?» (parcial «sesion»), que aparece tras un rato sin uso.
 $clasePagina = 'pagina' . (!empty($amplia) ? ' pagina--amplia' : '');
 ?>
 <!DOCTYPE html>
@@ -22,6 +23,7 @@ $clasePagina = 'pagina' . (!empty($amplia) ? ' pagina--amplia' : '');
 <head>
     <?= partial('head', ['titulo' => $titulo ?? null, 'estilos' => $hojas]) ?>
     <script src="<?= e(asset('js/core/ui.js')) ?>" defer></script>
+    <script src="<?= e(asset('js/core/sesion.js')) ?>" defer></script>
     <?php foreach ($scripts ?? [] as $script) : ?>
     <script src="<?= e(asset($script)) ?>" defer></script>
     <?php endforeach; ?>
@@ -45,5 +47,7 @@ $clasePagina = 'pagina' . (!empty($amplia) ? ' pagina--amplia' : '');
     <?php if ($conVentana) : ?>
         <?= $ventana ?>
     <?php endif; ?>
+
+    <?= partial('sesion') ?>
 </body>
 </html>

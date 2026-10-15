@@ -60,11 +60,26 @@ final class LoginController
         return Response::redirect(is_string($destino) && Url::isInternal($destino) ? $destino : Url::to());
     }
 
+    /** «Salir», o la ventana «¿Sigues ahí?» (sesion.js) sin respuesta: motivo=inactividad cambia el aviso del login. */
     public function logout(Request $request): Response
     {
         Auth::logout();
-        Session::flash('exito', 'Cerraste sesión correctamente.');
+
+        if ($request->input('motivo') === 'inactividad') {
+            Session::flash('aviso', 'Tu sesión se cerró por inactividad. Vuelve a ingresar.');
+        } else {
+            Session::flash('exito', 'Cerraste sesión correctamente.');
+        }
 
         return Response::redirect(Url::to('login'));
+    }
+
+    /**
+     * La persona sigue usando el sistema (sesion.js lo avisa mientras hay actividad, y al responder «Sí» en «¿Sigues
+     * ahí?»). Basta con llegar aquí: la petición renueva la actividad de la sesión.
+     */
+    public function seguir(Request $request): Response
+    {
+        return Response::json(['ok' => true]);
     }
 }

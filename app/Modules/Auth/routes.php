@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Rutas del módulo Auth: inicio y cierre de sesión.
+ * Rutas del módulo Auth: inicio y cierre de sesión, y el aviso de que la persona sigue usando el sistema.
  *
  * @var App\Core\Router $router
  */
@@ -16,3 +16,4 @@ defined('APP_ROOT') || exit;
 $router->get('/login', [LoginController::class, 'show'], Permission::PUBLICO);
 $router->post('/login', [LoginController::class, 'login'], Permission::PUBLICO);
 $router->post('/logout', [LoginController::class, 'logout'], Permission::AUTENTICADO);
+$router->post('/sesion/seguir', [LoginController::class, 'seguir'], Permission::AUTENTICADO);

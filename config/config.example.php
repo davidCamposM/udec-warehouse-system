@@ -34,7 +34,8 @@ return [
 
     'session' => [
         'name' => 'BODEGA_SID',
-        'idle_minutes' => 30,                   // cierre de sesión por inactividad
+        'idle_minutes' => 20,                   // sin uso por este tiempo, se pregunta «¿Sigues ahí?»
+        'respuesta_segundos' => 60,             // para responder; sin respuesta (o con «No») se cierra la sesión
     ],
 
     // Límite de intentos de inicio de sesión. Si el servidor está detrás de un proxy, todas las
@@ -48,9 +49,5 @@ return [
 
     'panel' => [
         'poll_seconds' => 30,                   // cada cuánto se actualiza el panel de inicio
-    ],
-
-    'retiro' => [
-        'inactividad_segundos' => 90,           // punto de retiro: tras este tiempo sin uso se cierra la identificación
     ],
 ];

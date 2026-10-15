@@ -8,9 +8,19 @@ defined('APP_ROOT') || exit;
 
 /**
  * Sesión PHP con cookies seguras, cierre por inactividad y mensajes flash.
+ *
+ * La inactividad la maneja la página (sesion.js): tras session.idle_minutes sin uso pregunta «¿Sigues ahí?» y, sin
+ * respuesta en session.respuesta_segundos, cierra la sesión. El servidor la cierra por su cuenta un poco después, por si
+ * la página no pudo hacerlo (sin JavaScript, el computador suspendido o el navegador cerrado).
  */
 final class Session
 {
+    /**
+     * Segundos de holgura del servidor sobre lo que espera la página: sesion.js avisa al servidor que la persona sigue
+     * usando el sistema como mucho cada 2 minutos, así que su última actividad puede ir hasta ese tanto atrasada.
+     */
+    private const HOLGURA = 180;
+
     private const ACTIVIDAD = '_ultima_actividad';
     private const FLASH = '_flash';
     private const FLASH_NUEVO = '_flash_nuevo';
@@ -28,7 +38,8 @@ final class Session
             return;
         }
 
-        $limite = (int) Config::get('session.idle_minutes', 30) * 60;
+        $limite = (int) Config::get('session.idle_minutes', 20) * 60 + (int) Config::get('session.respuesta_segundos', 60)
+            + self::HOLGURA;
 
         ini_set('session.use_strict_mode', '1');
         ini_set('session.use_only_cookies', '1');
