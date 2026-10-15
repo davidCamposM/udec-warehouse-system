@@ -18,7 +18,6 @@ final class InsumoRepository
         'todos' => 'i.activo = 1',
         'reponer' => 'i.activo = 1 AND i.stock_minimo > 0 AND i.stock_actual <= i.stock_minimo',
         'no-queda' => 'i.activo = 1 AND i.stock_actual <= 0',
-        'desactivados' => 'i.activo = 0',
     ];
 
     private const COLUMNAS = 'i.id, i.codigo, i.codigo_udec, i.nombre, i.stock_actual, i.stock_minimo, i.activo,
@@ -89,21 +88,28 @@ final class InsumoRepository
     }
 
     /** @return array<string, mixed>|null */
+    /**
+     * El producto, si no fue eliminado. Para las personas, un producto eliminado ya no existe (por dentro solo queda
+     * desactivado, con su historial).
+     *
+     * @return array<string, mixed>|null
+     */
     public function findById(int $id): ?array
     {
-        return Database::fetch('SELECT ' . self::COLUMNAS . ' FROM ' . self::DESDE . ' WHERE i.id = ?', [$id]);
+        return Database::fetch('SELECT ' . self::COLUMNAS . ' FROM ' . self::DESDE . ' WHERE i.id = ? AND i.activo = 1', [$id]);
     }
 
     /**
-     * Producto al que corresponde un código leído o escrito: el código interno (INS00001), el código UdeC o un
-     * código de barras de fábrica activo.
+     * Producto (no eliminado) al que corresponde un código leído o escrito: el código interno (INS00001), el código
+     * UdeC o un código de barras de fábrica activo.
      */
     public function idPorCodigo(string $codigo): ?int
     {
         $id = Database::fetchValue(
-            'SELECT insumo_id FROM insumo_codigos WHERE codigo = ? AND activo = 1
+            'SELECT ic.insumo_id FROM insumo_codigos ic JOIN insumos i ON i.id = ic.insumo_id
+              WHERE ic.codigo = ? AND ic.activo = 1 AND i.activo = 1
              UNION ALL
-             SELECT id FROM insumos WHERE codigo = ? OR codigo_udec = ?
+             SELECT id FROM insumos WHERE (codigo = ? OR codigo_udec = ?) AND activo = 1
              LIMIT 1',
             [$codigo, $codigo, $codigo]
         );
@@ -115,29 +121,6 @@ final class InsumoRepository
     public function tieneMovimientos(int $insumoId): bool
     {
         return Database::fetchValue('SELECT 1 FROM movimiento_items WHERE insumo_id = ? LIMIT 1', [$insumoId]) !== null;
-    }
-
-    /**
-     * Los últimos productos activos con un movimiento de ese tipo (los que entraron o los que se retiraron), sin
-     * repetir, del más reciente al más antiguo.
-     *
-     * @param 'entrada'|'salida' $tipo
-     * @return list<array<string, mixed>>
-     */
-    public function ultimosConMovimiento(string $tipo, int $limite): array
-    {
-        return Database::fetchAll(
-            'SELECT ' . self::COLUMNAS . ' FROM ' . self::DESDE . '
-               JOIN (SELECT mi.insumo_id, MAX(mi.movimiento_id) AS ultimo
-                       FROM movimiento_items mi
-                       JOIN movimientos m ON m.id = mi.movimiento_id
-                      WHERE m.tipo = ?
-                      GROUP BY mi.insumo_id) r ON r.insumo_id = i.id
-              WHERE i.activo = 1
-              ORDER BY r.ultimo DESC
-              LIMIT ' . max(1, $limite),
-            [$tipo]
-        );
     }
 
     /** @return list<array<string, mixed>> códigos de barra activos del producto */
@@ -203,16 +186,30 @@ final class InsumoRepository
         );
     }
 
-    public function setActivo(int $id, bool $activo): void
+    /**
+     * «Eliminar» un producto: por dentro solo se desactiva (con su historial), y sus códigos de barras quedan libres
+     * para usarlos en otro producto.
+     */
+    public function eliminar(int $id): void
     {
-        Database::execute('UPDATE insumos SET activo = ? WHERE id = ?', [(int) $activo, $id]);
+        Database::execute('UPDATE insumos SET activo = 0 WHERE id = ?', [$id]);
+        Database::execute('UPDATE insumo_codigos SET activo = 0 WHERE insumo_id = ?', [$id]);
+    }
+
+    /**
+     * Si un producto eliminado tiene ese código UdeC, se lo quita, para usarlo en otro (el código UdeC no se puede
+     * repetir). Para las personas, ese producto ya no existe.
+     */
+    public function liberarCodigoUdec(string $codigoUdec): void
+    {
+        Database::execute('UPDATE insumos SET codigo_udec = NULL WHERE codigo_udec = ? AND activo = 0', [$codigoUdec]);
     }
 
     /** Id de otro producto con exactamente ese nombre (sin distinguir mayúsculas ni tildes), o null. */
     public function idPorNombre(string $nombre, ?int $excepto): ?int
     {
         $id = Database::fetchValue(
-            'SELECT id FROM insumos WHERE nombre = ? AND id <> ? LIMIT 1',
+            'SELECT id FROM insumos WHERE nombre = ? AND id <> ? AND activo = 1 LIMIT 1',
             [$nombre, $excepto ?? 0]
         );
 
@@ -251,11 +248,11 @@ final class InsumoRepository
         $fila = Database::fetch(
             "SELECT CONCAT('el producto ', i.nombre) AS duenio
                FROM insumo_codigos ic JOIN insumos i ON i.id = ic.insumo_id
-              WHERE ic.codigo = ? AND ic.activo = 1
+              WHERE ic.codigo = ? AND ic.activo = 1 AND i.activo = 1
              UNION ALL
-             SELECT CONCAT('el producto ', nombre) FROM insumos WHERE (codigo = ? OR codigo_udec = ?) AND id <> ?
+             SELECT CONCAT('el producto ', nombre) FROM insumos WHERE (codigo = ? OR codigo_udec = ?) AND id <> ? AND activo = 1
              UNION ALL
-             SELECT CONCAT('el sector ', nombre) FROM sectores WHERE codigo = ?
+             SELECT CONCAT('el sector ', nombre) FROM sectores WHERE codigo = ? AND activo = 1
              LIMIT 1",
             [$codigo, $codigo, $codigo, $exceptoInsumo ?? 0, $codigo]
         );

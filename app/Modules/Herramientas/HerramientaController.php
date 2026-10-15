@@ -16,7 +16,7 @@ defined('APP_ROOT') || exit;
 
 /**
  * «Catálogo de herramientas»: lo que tiene la bodega para prestar, por categoría, con cuántas están prestadas ahora.
- * Todos los perfiles lo ven (el docente, para saber qué pedir); el encargado además agrega, edita y desactiva.
+ * Todos los perfiles lo ven (el docente, para saber qué pedir); el encargado además agrega, edita y elimina.
  */
 final class HerramientaController
 {
@@ -34,7 +34,6 @@ final class HerramientaController
         return Response::view('Herramientas::catalogo', [
             'titulo' => 'Catálogo de herramientas',
             'grupos' => $this->herramientas->porCategoria(),
-            'desactivadas' => $administrar ? $this->herramientas->desactivadas() : [],
             'puedeAdministrar' => $administrar,
             'puedeSolicitar' => Permission::can('herramientas.solicitar') && Auth::perfil() === 'docente',
             'estilos' => ['css/pages/herramientas.css'],
@@ -69,30 +68,19 @@ final class HerramientaController
         return Response::redirect(Url::to('herramientas'));
     }
 
-    public function confirmDeactivate(Request $request): Response
+    public function confirmDelete(Request $request): Response
     {
-        $herramienta = $this->herramienta($request);
-        if ((int) $herramienta['activo'] !== 1) {
-            return Response::redirect(Url::to('herramientas'));
-        }
-
-        return Response::view('Herramientas::desactivar', ['titulo' => 'Desactivar herramienta', 'herramienta' => $herramienta]);
+        return Response::view('Herramientas::eliminar', [
+            'titulo' => 'Eliminar herramienta',
+            'herramienta' => $this->herramienta($request),
+        ]);
     }
 
-    public function deactivate(Request $request): Response
+    public function delete(Request $request): Response
     {
         $herramienta = $this->herramienta($request);
-        $this->herramientas->cambiarActivo((int) $herramienta['id'], false);
-        Session::flash('exito', "Se desactivó «{$herramienta['nombre']}». Ya no aparece al solicitar herramientas.");
-
-        return Response::redirect(Url::to('herramientas'));
-    }
-
-    public function activate(Request $request): Response
-    {
-        $herramienta = $this->herramienta($request);
-        $this->herramientas->cambiarActivo((int) $herramienta['id'], true);
-        Session::flash('exito', "Listo. «{$herramienta['nombre']}» está activa otra vez.");
+        $this->herramientas->eliminar((int) $herramienta['id']);
+        Session::flash('exito', "Se eliminó «{$herramienta['nombre']}».");
 
         return Response::redirect(Url::to('herramientas'));
     }

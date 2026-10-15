@@ -25,7 +25,7 @@ final class SectorController
     {
         return Response::view('Sectores::index', [
             'titulo' => 'Sectores de bodega',
-            'sectores' => $this->sectores->todos(),
+            'sectores' => $this->sectores->activos(),
         ]);
     }
 
@@ -45,7 +45,7 @@ final class SectorController
     public function store(Request $request): Response
     {
         $sector = $this->sectores->crear($request->post());
-        Session::flash('exito', "Listo. Se agregó «{$sector['nombre']}» con el código {$sector['codigo']}.");
+        Session::flash('exito', "Listo. Se agregó «{$sector['nombre']}» con la etiqueta {$sector['codigo']}.");
 
         return Response::redirect(Url::to(match (self::para($request->input('para'))) {
             'guardar' => 'guardar/sector',
@@ -57,7 +57,7 @@ final class SectorController
     public function edit(Request $request): Response
     {
         return Response::view('Sectores::formulario', [
-            'titulo' => 'Cambiar nombre del sector',
+            'titulo' => 'Editar sector',
             'sector' => $this->sector($request),
             'para' => null,
         ]);
@@ -66,37 +66,24 @@ final class SectorController
     public function update(Request $request): Response
     {
         $sector = $this->sector($request);
-        $this->sectores->renombrar((int) $sector['id'], $request->post());
-        Session::flash('exito', 'Listo. Se guardó el nombre.');
+        $this->sectores->editar((int) $sector['id'], $request->post());
+        Session::flash('exito', 'Listo. Se guardaron los cambios.');
 
         return Response::redirect(Url::to('sectores'));
     }
 
-    public function confirmDeactivate(Request $request): Response
+    /** Antes de eliminar se pregunta en una pantalla propia, explicando qué pasa. */
+    public function confirmDelete(Request $request): Response
     {
-        $sector = $this->sector($request);
-
-        if ((int) $sector['activo'] !== 1) {
-            return Response::redirect(Url::to('sectores'));
-        }
-
-        return Response::view('Sectores::desactivar', ['titulo' => 'Desactivar sector', 'sector' => $sector]);
+        return Response::view('Sectores::eliminar', ['titulo' => 'Eliminar sector', 'sector' => $this->sector($request)]);
     }
 
-    public function deactivate(Request $request): Response
+    /** Para las personas el sector desaparece; por dentro solo se desactiva (SectorService::eliminar). */
+    public function delete(Request $request): Response
     {
         $sector = $this->sector($request);
-        $this->sectores->cambiarActivo((int) $sector['id'], false);
-        Session::flash('exito', "Se desactivó «{$sector['nombre']}». Ya no aparece al registrar productos.");
-
-        return Response::redirect(Url::to('sectores'));
-    }
-
-    public function activate(Request $request): Response
-    {
-        $sector = $this->sector($request);
-        $this->sectores->cambiarActivo((int) $sector['id'], true);
-        Session::flash('exito', "Listo. «{$sector['nombre']}» está activo otra vez.");
+        $this->sectores->eliminar((int) $sector['id']);
+        Session::flash('exito', "Se eliminó «{$sector['nombre']}».");
 
         return Response::redirect(Url::to('sectores'));
     }

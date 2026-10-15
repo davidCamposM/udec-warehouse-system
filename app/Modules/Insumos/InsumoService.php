@@ -25,7 +25,6 @@ final class InsumoService
         'ok' => ['Hay', 'check'],
         'low' => ['Queda poco', 'alert'],
         'out' => ['No queda', 'x-circle'],
-        'off' => ['Desactivado', 'close'],
     ];
 
     public function __construct(
@@ -35,14 +34,13 @@ final class InsumoService
     }
 
     /**
-     * Desactivado → off; sin stock → out; en o bajo su mínimo (si tiene uno) → low; si no → ok.
+     * Sin stock → out; en o bajo su mínimo (si tiene uno) → low; si no → ok.
      *
      * @param array<string, mixed> $insumo
      */
     public static function estado(array $insumo): string
     {
         return match (true) {
-            (int) $insumo['activo'] !== 1 => 'off',
             (float) $insumo['stock_actual'] <= 0 => 'out',
             (float) $insumo['stock_minimo'] > 0 && (float) $insumo['stock_actual'] <= (float) $insumo['stock_minimo'] => 'low',
             default => 'ok',
@@ -66,11 +64,9 @@ final class InsumoService
     }
 
     /** Filtro válido de la lista; cualquier otro valor se trata como "todos". */
-    public static function filtro(mixed $valor, bool $puedeVerDesactivados): string
+    public static function filtro(mixed $valor): string
     {
-        $filtro = is_string($valor) && isset(InsumoRepository::FILTROS[$valor]) ? $valor : 'todos';
-
-        return $filtro === 'desactivados' && !$puedeVerDesactivados ? 'todos' : $filtro;
+        return is_string($valor) && isset(InsumoRepository::FILTROS[$valor]) ? $valor : 'todos';
     }
 
     /** @return list<array<string, mixed>> */
@@ -181,26 +177,6 @@ final class InsumoService
     public function sinMovimientos(int $id): bool
     {
         return !$this->insumos->tieneMovimientos($id);
-    }
-
-    /**
-     * Los últimos productos que entraron a bodega: en «Registrar producto» se eligen con un toque.
-     *
-     * @return list<array<string, mixed>>
-     */
-    public function ultimosRegistrados(int $limite): array
-    {
-        return $this->insumos->ultimosConMovimiento('entrada', $limite);
-    }
-
-    /**
-     * Los últimos productos que se retiraron: en «Retirar producto» se eligen con un toque.
-     *
-     * @return list<array<string, mixed>>
-     */
-    public function ultimosRetirados(int $limite): array
-    {
-        return $this->insumos->ultimosConMovimiento('salida', $limite);
     }
 
     // ---------- Crear, editar, activar y desactivar ----------
@@ -320,6 +296,9 @@ final class InsumoService
         }
 
         return Database::transaction(function () use ($insumo, $barras): array {
+            if (($insumo['codigo_udec'] ?? null) !== null) {
+                $this->insumos->liberarCodigoUdec($insumo['codigo_udec']);
+            }
             $insumo['codigo'] = $this->insumos->siguienteCodigo();
             $id = $this->insumos->create($insumo);
 
@@ -352,22 +331,28 @@ final class InsumoService
         }
 
         Database::transaction(function () use ($id, $nuevo, $cambios): void {
+            if (($nuevo['codigo_udec'] ?? null) !== null) {
+                $this->insumos->liberarCodigoUdec($nuevo['codigo_udec']);
+            }
             $this->insumos->update($id, $nuevo);
             $this->auditoria->registrar('editar', 'insumo', $id, ['cambios' => $cambios]);
         });
     }
 
-    public function cambiarActivo(int $id, bool $activo): void
+    /**
+     * «Eliminar»: el producto desaparece del sistema para las personas; por dentro solo se desactiva y queda su historial
+     * (InsumoRepository::eliminar).
+     */
+    public function eliminar(int $id): void
     {
         $insumo = $this->insumos->findById($id);
-
-        if ($insumo === null || (int) $insumo['activo'] === (int) $activo) {
+        if ($insumo === null) {
             return;
         }
 
-        Database::transaction(function () use ($id, $activo, $insumo): void {
-            $this->insumos->setActivo($id, $activo);
-            $this->auditoria->registrar($activo ? 'activar' : 'desactivar', 'insumo', $id, [
+        Database::transaction(function () use ($id, $insumo): void {
+            $this->insumos->eliminar($id);
+            $this->auditoria->registrar('eliminar', 'insumo', $id, [
                 'codigo' => $insumo['codigo'],
                 'nombre' => $insumo['nombre'],
             ]);

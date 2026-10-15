@@ -39,7 +39,7 @@ final class StockService
     /**
      * Entrada: suma lo que llegó y deja el producto en el sector donde se guardó.
      *
-     * @return array{insumo_id: int, nombre: string, cantidad: int, stock: int, sector: string}
+     * @return array{insumo_id: int, nombre: string, cantidad: int, stock: int, sector: string, sector_codigo: string}
      * @throws ValidationException si la cantidad, el producto o el sector no sirven
      */
     public function guardarEnBodega(int $insumoId, int $cantidad, int $sectorId): array
@@ -54,7 +54,7 @@ final class StockService
 
             $sector = $this->sectores->findById($sectorId);
             if ($sector === null || (int) $sector['activo'] !== 1) {
-                throw new ValidationException(['codigo' => 'Ese sector no existe o está desactivado. Elige otro.']);
+                throw new ValidationException(['codigo' => 'Ese sector ya no existe. Elige otro.']);
             }
 
             $stock = (int) $insumo['stock_actual'] + $cantidad;
@@ -68,6 +68,7 @@ final class StockService
                 'cantidad' => $cantidad,
                 'stock' => $stock,
                 'sector' => $sector['nombre'],
+                'sector_codigo' => $sector['codigo'],
             ];
         });
     }
@@ -155,6 +156,17 @@ final class StockService
                 'stock' => $stock,
             ];
         });
+    }
+
+    /**
+     * El número que se veía en pantalla justo antes de escanear otra vez el producto (lo deja ui.js en el campo oculto
+     * «cantidad_antes», porque la lectura reemplaza el número del campo). Si no llegó o no sirve, la guardada.
+     */
+    public static function cantidadAntes(mixed $antes, int $guardada): int
+    {
+        return is_string($antes) && ctype_digit($antes) && (int) $antes >= 1 && (int) $antes <= self::MAXIMO
+            ? (int) $antes
+            : $guardada;
     }
 
     /** @throws ValidationException */

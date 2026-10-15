@@ -6,7 +6,7 @@
    ========================================================== */
 
 /* El color de cada tarea, desde tokens.css (el mismo de su tarjeta en el inicio). También en las piezas de adentro
-   que llevan su propio tono (los pasos, el botón «Agregar sector»).
+   que llevan su propio tono (el botón «Agregar sector»).
    --tono: el color tal cual, para bordes, barras, íconos y fondos suaves.
    --tono-texto: el mismo color con contraste AA (≥ 4,5:1) sobre blanco y con blanco encima: textos y rellenos. */
 .ventana.tono-verde, .ventana .tono-verde { --tono: var(--tarea-verde); --tono-texto: var(--tarea-verde-texto); }
@@ -65,40 +65,6 @@
   border-color: var(--bs-gray-500);
   background: var(--bs-gray-100);
   color: var(--bs-body);
-}
-
-/* ---------- Pasos: una barra fina por paso; los hechos y el actual, en el color de la tarea ---------- */
-.ventana .pasos__paso {
-  border-bottom: 3px solid var(--bs-gray-200);
-  color: var(--bs-muted);
-  font-weight: 500;
-  transition: border-color var(--bs-transition), color var(--bs-transition);
-}
-
-.ventana .pasos__numero {
-  background: var(--bs-gray-200);
-  color: var(--bs-muted);
-  font-weight: 700;
-}
-
-.ventana .pasos__paso.is-actual {
-  border-bottom-color: var(--tono);
-  color: var(--bs-body);
-  font-weight: 700;
-}
-
-.ventana .pasos__paso.is-actual .pasos__numero,
-.ventana .pasos__paso.is-hecho .pasos__numero {
-  background: var(--tono-texto);
-  color: #fff;
-}
-
-.ventana .pasos__paso.is-actual .pasos__numero {
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--tono) 20%, transparent);
-}
-
-.ventana .pasos__paso.is-hecho {
-  border-bottom-color: color-mix(in srgb, var(--tono) 45%, var(--bs-gray-200));
 }
 
 /* ---------- Campos ---------- */
@@ -388,9 +354,582 @@
   font-weight: 600;
 }
 
+/* ---------- Boleta: lo que se acaba de hacer, un dato por línea con su ícono (parcial «boleta») ---------- */
+.ventana .boleta {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--color-brand-200);
+  border-radius: 0.75rem;
+  background: var(--bs-success-subtle);
+}
+
+.ventana .boleta__titulo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--color-brand-950);
+  font-size: var(--text-lg);
+  font-weight: 800;
+}
+
+.ventana .boleta__check {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  background: var(--bs-success);
+  box-shadow: 0 0 0 4px rgba(83, 148, 82, 0.2);
+  color: #fff;
+}
+
+.ventana .boleta__check .icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  stroke-width: 2.6;
+}
+
+.ventana .boleta__filas {
+  display: grid;
+  gap: var(--space-2);
+  padding: 0 0 0 var(--space-1);
+  list-style: none;
+}
+
+.ventana .boleta__fila {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--bs-body);
+  font-size: var(--text-base);
+}
+
+.ventana .boleta__icono {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 0.375rem;
+  background: #fff;
+  color: var(--color-brand-800);
+}
+
+.ventana .boleta__icono .icon {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+/* El lugar, igual que la etiqueta pegada en el mueble: el código en negrita dentro de un recuadro */
+.ventana .boleta__etiqueta {
+  display: inline-block;
+  margin-right: var(--space-1);
+  padding: 0 var(--space-2);
+  border: 2px solid var(--bs-body);
+  border-radius: 0.25rem;
+  background: #fff;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+}
+
+@media (max-height: 56rem) {
+  .ventana .boleta {
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .ventana .boleta__filas {
+    gap: var(--space-1);
+  }
+}
+
+/* ---------- Cantidad en foco: el número en grande y al centro, con − y + y sumas rápidas ----------
+   <div class="cantidad-foco"> <label class="cantidad-foco__pregunta"> <div class="cantidad-foco__control" data-stepper>
+   <div class="cantidad-foco__fila"> botón − · <input class="cantidad-foco__numero"> · botón + </div>
+   <p class="cantidad-foco__unidad"> <div class="cantidad-foco__rapidos"> +5 +10 </div> */
+.ventana .cantidad-foco {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-3);
+  padding: var(--space-5) var(--space-4);
+  border: 1px solid color-mix(in srgb, var(--tono) 30%, var(--bs-gray-200));
+  border-radius: 0.75rem;
+  background: color-mix(in srgb, var(--tono) 6%, #fff);
+  text-align: center;
+}
+
+.ventana .cantidad-foco__pregunta {
+  color: var(--bs-body);
+  font-size: var(--text-xl);
+  font-weight: 700;
+}
+
+.ventana .cantidad-foco__control {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-2);
+}
+
+.ventana .cantidad-foco__fila {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.ventana .cantidad-foco__boton {
+  display: grid;
+  place-items: center;
+  width: 3.75rem;
+  height: 3.75rem;
+  border: 1px solid var(--bs-border);
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: var(--bs-shadow-sm);
+  color: var(--bs-body);
+  cursor: pointer;
+  transition: background-color var(--bs-transition), border-color var(--bs-transition), transform var(--bs-transition);
+}
+
+.ventana .cantidad-foco__boton:hover {
+  border-color: var(--tono);
+  background: color-mix(in srgb, var(--tono) 10%, #fff);
+}
+
+.ventana .cantidad-foco__boton:active {
+  transform: scale(0.94);
+}
+
+.ventana .cantidad-foco__boton .icon {
+  width: 1.75rem;
+  height: 1.75rem;
+  stroke-width: 2.4;
+}
+
+/* El número: grande, al centro, con el borde del color de la tarea */
+.ventana .cantidad-foco__numero {
+  width: 8.5rem;
+  height: 5.5rem;
+  padding: 0;
+  border: 2px solid var(--tono);
+  border-radius: 0.75rem;
+  background: #fff;
+  color: var(--tono-texto);
+  font: inherit;
+  font-size: 3.5rem;
+  font-weight: 800;
+  line-height: 1;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  transition: box-shadow var(--bs-transition);
+}
+
+.ventana .cantidad-foco__numero:focus {
+  outline: none;
+  box-shadow: 0 0 0 0.3rem color-mix(in srgb, var(--tono) 25%, transparent);
+}
+
+.ventana .cantidad-foco.has-error .cantidad-foco__numero {
+  border-color: var(--bs-danger);
+}
+
+.ventana .cantidad-foco__unidad {
+  color: var(--bs-muted);
+  font-weight: 600;
+}
+
+.ventana .cantidad-foco__rapidos {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.ventana .cantidad-foco__rapido {
+  min-width: 3.5rem;
+  min-height: 2.25rem;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--bs-border);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--bs-body);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color var(--bs-transition), border-color var(--bs-transition);
+}
+
+.ventana .cantidad-foco__rapido:hover {
+  border-color: var(--tono);
+  background: color-mix(in srgb, var(--tono) 10%, #fff);
+}
+
+.ventana .cantidad-foco__sumada {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  border-radius: 999px;
+  background: var(--color-brand-100);
+  color: var(--color-brand-900);
+  font-size: var(--text-sm);
+  font-weight: 700;
+}
+
+.ventana .cantidad-foco__sumada .icon,
+.ventana .cantidad-foco__ayuda .icon {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.ventana .cantidad-foco__ayuda {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--bs-muted);
+  font-size: var(--text-sm);
+}
+
+/* Lo que dice el sistema, sobre el número contado («Actualizar cantidad»): se ve siempre, también en pantallas bajas */
+.ventana .cantidad-foco__sistema {
+  color: var(--bs-muted);
+  font-size: var(--text-sm);
+}
+
+.ventana .cantidad-foco__sistema strong {
+  color: var(--bs-body);
+}
+
+/* Motivos de «Actualizar cantidad»: opciones bajas, en columnas, para que la etapa quepa sin bajar */
+.ventana .options--motivos {
+  grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+}
+
+.ventana .options--motivos .option__box {
+  min-height: 2.75rem;
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-sm);
+}
+
+/* ---------- Escaneo en foco: el campo para la pistola, grande y al centro ---------- */
+.ventana .escaneo-foco {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-3);
+  padding: var(--space-5) var(--space-4);
+  border: 2px dashed color-mix(in srgb, var(--tono) 55%, transparent);
+  border-radius: 0.75rem;
+  background: color-mix(in srgb, var(--tono) 6%, #fff);
+  text-align: center;
+}
+
+.ventana .escaneo-foco__icono {
+  display: grid;
+  place-items: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--tono) 82%, #fff) 0%, var(--tono) 50%,
+    color-mix(in srgb, var(--tono) 82%, #000) 100%);
+  color: #fff;
+}
+
+.ventana .escaneo-foco__icono .icon {
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+.ventana .escaneo-foco__pregunta {
+  color: var(--bs-body);
+  font-size: var(--text-xl);
+  font-weight: 700;
+}
+
+.ventana .escaneo-foco__campo {
+  width: min(100%, 20rem);
+  height: 3.5rem;
+  padding: 0 var(--space-4);
+  border: 2px solid var(--tono);
+  border-radius: 0.75rem;
+  background: #fff;
+  color: var(--bs-body);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-align: center;
+}
+
+.ventana .escaneo-foco__campo::placeholder {
+  color: var(--bs-gray-500);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  font-weight: 400;
+  letter-spacing: 0;
+}
+
+.ventana .escaneo-foco__campo:focus {
+  outline: none;
+  box-shadow: 0 0 0 0.3rem color-mix(in srgb, var(--tono) 25%, transparent);
+}
+
+.ventana .escaneo-foco.has-error .escaneo-foco__campo {
+  border-color: var(--bs-danger);
+}
+
+.ventana .escaneo-foco__ayuda {
+  color: var(--bs-muted);
+  font-size: var(--text-sm);
+}
+
+.ventana .escaneo-foco__ayuda kbd {
+  padding: 0 0.375rem;
+  border: 1px solid var(--bs-border);
+  border-radius: 0.25rem;
+  background: #fff;
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  font-weight: 700;
+}
+
+.ventana .escaneo-foco--compacto {
+  gap: var(--space-2);
+  padding: var(--space-4);
+}
+
+.ventana .escaneo-foco--compacto .escaneo-foco__icono {
+  width: 2.75rem;
+  height: 2.75rem;
+}
+
+.ventana .escaneo-foco--compacto .escaneo-foco__pregunta {
+  font-size: var(--text-lg);
+}
+
+/* ---------- Lista plegada: el plan B, para cuando no hay etiqueta ---------- */
+.ventana .lista-plegada {
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--bs-gray-200);
+  border-radius: 0.75rem;
+  background: #fff;
+}
+
+.ventana .lista-plegada summary {
+  color: var(--bs-muted);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.ventana .lista-plegada[open] summary {
+  margin-bottom: var(--space-3);
+}
+
+.ventana .lista-plegada .options {
+  max-height: 18rem;
+  overflow-y: auto;
+}
+
+/* Lo elegido en las etapas anteriores, arriba: una tarjeta baja por fila, con la etiqueta chica dentro (campo--compacto).
+   El nombre largo se corta en dos líneas: «Cambiar» nunca se aprieta ni se sale de la ventana. */
+.ventana .resumen-fijo {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-2);
+}
+
+.ventana .campo--compacto {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.ventana .campo--compacto .campo__fijo {
+  min-height: 0;
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3);
+}
+
+.ventana .campo__mini {
+  color: var(--bs-muted);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.ventana .campo--compacto .campo__valor {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+.ventana .campo--compacto .campo__detalle {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ventana .campo--compacto .campo__cambiar {
+  min-height: 2.25rem;
+}
+
+/* ---------- Cambio de etapa: cada etapa es su propia ventana ----------
+   ventana.js cambia una ventana por otra: al avanzar, la que se va sale hacia la izquierda y la nueva entra desde la
+   derecha; al volver («Atrás», «Cambiar»: <html data-direccion="atras">), al revés. Con View Transitions, el navegador
+   anima las dos a la vez; sin ellas, la nueva entra sola (.ventana__caja.is-entrando). */
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(ventana) {
+    animation: ventana-sale 160ms cubic-bezier(0.4, 0, 1, 1) both;
+  }
+
+  ::view-transition-new(ventana) {
+    animation: ventana-entra 240ms cubic-bezier(0, 0, 0.2, 1) both;
+  }
+
+  html[data-direccion="atras"]::view-transition-old(ventana) {
+    animation-name: ventana-sale-atras;
+  }
+
+  html[data-direccion="atras"]::view-transition-new(ventana) {
+    animation-name: ventana-entra-atras;
+  }
+
+  .ventana__caja.is-entrando {
+    animation: ventana-entra 240ms cubic-bezier(0, 0, 0.2, 1) both;
+  }
+
+  html[data-direccion="atras"] .ventana__caja.is-entrando {
+    animation-name: ventana-entra-atras;
+  }
+}
+
+@keyframes ventana-sale {
+  to {
+    opacity: 0;
+    transform: translateX(-3rem) scale(0.97);
+  }
+}
+
+@keyframes ventana-entra {
+  from {
+    opacity: 0;
+    transform: translateX(3rem) scale(0.97);
+  }
+}
+
+@keyframes ventana-sale-atras {
+  to {
+    opacity: 0;
+    transform: translateX(3rem) scale(0.97);
+  }
+}
+
+@keyframes ventana-entra-atras {
+  from {
+    opacity: 0;
+    transform: translateX(-3rem) scale(0.97);
+  }
+}
+
+/* ---------- Que la ventana se vea completa en cualquier pantalla ----------
+   Si la ventana no cabe, se baja (se desplaza el fondo, no la ventana: así la lista de productos que aparece al
+   escribir no queda recortada), y los botones del final quedan pegados al borde de abajo de la pantalla, siempre a la
+   vista. bottom = el margen de la ventana con la pantalla; margin/padding-bottom = el relleno de abajo de la caja, para
+   que al final quede todo como antes. En pantallas bajas (laptops de 768 a 900 px de alto) todo se compacta, y en las
+   muy bajas se quita lo que solo ayuda. */
+.ventana .formulario__acciones {
+  position: sticky;
+  bottom: calc(-1 * var(--space-3));
+  z-index: 2;
+  margin-bottom: calc(-1 * var(--space-5));
+  padding-bottom: var(--space-5);
+  background: #fff;
+}
+
+@media (min-width: 40em) {
+  .ventana .formulario__acciones {
+    bottom: calc(-1 * var(--space-8));
+    margin-bottom: calc(-1 * var(--space-8));
+    padding-bottom: var(--space-8);
+  }
+}
+
+@media (max-height: 56rem) {
+  .ventana {
+    padding-block: var(--space-4);
+  }
+
+  .ventana .ventana__caja {
+    padding-top: var(--space-4);
+    padding-bottom: var(--space-4);
+  }
+
+  .ventana .formulario__acciones {
+    bottom: calc(-1 * var(--space-4));
+    margin-bottom: calc(-1 * var(--space-4));
+    padding-top: var(--space-3);
+    padding-bottom: var(--space-4);
+  }
+
+  .ventana .ventana__cabecera {
+    margin-bottom: var(--space-3);
+    padding-bottom: var(--space-3);
+  }
+
+  .ventana .formulario {
+    gap: var(--space-3);
+  }
+
+  .ventana .cantidad-foco,
+  .ventana .escaneo-foco {
+    gap: var(--space-2);
+    padding: var(--space-3);
+  }
+
+  .ventana .cantidad-foco__boton {
+    width: 3rem;
+    height: 3rem;
+  }
+
+  .ventana .cantidad-foco__numero {
+    width: 7rem;
+    height: 4.25rem;
+    font-size: 2.75rem;
+  }
+
+  .ventana .escaneo-foco__icono {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .ventana .escaneo-foco__icono .icon {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .ventana .escaneo-foco__pregunta {
+    font-size: var(--text-lg);
+  }
+
+  .ventana .escaneo-foco__campo {
+    height: 3rem;
+  }
+}
+
+@media (max-height: 44rem) {
+  .ventana .cantidad-foco__ayuda,
+  .ventana .escaneo-foco__icono,
+  .ventana .cantidad-foco__unidad {
+    display: none;
+  }
+
+  .ventana .cantidad-foco__numero {
+    height: 3.5rem;
+    font-size: 2.25rem;
+  }
+}
+
 /* ---------- Sin movimiento si el sistema lo pide ---------- */
 @media (prefers-reduced-motion: reduce) {
-  .ventana .pasos__paso,
   .ventana .input--relleno,
   .ventana .stepper__input,
   .ventana .stepper__button,
@@ -398,6 +937,9 @@
   .ventana .option__box,
   .ventana .item-row--elegir,
   .ventana .item-row__elegir,
+  .ventana .cantidad-foco__boton,
+  .ventana .cantidad-foco__rapido,
+  .ventana .cantidad-foco__numero,
   .ventana .btn {
     transition: none;
   }

@@ -6,14 +6,14 @@ namespace App\Modules\Sectores;
 
 use App\Core\Database;
 use App\Core\ValidationException;
-use App\Core\Validator;
 use App\Modules\Historial\AuditoriaService;
 
 defined('APP_ROOT') || exit;
 
 /**
- * Sectores de bodega: cada parte de la bodega (un estante, una repisa) con su código, que se imprime como QR
- * y se escanea al guardar un producto.
+ * Sectores de bodega: cada parte de la bodega (una repisa, un cubículo) con su código, el de la etiqueta impresa
+ * pegada en el lugar (Code 128, docs/etiquetas). Al agregar un sector se escanea esa etiqueta; al registrar un producto
+ * se vuelve a escanear y el producto queda en ese sector.
  */
 final class SectorService
 {
@@ -21,12 +21,6 @@ final class SectorService
         private readonly SectorRepository $sectores = new SectorRepository(),
         private readonly AuditoriaService $auditoria = new AuditoriaService(),
     ) {
-    }
-
-    /** @return list<array<string, mixed>> */
-    public function todos(): array
-    {
-        return $this->sectores->todos();
     }
 
     /** @return list<array<string, mixed>> */
@@ -41,7 +35,7 @@ final class SectorService
         return $this->sectores->findById($id);
     }
 
-    /** @return array<string, mixed>|null el sector de un código leído o escrito, esté activo o no */
+    /** @return array<string, mixed>|null el sector de un código leído o escrito (los eliminados ya no existen) */
     public function buscarPorCodigo(string $codigo): ?array
     {
         $codigo = trim($codigo);
@@ -50,18 +44,21 @@ final class SectorService
     }
 
     /**
-     * Crea el sector con el siguiente código (SEC001…).
+     * Crea el sector con el código de su etiqueta (escaneado). Sin código, el sistema le da el siguiente (SEC001…); sin
+     * nombre, se arma del código de la etiqueta (M12 → «Mueble de madera · Cubículo 12»).
      *
-     * @param array<string, mixed> $datos
+     * @param array<string, mixed> $datos codigo y nombre
      * @return array{id: int, codigo: string, nombre: string}
      * @throws ValidationException
      */
     public function crear(array $datos): array
     {
-        $nombre = $this->validarNombre($datos, null);
+        [$codigo, $nombre] = $this->validar($datos, null);
 
-        return Database::transaction(function () use ($nombre): array {
-            $codigo = $this->sectores->siguienteCodigo();
+        return Database::transaction(function () use ($codigo, $nombre): array {
+            $codigo ??= $this->sectores->siguienteCodigo();
+            $this->sectores->liberarCodigo($codigo);
+            $this->sectores->liberarNombre($nombre);
             $id = $this->sectores->create($codigo, $nombre);
             $this->auditoria->registrar('crear', 'sector', $id, ['codigo' => $codigo, 'nombre' => $nombre]);
 
@@ -70,64 +67,109 @@ final class SectorService
     }
 
     /**
-     * @param array<string, mixed> $datos
+     * Cambia el código (se escanea otra etiqueta) y el nombre. Sin código, se mantiene el que tenía.
+     *
+     * @param array<string, mixed> $datos codigo y nombre
      * @throws ValidationException
      */
-    public function renombrar(int $id, array $datos): void
+    public function editar(int $id, array $datos): void
     {
         $actual = $this->sectores->findById($id) ?? throw new ValidationException(['nombre' => 'Ese sector no existe.']);
-        $nombre = $this->validarNombre($datos, $id);
+        [$codigo, $nombre] = $this->validar($datos, $id);
+        $codigo ??= $actual['codigo'];
 
-        if ($nombre === $actual['nombre']) {
+        if ($codigo === $actual['codigo'] && $nombre === $actual['nombre']) {
             return;
         }
 
-        Database::transaction(function () use ($id, $nombre, $actual): void {
-            $this->sectores->rename($id, $nombre);
-            $this->auditoria->registrar('editar', 'sector', $id, ['cambios' => ['nombre' => [$actual['nombre'], $nombre]]]);
+        Database::transaction(function () use ($id, $codigo, $nombre, $actual): void {
+            $this->sectores->liberarCodigo($codigo);
+            $this->sectores->liberarNombre($nombre);
+            $this->sectores->update($id, $codigo, $nombre);
+            $this->auditoria->registrar('editar', 'sector', $id, AuditoriaService::diferencias(
+                ['codigo' => $actual['codigo'], 'nombre' => $actual['nombre']],
+                ['codigo' => $codigo, 'nombre' => $nombre],
+            ));
         });
     }
 
-    public function cambiarActivo(int $id, bool $activo): void
+    /**
+     * El nombre que corresponde al código de una etiqueta impresa (docs/etiquetas/generar.py): A03 → «Estante metálico
+     * A · Repisa 3», M12 → «Mueble de madera · Cubículo 12». Un código de otra forma se usa tal cual.
+     */
+    public static function nombreDeEtiqueta(string $codigo): string
+    {
+        if (preg_match('/^([AB])0*(\d{1,3})$/', $codigo, $m) === 1) {
+            return "Estante metálico {$m[1]} · Repisa {$m[2]}";
+        }
+        if (preg_match('/^M0*(\d{1,3})$/', $codigo, $m) === 1) {
+            return "Mueble de madera · Cubículo {$m[1]}";
+        }
+
+        return $codigo;
+    }
+
+    /**
+     * «Eliminar»: el sector desaparece del sistema para las personas y sus productos quedan sin ubicación; por dentro
+     * solo se desactiva (SectorRepository::eliminar).
+     */
+    public function eliminar(int $id): void
     {
         $sector = $this->sectores->findById($id);
-
-        if ($sector === null || (int) $sector['activo'] === (int) $activo) {
+        if ($sector === null) {
             return;
         }
 
-        Database::transaction(function () use ($id, $activo, $sector): void {
-            $this->sectores->setActivo($id, $activo);
-            $this->auditoria->registrar($activo ? 'activar' : 'desactivar', 'sector', $id, [
+        Database::transaction(function () use ($id, $sector): void {
+            $this->sectores->eliminar($id);
+            $this->auditoria->registrar('eliminar', 'sector', $id, [
                 'codigo' => $sector['codigo'],
                 'nombre' => $sector['nombre'],
+                'productos' => (int) $sector['productos'],
             ]);
         });
     }
 
     /**
-     * @param array<string, mixed> $datos
+     * @param array<string, mixed> $datos codigo y nombre
+     * @return array{0: ?string, 1: string} el código (null: sin código) y el nombre
      * @throws ValidationException
      */
-    private function validarNombre(array $datos, ?int $id): string
+    private function validar(array $datos, ?int $id): array
     {
-        // Espacios repetidos fuera: "Estante  A" y "Estante A" son el mismo nombre.
-        if (is_string($datos['nombre'] ?? null)) {
-            $datos['nombre'] = preg_replace('/\s+/u', ' ', trim($datos['nombre']));
+        $errores = [];
+
+        // El código, como lo manda la pistola: sin espacios y en mayúsculas («m12» y «M12» son la misma etiqueta).
+        $codigo = strtoupper(preg_replace('/\s+/u', '', (string) ($datos['codigo'] ?? '')) ?? '');
+        if ($codigo === '') {
+            $codigo = null;
+        } elseif (preg_match('/^[A-Z0-9][A-Z0-9-]{0,19}$/', $codigo) !== 1) {
+            $errores['codigo'] = 'Ese código no sirve: usa solo letras y números, hasta 20. Ejemplo: M12.';
+        } elseif ($this->sectores->idPorCodigo($codigo, $id) !== null) {
+            $errores['codigo'] = 'Esa etiqueta ya es de otro sector. Escanea otra.';
+        } elseif (($producto = $this->sectores->productoConCodigo($codigo)) !== null) {
+            $errores['codigo'] = "Ese código es del producto «{$producto}», no de una etiqueta de sector.";
         }
 
-        try {
-            $limpios = Validator::validate($datos, ['nombre' => 'requerido|max:80']);
-        } catch (ValidationException) {
-            throw new ValidationException(['nombre' => ($datos['nombre'] ?? '') === ''
-                ? 'Escribe el nombre del sector. Ejemplo: Estante A.'
-                : 'El nombre es muy largo: usa 80 letras como máximo.']);
+        // Espacios repetidos fuera: "Estante  A" y "Estante A" son el mismo nombre. Sin nombre, el de la etiqueta.
+        $nombre = preg_replace('/\s+/u', ' ', trim((string) ($datos['nombre'] ?? ''))) ?? '';
+        if ($nombre === '') {
+            if ($codigo === null) {
+                $errores['codigo'] ??= 'Escanea la etiqueta del sector, o escribe su nombre.';
+            } else {
+                $nombre = self::nombreDeEtiqueta($codigo);
+            }
+        }
+        if (mb_strlen($nombre) > 80) {
+            $errores['nombre'] = 'El nombre es muy largo: usa 80 letras como máximo.';
+        } elseif ($nombre !== '' && $this->sectores->idPorNombre($nombre, $id) !== null) {
+            $errores['nombre'] = 'Ya hay un sector con ese nombre. Usa otro, por ejemplo agregando un número.';
         }
 
-        if ($this->sectores->idPorNombre($limpios['nombre'], $id) !== null) {
-            throw new ValidationException(['nombre' => 'Ya hay un sector con ese nombre. Usa otro, por ejemplo agregando un número.']);
+        if ($errores !== []) {
+            throw new ValidationException($errores);
         }
 
-        return $limpios['nombre'];
+        return [$codigo, $nombre];
     }
 }

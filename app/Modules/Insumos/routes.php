@@ -35,9 +35,8 @@ $router->post('/insumos/nuevo/sector', [NuevoProductoController::class, 'agregar
 $router->get('/insumos/{id}', [InsumoController::class, 'show'], 'insumos.ver');
 $router->get('/insumos/{id}/editar', [InsumoController::class, 'edit'], 'insumos.administrar');
 $router->post('/insumos/{id}', [InsumoController::class, 'update'], 'insumos.administrar');
-$router->get('/insumos/{id}/desactivar', [InsumoController::class, 'confirmDeactivate'], 'insumos.administrar');
-$router->post('/insumos/{id}/desactivar', [InsumoController::class, 'deactivate'], 'insumos.administrar');
-$router->post('/insumos/{id}/activar', [InsumoController::class, 'activate'], 'insumos.administrar');
+$router->get('/insumos/{id}/eliminar', [InsumoController::class, 'confirmDelete'], 'insumos.administrar');
+$router->post('/insumos/{id}/eliminar', [InsumoController::class, 'delete'], 'insumos.administrar');
 
 $router->get('/insumos/{id}/codigos/nuevo', [InsumoController::class, 'createCode'], 'insumos.administrar');
 $router->post('/insumos/{id}/codigos', [InsumoController::class, 'storeCode'], 'insumos.administrar');
@@ -55,13 +54,11 @@ $router->post('/guardar/cantidad', [GuardarController::class, 'leerCantidad'], '
 $router->get('/guardar/sector', [GuardarController::class, 'sector'], 'insumos.entrada');
 $router->post('/guardar/sector', [GuardarController::class, 'guardarSector'], 'insumos.entrada');
 
-// Actualizar cantidad: 1) el producto, 2) cuántos hay realmente y por qué, 3) confirmar.
+// Actualizar cantidad: 1) el producto, 2) cuántos hay realmente y por qué (y se actualiza).
 $router->get('/ajustar', [AjusteController::class, 'producto'], 'insumos.ajuste');
 $router->post('/ajustar/producto', [AjusteController::class, 'leerProducto'], 'insumos.ajuste');
 $router->get('/ajustar/contar', [AjusteController::class, 'contar'], 'insumos.ajuste');
 $router->post('/ajustar/contar', [AjusteController::class, 'leerConteo'], 'insumos.ajuste');
-$router->get('/ajustar/confirmar', [AjusteController::class, 'confirmar'], 'insumos.ajuste');
-$router->post('/ajustar/confirmar', [AjusteController::class, 'guardar'], 'insumos.ajuste');
 
 // Retirar producto: 1) el producto, 2) cuántos se retiran (y se descuenta).
 $router->get('/retirar', [RetirarController::class, 'producto'], 'insumos.salida');

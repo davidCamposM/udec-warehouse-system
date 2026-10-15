@@ -1,14 +1,11 @@
 <?php
 
-use App\Modules\Insumos\GuardarController;
-
 defined('APP_ROOT') || exit;
 
 // Etapa 1, en la ventana: el código leído es de otro envase. Se busca el producto (mientras se escribe, debajo
 // aparecen los que coinciden) y, al elegirlo, el código queda como uno de sus códigos y se sigue con la etapa 2.
 // Los productos de esa lista son botones del formulario #envase-elegir.
 ?>
-<?= partial('Insumos::partials/pasos', ['paso' => 1, 'pasos' => GuardarController::PASOS, 'color' => 'verde']) ?>
 
 <div class="formulario">
     <?php if (error_de('codigo_barras') !== null) : ?>

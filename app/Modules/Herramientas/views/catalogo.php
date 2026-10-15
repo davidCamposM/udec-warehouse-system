@@ -4,7 +4,7 @@ defined('APP_ROOT') || exit;
 
 // «Catálogo de herramientas»: lo que tiene la bodega para prestar, en una tarjeta por categoría, con cuántas están
 // prestadas ahora. Arriba, el buscador y las categorías (herramientas.js). El encargado además agrega, edita y
-// desactiva; abajo ve las desactivadas.
+// elimina (desde Editar).
 $acciones = match (true) {
     $puedeAdministrar => '<a class="btn btn-success" href="' . e(url('herramientas/nueva')) . '">' . icon('plus') . 'Agregar herramienta</a>',
     $puedeSolicitar => '<a class="btn btn-success" href="' . e(url('herramientas/solicitar')) . '">' . icon('tool') . 'Solicitar herramientas</a>',
@@ -54,22 +54,3 @@ $acciones = match (true) {
     </div>
 <?php endif; ?>
 
-<?php if ($desactivadas !== []) : ?>
-    <section class="card desactivados" aria-labelledby="titulo-desactivadas">
-        <div class="card-header">
-            <h2 class="card-title" id="titulo-desactivadas">Desactivadas</h2>
-            <span class="text-muted desactivados__ayuda">No aparecen al solicitar herramientas</span>
-        </div>
-        <ul class="list-group">
-            <?php foreach ($desactivadas as $herramienta) : ?>
-                <li class="list-group-item desactivado">
-                    <span class="desactivado__nombre"><?= e($herramienta['nombre']) ?></span>
-                    <form method="post" action="<?= e(url('herramientas/' . $herramienta['id'] . '/activar')) ?>" data-submit-once>
-                        <?= csrf_field() ?>
-                        <button class="btn btn-outline-secondary btn-sm" type="submit" data-loading-text="Activando…">Volver a activar</button>
-                    </form>
-                </li>
-            <?php endforeach; ?>
-        </ul>
-    </section>
-<?php endif; ?>

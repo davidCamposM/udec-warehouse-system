@@ -221,5 +221,9 @@
     });
   };
 
-  document.querySelectorAll("[data-sugerencias]").forEach(iniciar);
+  let numero = 0;
+  const iniciarEn = (root) => root.querySelectorAll("[data-sugerencias]").forEach((input) => iniciar(input, numero++));
+  iniciarEn(document);
+  // También en la ventana nueva cuando cambia la etapa sin recargar (ventana.js).
+  window.Bodega?.alIniciar(iniciarEn);
 })();

@@ -17,21 +17,25 @@ use App\Modules\Sectores\SectorService;
 defined('APP_ROOT') || exit;
 
 /**
- * «Registrar producto»: un formulario por etapas, en una ventana sobre el inicio (con el fondo difuminado), con los
- * menos clics posibles.
- * 1) El producto: se escanea, se escribe (los que coinciden aparecen al escribir) o se toca uno de los últimos
- *    registrados. 2) Cuántas unidades llegaron. 3) Dónde quedaron: se elige el sector (viene marcado el de antes) o se
- *    escanea su etiqueta, y «Confirmar producto» registra todo.
- * Al confirmar, la ventana muestra solo lo registrado, con «Finalizar» (al inicio) y «Registrar otro producto» (a la
- * etapa 1).
+ * «Registrar producto»: un formulario por etapas, en una ventana sobre el inicio (con el fondo difuminado), pensado para
+ * hacerse casi entero con la pistola, una cosa por pantalla:
+ * 1) El producto: se escanea (o se escribe y se elige en la lista que aparece al escribir).
+ * 2) Cuántas llegaron: el número en grande. Escanear otra vez el mismo producto suma 1, así se cuenta pasando cada
+ *    unidad por la pistola.
+ * 3) Dónde quedaron: se escanea la etiqueta de la repisa. Si el producto ya tenía un lugar, Enter lo deja ahí mismo;
+ *    sin etiqueta, se elige de la lista. Con eso se registra.
+ * Al registrar se vuelve a la etapa 1 con el aviso de lo registrado, lista para el siguiente producto.
  */
 final class GuardarController
 {
-    /** Nombres de los pasos, para la barra de avance. */
-    public const PASOS = ['El producto', 'Cuántos llegaron', 'Dónde quedó'];
-
-    /** Cuántos de los últimos productos registrados se ofrecen para elegir con un toque. */
-    private const RECIENTES = 5;
+    /** Cada etapa es su propia ventana: etapa => [número, la pregunta que va de título]. */
+    private const ETAPAS = [
+        'producto' => [1, '¿Qué producto llegó?'],
+        'cantidad' => [2, '¿Cuántas unidades llegaron?'],
+        'sector' => [3, '¿Dónde quedó?'],
+        'desconocido' => [1, 'Ese código no está registrado'],
+        'envase' => [1, '¿De qué producto es este envase?'],
+    ];
 
     private InsumoService $insumos;
     private SectorService $sectores;
@@ -57,18 +61,13 @@ final class GuardarController
 
         Guardado::terminar();
 
-        // Recién confirmado: lo registrado, y nada más.
-        $registrado = Session::getFlash('registrado');
-        if ($registrado !== null) {
-            return $this->ventana('listo', ['registrado' => $registrado]);
-        }
-
         $texto = trim((string) $request->query('q', ''));
 
         return $this->ventana('producto', [
             'texto' => $texto,
             'resultados' => $texto === '' ? [] : $this->insumos->buscar($texto, 'todos'),
-            'recientes' => $this->insumos->ultimosRegistrados(self::RECIENTES),
+            // Recién registrado: el aviso va arriba, y el campo queda listo para el siguiente producto.
+            'registrado' => Session::getFlash('registrado'),
             'puedeAdministrar' => Permission::can('insumos.administrar'),
         ]);
     }
@@ -158,18 +157,40 @@ final class GuardarController
         return $this->ventana('cantidad', [
             'insumo' => $insumo,
             'cantidad' => $guardado['cantidad'],
+            // Se acaba de sumar una unidad al escanear otra vez el producto.
+            'sumada' => Session::getFlash('sumada') === true,
         ]);
     }
 
-    /** «Siguiente» con la cantidad escrita. */
+    /**
+     * «Siguiente» con la cantidad escrita. Si lo que llegó es el código del mismo producto (se escaneó otra vez), suma 1
+     * y se queda en esta etapa: así se cuentan las unidades pasándolas por la pistola.
+     */
     public function leerCantidad(Request $request): Response
     {
-        [$guardado] = $this->enCurso();
+        [$guardado, $insumo] = $this->enCurso();
         if ($guardado === null) {
             return $this->sinGuardado();
         }
 
-        Guardado::cambiarCantidad(self::cantidadEscrita($request->input('cantidad')));
+        $valor = trim((string) $request->input('cantidad', ''));
+        // Una cantidad es un número corto; un código leído es más largo o lleva letras.
+        if ($valor !== '' && (!ctype_digit($valor) || strlen($valor) > 5)) {
+            $id = $this->insumos->idPorCodigo($valor);
+            if ($id === (int) $insumo['id']) {
+                $antes = StockService::cantidadAntes($request->input('cantidad_antes'), $guardado['cantidad']);
+                Guardado::cambiarCantidad(min($antes + 1, StockService::MAXIMO));
+                Session::flash('sumada', true);
+
+                return Response::redirect(Url::to('guardar/cantidad'));
+            }
+            if ($id !== null) {
+                throw new ValidationException(['cantidad' => 'Ese código es de otro producto. Registra primero este y '
+                    . 'después escanea el otro.']);
+            }
+        }
+
+        Guardado::cambiarCantidad(self::cantidadEscrita($valor));
 
         return Response::redirect(Url::to('guardar/sector'));
     }
@@ -207,6 +228,11 @@ final class GuardarController
         $codigo = trim((string) $request->input('codigo', ''));
         $sectorId = (string) $request->input('sector_id', '');
 
+        // Enter sin escanear ni elegir: queda donde estaba (si estaba en algún lugar).
+        if ($codigo === '' && $sectorId === '' && $insumo['sector_id'] !== null) {
+            $sectorId = (string) $insumo['sector_id'];
+        }
+
         if ($codigo !== '') {
             $sector = $this->sectores->buscarPorCodigo($codigo);
             if ($sector === null) {
@@ -217,7 +243,7 @@ final class GuardarController
         } elseif (ctype_digit($sectorId)) {
             $sector = $this->sectores->buscarPorId((int) $sectorId);
         } else {
-            throw new ValidationException(['sector_id' => 'Elige el sector donde quedó, o escanea su etiqueta.']);
+            throw new ValidationException(['codigo' => 'Escanea la etiqueta de la repisa donde quedó, o elígela en la lista.']);
         }
 
         return $this->guardarEn($sector);
@@ -226,17 +252,21 @@ final class GuardarController
     // ---------- Apoyo ----------
 
     /**
-     * Cada etapa se muestra en una ventana sobre el inicio, que queda de fondo, difuminado.
+     * Cada etapa es su propia ventana sobre el inicio (que queda de fondo, difuminado): su pregunta de título y, debajo,
+     * en qué etapa va («Registrar producto · 2 de 3»). Al avanzar, ventana.js cambia una ventana por la otra.
      *
      * @param array<string, mixed> $datos los de la vista de la etapa (Insumos::guardar/{$etapa})
      */
     private function ventana(string $etapa, array $datos): Response
     {
+        [$numero, $pregunta] = self::ETAPAS[$etapa];
+
         return Inicio::conVentana(
             'guardar-en-bodega',
-            'Anota lo que llegó a la bodega.',
+            "Registrar producto · {$numero} de 3",
             View::render("Insumos::guardar/{$etapa}", $datos, null),
             scripts: ['js/modules/insumos.js'],
+            titulo: $pregunta,
         );
     }
 
@@ -254,7 +284,7 @@ final class GuardarController
         $guardado = Guardado::actual();
 
         if ($sector === null || (int) $sector['activo'] !== 1) {
-            throw new ValidationException(['sector_id' => 'Ese sector está desactivado. Elige otro.']);
+            throw new ValidationException(['sector_id' => 'Ese sector ya no existe. Elige otro.']);
         }
 
         $resultado = (new StockService())->guardarEnBodega($guardado['insumo_id'], $guardado['cantidad'], (int) $sector['id']);

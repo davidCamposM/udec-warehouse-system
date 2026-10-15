@@ -15,20 +15,20 @@ use App\Modules\Panel\Inicio;
 defined('APP_ROOT') || exit;
 
 /**
- * «Retirar producto»: un formulario por etapas, en una ventana sobre el inicio (con el fondo difuminado), como
- * «Registrar producto». Lo hace la cuenta del encargado; el retiro queda a su nombre.
- * 1) El producto: se escanea, se escribe (los que coinciden aparecen al escribir) o se toca uno de los últimos
- *    retirados. 2) Cuántas unidades se retiran, y «Retirar» descuenta. Si no alcanza, no se descuenta nada.
- * Al confirmar, la ventana muestra solo lo retirado, con «Finalizar» (al inicio) y «Retirar otro producto» (a la
- * etapa 1).
+ * «Retirar producto»: un formulario por etapas, en una ventana sobre el inicio (con el fondo difuminado), igual que
+ * «Registrar producto»: cada etapa es su propia ventana. Lo hace la cuenta del encargado; el retiro queda a su nombre.
+ * 1) El producto: se escanea (o se escribe y se elige en la lista que aparece al escribir).
+ * 2) Cuántas unidades se retiran: el número en grande. Escanear otra vez el mismo producto suma 1 (sin pasar de lo que
+ *    hay). «Retirar» descuenta; si no alcanza, no se descuenta nada.
+ * Al retirar se vuelve a la etapa 1 con el aviso de lo retirado, lista para el siguiente producto.
  */
 final class RetirarController
 {
-    /** Nombres de los pasos, para la barra de avance. */
-    public const PASOS = ['El producto', 'Cuántos se retiran'];
-
-    /** Cuántos de los últimos productos retirados se ofrecen para elegir con un toque. */
-    private const RECIENTES = 5;
+    /** Cada etapa es su propia ventana: etapa => [número, la pregunta que va de título]. */
+    private const ETAPAS = [
+        'producto' => [1, '¿Qué producto se retira?'],
+        'cantidad' => [2, '¿Cuántas unidades se retiran?'],
+    ];
 
     private InsumoService $insumos;
 
@@ -51,19 +51,13 @@ final class RetirarController
         }
 
         Retiro::terminar();
-
-        // Recién confirmado: lo retirado, y nada más.
-        $retirado = Session::getFlash('retirado');
-        if ($retirado !== null) {
-            return $this->ventana('listo', ['retirado' => $retirado]);
-        }
-
         $texto = trim((string) $request->query('q', ''));
 
         return $this->ventana('producto', [
             'texto' => $texto,
             'resultados' => $texto === '' ? [] : $this->insumos->buscar($texto, 'todos'),
-            'recientes' => $this->insumos->ultimosRetirados(self::RECIENTES),
+            // Recién retirado: el aviso va arriba, y el campo queda listo para el siguiente producto.
+            'retirado' => Session::getFlash('retirado'),
         ]);
     }
 
@@ -104,10 +98,18 @@ final class RetirarController
             return $this->sinRetiro();
         }
 
-        return $this->ventana('cantidad', ['insumo' => $insumo]);
+        return $this->ventana('cantidad', [
+            'insumo' => $insumo,
+            'cantidad' => Retiro::actual()['cantidad'] ?? 1,
+            // Se acaba de sumar una unidad al escanear otra vez el producto.
+            'sumada' => Session::getFlash('sumada') === true,
+        ]);
     }
 
-    /** «Retirar» con la cantidad escrita: descuenta y vuelve a la etapa 1, que muestra lo retirado. */
+    /**
+     * «Retirar» con la cantidad escrita: descuenta y vuelve a la etapa 1, que muestra lo retirado. Si lo que llegó es el
+     * código del mismo producto (se escaneó otra vez), suma 1 y se queda en esta etapa.
+     */
     public function retirar(Request $request): Response
     {
         $insumo = $this->enCurso();
@@ -117,7 +119,27 @@ final class RetirarController
 
         $valor = $request->input('cantidad');
         $valor = is_string($valor) ? trim($valor) : '';
-        $cantidad = ctype_digit($valor) && strlen($valor) < 7 ? (int) $valor : 0;
+
+        // Una cantidad es un número corto; un código leído es más largo o lleva letras.
+        if ($valor !== '' && (!ctype_digit($valor) || strlen($valor) > 5)) {
+            $id = $this->insumos->idPorCodigo($valor);
+            if ($id === (int) $insumo['id']) {
+                $siguiente = StockService::cantidadAntes($request->input('cantidad_antes'), Retiro::actual()['cantidad'] ?? 1) + 1;
+                if ($siguiente > (int) $insumo['stock_actual']) {
+                    throw new ValidationException(['cantidad' => 'No se puede sumar otra: en bodega '
+                        . ((int) $insumo['stock_actual'] === 1 ? 'queda ' : 'quedan ') . unidades($insumo['stock_actual']) . '.']);
+                }
+                Retiro::cambiarCantidad($siguiente);
+                Session::flash('sumada', true);
+
+                return Response::redirect(Url::to('retirar/cantidad'));
+            }
+            throw new ValidationException(['cantidad' => $id !== null
+                ? 'Ese código es de otro producto. Retira primero este y después escanea el otro.'
+                : 'Escribe cuántas unidades se retiran, con un número entero. Ejemplo: 2.']);
+        }
+
+        $cantidad = ctype_digit($valor) ? (int) $valor : 0;
 
         $resultado = (new StockService())->retirar((int) $insumo['id'], $cantidad);
         Retiro::terminar();
@@ -129,21 +151,25 @@ final class RetirarController
     // ---------- Apoyo ----------
 
     /**
-     * Cada etapa se muestra en una ventana sobre el inicio, que queda de fondo, difuminado.
+     * Cada etapa es su propia ventana sobre el inicio (que queda de fondo, difuminado): su pregunta de título y, debajo,
+     * en qué etapa va («Retirar producto · 2 de 2»). Al avanzar, ventana.js cambia una ventana por la otra.
      *
      * @param array<string, mixed> $datos los de la vista de la etapa (Insumos::retirar/{$etapa})
      */
     private function ventana(string $etapa, array $datos): Response
     {
+        [$numero, $pregunta] = self::ETAPAS[$etapa];
+
         return Inicio::conVentana(
             'retirar-producto',
-            'Descuenta lo que sale de la bodega.',
+            "Retirar producto · {$numero} de 2",
             View::render("Insumos::retirar/{$etapa}", $datos, null),
             scripts: ['js/modules/insumos.js'],
+            titulo: $pregunta,
         );
     }
 
-    /** @throws ValidationException si el producto no existe, está desactivado o no le quedan unidades */
+    /** @throws ValidationException si el producto no existe o no le quedan unidades */
     private function empezarCon(int $insumoId): Response
     {
         $insumo = (new LectorDeProducto($this->insumos))->productoActivo($insumoId);

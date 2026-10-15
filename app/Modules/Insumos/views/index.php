@@ -9,9 +9,6 @@ defined('APP_ROOT') || exit;
 // los que coinciden; un código leído con la pistola abre directo la ficha. Debajo, los filtros y una tarjeta por
 // producto: nombre y datos, la cantidad con su estado y la foto.
 $filtros = ['todos' => 'Todos', 'reponer' => 'Por reponer', 'no-queda' => 'No queda'];
-if ($puedeAdministrar) {
-    $filtros['desactivados'] = 'Desactivados';
-}
 
 $urlFiltro = static fn (string $ver): string => url('insumos', array_filter([
     'q' => $texto,

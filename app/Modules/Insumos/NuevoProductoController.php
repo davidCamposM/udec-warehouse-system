@@ -18,19 +18,26 @@ use App\Modules\Sectores\SectorService;
 defined('APP_ROOT') || exit;
 
 /**
- * «Agregar nuevo producto»: un formulario por etapas, en una ventana sobre el inicio (con el fondo difuminado).
- * 1) El producto: su nombre y, si tiene, su código de barras y su código del catálogo UdeC. 2) El tipo: una de las
- *    categorías principales. 3) Cuántas unidades llegaron. 4) Dónde quedaron: «Agregar producto» lo crea y registra
- *    esas unidades en el sector, todo junto.
- * Cada etapa revisa lo suyo antes de seguir. Al terminar, la ventana muestra solo lo agregado, con «Finalizar» (al
- * inicio) y «Agregar otro producto» (a la etapa 1); si se llegó desde «Registrar producto», lo registrado como allí.
+ * «Agregar nuevo producto»: un formulario por etapas, en una ventana sobre el inicio (con el fondo difuminado), pensado
+ * para la pistola como «Registrar producto»:
+ * 1) El producto: se escanea su código de barras (Enter pasa al nombre) y se escribe el nombre; el código UdeC va
+ *    plegado, porque casi nunca se tiene a mano. 2) El tipo: tocar uno avanza solo. 3) Cuántas llegaron: el número en
+ *    grande; escanear otra vez el producto suma 1. 4) Dónde quedaron: se escanea la etiqueta de la repisa y se agrega
+ *    (crea el producto y registra esas unidades, todo junto).
+ * Cada etapa revisa lo suyo antes de seguir. Al agregar se vuelve a la etapa 1 con el aviso de lo agregado, lista para
+ * el siguiente; si se llegó desde «Registrar producto», se vuelve allí con lo registrado.
  */
 final class NuevoProductoController
 {
-    /** Nombres de los pasos, para la barra de avance. */
-    public const PASOS = ['El producto', 'El tipo', 'Cuántos llegaron', 'Dónde quedó'];
-
     private const ETAPAS = [1 => 'producto', 2 => 'tipo', 3 => 'cantidad', 4 => 'sector'];
+
+    /** Cada etapa es su propia ventana, con su pregunta de título. */
+    private const PREGUNTAS = [
+        'producto' => '¿Qué producto es?',
+        'tipo' => '¿De qué tipo es?',
+        'cantidad' => '¿Cuántas unidades llegaron?',
+        'sector' => '¿Dónde quedó?',
+    ];
 
     private InsumoService $insumos;
     private SectorService $sectores;
@@ -63,13 +70,11 @@ final class NuevoProductoController
             NuevoProducto::empezar();
         }
 
-        // Recién agregado: lo agregado, y nada más.
-        $agregado = Session::getFlash('agregado');
-        if ($agregado !== null) {
-            return $this->ventana('listo', ['agregado' => $agregado]);
-        }
-
-        return $this->ventana('producto', ['nuevo' => NuevoProducto::actual()]);
+        return $this->ventana('producto', [
+            'nuevo' => NuevoProducto::actual(),
+            // Recién agregado: el aviso va arriba, y el campo queda listo para el siguiente producto.
+            'agregado' => Session::getFlash('agregado'),
+        ]);
     }
 
     public function leerProducto(Request $request): Response
@@ -125,7 +130,12 @@ final class NuevoProductoController
             return $this->volverA($nuevo);
         }
 
-        return $this->ventana('cantidad', ['nuevo' => $nuevo, 'categoria' => $this->categoria($nuevo)]);
+        return $this->ventana('cantidad', [
+            'nuevo' => $nuevo,
+            'categoria' => $this->categoria($nuevo),
+            // Se acaba de sumar una unidad al escanear otra vez el producto.
+            'sumada' => Session::getFlash('sumada') === true,
+        ]);
     }
 
     public function leerCantidad(Request $request): Response
@@ -136,6 +146,24 @@ final class NuevoProductoController
         }
 
         $valor = trim((string) $request->input('cantidad', ''));
+
+        // Se escaneó otra vez el código del producto: suma 1 al número que se veía y se queda en esta etapa (contar
+        // pasando por la pistola).
+        if ($nuevo['codigo_barras'] !== '' && strcasecmp($valor, $nuevo['codigo_barras']) === 0) {
+            $antes = StockService::cantidadAntes($request->input('cantidad_antes'), (int) $nuevo['cantidad']);
+            NuevoProducto::completar(['cantidad' => (string) min($antes + 1, StockService::MAXIMO)], 3);
+            Session::flash('sumada', true);
+
+            return Response::redirect(Url::to('insumos/nuevo/cantidad'));
+        }
+
+        // Otro código leído (no un número corto): se explica en vez de pedir «un número entero».
+        if ($valor !== '' && (!ctype_digit($valor) || strlen($valor) > 5)) {
+            throw new ValidationException(['cantidad' => $this->insumos->idPorCodigo($valor) !== null
+                ? 'Ese código es de otro producto. Agrega primero este y después escanea el otro.'
+                : 'Ese código no es de este producto. Escribe cuántas unidades llegaron. Ejemplo: 12.']);
+        }
+
         StockService::validarCantidad(ctype_digit($valor) ? (int) $valor : 0);
         NuevoProducto::completar(['cantidad' => (string) (int) $valor], 4);
 
@@ -200,7 +228,12 @@ final class NuevoProductoController
         }
 
         NuevoProducto::empezar();
-        Session::flash('agregado', $creado + ['cantidad' => $registrado['cantidad'], 'sector' => $registrado['sector']]);
+        Session::flash('agregado', $creado + [
+            'cantidad' => $registrado['cantidad'],
+            'stock' => $registrado['stock'],
+            'sector' => $registrado['sector'],
+            'sector_codigo' => $registrado['sector_codigo'],
+        ]);
 
         return Response::redirect(Url::to('insumos/nuevo/producto'));
     }
@@ -223,11 +256,11 @@ final class NuevoProductoController
         } elseif (ctype_digit($sectorId)) {
             $sector = $this->sectores->buscarPorId((int) $sectorId);
         } else {
-            throw new ValidationException(['sector_id' => 'Elige el sector donde quedó, o escanea su etiqueta.']);
+            throw new ValidationException(['codigo' => 'Escanea la etiqueta de la repisa donde quedó, o elígela en la lista.']);
         }
 
         if ($sector === null || (int) $sector['activo'] !== 1) {
-            throw new ValidationException(['sector_id' => 'Ese sector está desactivado. Elige otro.']);
+            throw new ValidationException(['sector_id' => 'Ese sector ya no existe. Elige otro.']);
         }
 
         return $sector;
@@ -242,16 +275,20 @@ final class NuevoProductoController
     // ---------- Apoyo ----------
 
     /**
-     * Cada etapa se muestra en una ventana sobre el inicio, que queda de fondo, difuminado.
+     * Cada etapa es su propia ventana sobre el inicio (que queda de fondo, difuminado): su pregunta de título y, debajo,
+     * en qué etapa va («Agregar nuevo producto · 2 de 4»). Al avanzar, ventana.js cambia una ventana por la otra.
      *
      * @param array<string, mixed> $datos los de la vista de la etapa (Insumos::nuevo/{$etapa})
      */
     private function ventana(string $etapa, array $datos): Response
     {
+        $numero = (int) array_search($etapa, self::ETAPAS, true);
+
         return Inicio::conVentana(
             'agregar-producto',
-            'Uno que todavía no está en el sistema.',
+            "Agregar nuevo producto · {$numero} de 4",
             View::render("Insumos::nuevo/{$etapa}", $datos, null),
+            titulo: self::PREGUNTAS[$etapa],
         );
     }
 

@@ -24,6 +24,7 @@ $clasePagina = 'pagina' . (!empty($amplia) ? ' pagina--amplia' : '');
     <?= partial('head', ['titulo' => $titulo ?? null, 'estilos' => $hojas]) ?>
     <script src="<?= e(asset('js/core/ui.js')) ?>" defer></script>
     <script src="<?= e(asset('js/core/sesion.js')) ?>" defer></script>
+    <script src="<?= e(asset('js/core/ventana.js')) ?>" defer></script>
     <?php foreach ($scripts ?? [] as $script) : ?>
     <script src="<?= e(asset($script)) ?>" defer></script>
     <?php endforeach; ?>

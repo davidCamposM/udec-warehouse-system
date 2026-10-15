@@ -3,7 +3,7 @@
 defined('APP_ROOT') || exit;
 
 // Agregar o editar una herramienta del catálogo: su nombre y su categoría (opciones grandes, sin lista desplegable).
-// Al editar, abajo está «Desactivar».
+// Al editar, abajo está «Eliminar».
 $editando = $herramienta !== null;
 $elegida = old('categoria_id', $editando && $herramienta['categoria_id'] !== null ? (string) $herramienta['categoria_id'] : '');
 ?>
@@ -60,9 +60,9 @@ $elegida = old('categoria_id', $editando && $herramienta['categoria_id'] !== nul
     </div>
 </form>
 
-<?php if ($editando && (int) $herramienta['activo'] === 1) : ?>
-    <p class="catalogo__desactivar">
+<?php if ($editando) : ?>
+    <p class="catalogo__eliminar">
         ¿Ya no está en la bodega?
-        <a class="btn btn-outline-danger btn-sm" href="<?= e(url('herramientas/' . $herramienta['id'] . '/desactivar')) ?>">Desactivar</a>
+        <a class="btn btn-outline-danger btn-sm" href="<?= e(url('herramientas/' . $herramienta['id'] . '/eliminar')) ?>">Eliminar esta herramienta</a>
     </p>
 <?php endif; ?>

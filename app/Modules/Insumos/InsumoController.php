@@ -32,7 +32,7 @@ final class InsumoController
     public function index(Request $request): Response
     {
         $texto = trim((string) $request->query('q', ''));
-        $filtro = InsumoService::filtro($request->query('ver'), Permission::can('insumos.administrar'));
+        $filtro = InsumoService::filtro($request->query('ver'));
 
         $id = $this->insumos->idPorCodigo($texto);
         if ($id !== null) {
@@ -118,40 +118,26 @@ final class InsumoController
         return Response::redirect(Url::to("insumos/{$insumo['id']}"));
     }
 
-    // ---------- Activar y desactivar ----------
+    // ---------- Eliminar ----------
 
-    /** Antes de desactivar se pregunta en una pantalla propia, explicando qué pasa. */
-    public function confirmDeactivate(Request $request): Response
+    /** Antes de eliminar se pregunta en una pantalla propia, explicando qué pasa. */
+    public function confirmDelete(Request $request): Response
     {
-        $insumo = $this->insumo($request);
-
-        if ((int) $insumo['activo'] !== 1) {
-            return Response::redirect(Url::to("insumos/{$insumo['id']}"));
-        }
-
-        return Response::view('Insumos::desactivar', [
-            'titulo' => 'Desactivar producto',
-            'insumo' => $insumo,
+        return Response::view('Insumos::eliminar', [
+            'titulo' => 'Eliminar producto',
+            'insumo' => $this->insumo($request),
             'estilos' => ['css/pages/insumos.css'],
         ]);
     }
 
-    public function deactivate(Request $request): Response
+    /** Para las personas el producto desaparece; por dentro solo se desactiva (InsumoService::eliminar). */
+    public function delete(Request $request): Response
     {
         $insumo = $this->insumo($request);
-        $this->insumos->cambiarActivo((int) $insumo['id'], false);
-        Session::flash('exito', 'Se desactivó el producto. Ya no aparece en la lista de Insumos.');
+        $this->insumos->eliminar((int) $insumo['id']);
+        Session::flash('exito', "Se eliminó «{$insumo['nombre']}».");
 
-        return Response::redirect(Url::to("insumos/{$insumo['id']}"));
-    }
-
-    public function activate(Request $request): Response
-    {
-        $insumo = $this->insumo($request);
-        $this->insumos->cambiarActivo((int) $insumo['id'], true);
-        Session::flash('exito', 'Listo. El producto está activo otra vez.');
-
-        return Response::redirect(Url::to("insumos/{$insumo['id']}"));
+        return Response::redirect(Url::to('insumos'));
     }
 
     // ---------- Códigos de barra ----------

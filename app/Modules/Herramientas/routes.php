@@ -39,6 +39,5 @@ $router->get('/herramientas/nueva', [HerramientaController::class, 'create'], 'h
 $router->post('/herramientas', [HerramientaController::class, 'store'], 'herramientas.administrar');
 $router->get('/herramientas/{id}/editar', [HerramientaController::class, 'edit'], 'herramientas.administrar');
 $router->post('/herramientas/{id}', [HerramientaController::class, 'update'], 'herramientas.administrar');
-$router->get('/herramientas/{id}/desactivar', [HerramientaController::class, 'confirmDeactivate'], 'herramientas.administrar');
-$router->post('/herramientas/{id}/desactivar', [HerramientaController::class, 'deactivate'], 'herramientas.administrar');
-$router->post('/herramientas/{id}/activar', [HerramientaController::class, 'activate'], 'herramientas.administrar');
+$router->get('/herramientas/{id}/eliminar', [HerramientaController::class, 'confirmDelete'], 'herramientas.administrar');
+$router->post('/herramientas/{id}/eliminar', [HerramientaController::class, 'delete'], 'herramientas.administrar');

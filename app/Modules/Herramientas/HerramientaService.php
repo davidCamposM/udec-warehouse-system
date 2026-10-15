@@ -11,7 +11,8 @@ defined('APP_ROOT') || exit;
 
 /**
  * Catálogo de herramientas: lo que se puede pedir prestado, agrupado por categoría. El encargado agrega, renombra,
- * cambia de categoría y desactiva; desactivar no borra nada (las solicitudes antiguas la siguen mostrando).
+ * cambia de categoría y elimina. Para las personas, eliminar la saca del sistema; por dentro solo se desactiva (los
+ * préstamos antiguos la siguen mostrando).
  */
 final class HerramientaService
 {
@@ -37,12 +38,6 @@ final class HerramientaService
         }
 
         return $grupos;
-    }
-
-    /** @return list<array<string, mixed>> */
-    public function desactivadas(): array
-    {
-        return $this->herramientas->desactivadas();
     }
 
     /** @return list<array{id: int, nombre: string}> */
@@ -86,10 +81,10 @@ final class HerramientaService
         ));
     }
 
-    public function cambiarActivo(int $id, bool $activo): void
+    public function eliminar(int $id): void
     {
-        $this->herramientas->cambiarActivo($id, $activo);
-        $this->auditoria->registrar($activo ? 'activar' : 'desactivar', 'herramienta', $id);
+        $this->herramientas->eliminar($id);
+        $this->auditoria->registrar('eliminar', 'herramienta', $id);
     }
 
     /**

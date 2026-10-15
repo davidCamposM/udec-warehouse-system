@@ -2,6 +2,7 @@
 
 defined('APP_ROOT') || exit;
 
+// Agregar o editar un sector: su etiqueta (se escanea; Enter, que manda la pistola, guarda) y su nombre, opcional.
 $editando = $sector !== null;
 // Desde «Registrar producto» o «Agregar nuevo producto» (no había sectores) se vuelve a ese paso.
 $volver = match (true) {
@@ -15,10 +16,10 @@ $volver = match (true) {
     'volver' => $volver,
     'color' => $editando ? 'pizarra' : 'turquesa',
     'icono' => $editando ? 'edit' : 'map-pin',
-    'titulo' => $editando ? 'Cambiar nombre del sector' : 'Agregar sector',
+    'titulo' => $editando ? 'Editar sector' : 'Agregar sector',
     'texto' => $editando
-        ? 'Su código (' . $sector['codigo'] . ') no cambia: la etiqueta pegada sigue sirviendo.'
-        : 'El sistema le asigna un código solo (SEC001, SEC002…).',
+        ? 'Para cambiar su etiqueta, escanea la nueva. La de ahora es ' . $sector['codigo'] . '.'
+        : 'Escanea la etiqueta impresa de la repisa o cubículo y toca Guardar.',
 ]) ?>
 
 <?php if (errores() !== []) : ?>
@@ -35,12 +36,24 @@ $volver = match (true) {
         <input type="hidden" name="para" value="<?= e($para) ?>">
     <?php endif; ?>
 
+    <div class="question<?= error_de('codigo') !== null ? ' has-error' : '' ?>">
+        <label class="question__label" for="codigo">
+            <span class="question__number">1</span>Escanea la etiqueta del sector
+        </label>
+        <p class="question__hint">Apunta la pistola al código de barras de la etiqueta. Ejemplo: M12.</p>
+        <input class="input" id="codigo" name="codigo" type="text" maxlength="20" autocomplete="off" autofocus data-lectura
+            value="<?= e(old('codigo', $sector['codigo'] ?? '')) ?>" <?= aria_error('codigo') ?>>
+        <?= mensaje_error('codigo') ?>
+    </div>
+
     <div class="question<?= error_de('nombre') !== null ? ' has-error' : '' ?>">
         <label class="question__label" for="nombre">
-            <span class="question__number">1</span>¿Cómo se llama este sector?
+            <span class="question__number">2</span>Nombre (opcional)
         </label>
-        <p class="question__hint">Un nombre que todos reconozcan en la bodega. Ejemplo: Estante A, Repisa de líquidos.</p>
-        <input class="input" id="nombre" name="nombre" type="text" maxlength="80" required autofocus
+        <p class="question__hint">
+            Si lo dejas en blanco, se usa el de la etiqueta: M12 queda como «Mueble de madera · Cubículo 12».
+        </p>
+        <input class="input" id="nombre" name="nombre" type="text" maxlength="80" autocomplete="off"
             value="<?= e(old('nombre', $sector['nombre'] ?? '')) ?>" <?= aria_error('nombre') ?>>
         <?= mensaje_error('nombre') ?>
     </div>

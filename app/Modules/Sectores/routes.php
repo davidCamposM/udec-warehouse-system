@@ -18,6 +18,5 @@ $router->post('/sectores', [SectorController::class, 'store'], 'sectores.adminis
 
 $router->get('/sectores/{id}/editar', [SectorController::class, 'edit'], 'sectores.administrar');
 $router->post('/sectores/{id}', [SectorController::class, 'update'], 'sectores.administrar');
-$router->get('/sectores/{id}/desactivar', [SectorController::class, 'confirmDeactivate'], 'sectores.administrar');
-$router->post('/sectores/{id}/desactivar', [SectorController::class, 'deactivate'], 'sectores.administrar');
-$router->post('/sectores/{id}/activar', [SectorController::class, 'activate'], 'sectores.administrar');
+$router->get('/sectores/{id}/eliminar', [SectorController::class, 'confirmDelete'], 'sectores.administrar');
+$router->post('/sectores/{id}/eliminar', [SectorController::class, 'delete'], 'sectores.administrar');

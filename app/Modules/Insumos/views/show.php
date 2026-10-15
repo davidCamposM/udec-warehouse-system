@@ -5,7 +5,6 @@ use App\Support\Fecha;
 defined('APP_ROOT') || exit;
 
 [$numero, $palabra] = explode(' ', unidades($insumo['stock_actual']), 2);
-$activo = (int) $insumo['activo'] === 1;
 $categoria = $insumo['categoria'] === null
     ? 'Sin categoría'
     : ($insumo['categoria_padre'] !== null ? $insumo['categoria_padre'] . ' › ' : '') . $insumo['categoria'];
@@ -26,16 +25,16 @@ $frase = static function (array $movimiento): string {
 
 // Lo que se puede hacer con este producto, según los permisos: [texto, descripción, ícono, color, URL]
 $tareas = [];
-if ($activo && $puedeGuardar) {
+if ($puedeGuardar) {
     $tareas[] = ['Registrar producto', 'Anotar lo que llegó y dónde quedó', 'box', 'verde', url('guardar', ['producto' => $insumo['id']])];
 }
-if ($activo && $puedeRetirar && (int) $insumo['stock_actual'] > 0) {
+if ($puedeRetirar && (int) $insumo['stock_actual'] > 0) {
     $tareas[] = ['Retirar producto', 'Descontar lo que sale de la bodega', 'arrow-out', 'ocre', url('retirar', ['producto' => $insumo['id']])];
 }
-if ($activo && $puedeAjustar) {
+if ($puedeAjustar) {
     $tareas[] = ['Actualizar cantidad', 'Dejar lo que realmente hay, después de contar', 'refresh', 'naranja', url('ajustar', ['producto' => $insumo['id']])];
 }
-if ($activo && $puedeAdministrar) {
+if ($puedeAdministrar) {
     $tareas[] = ['Editar datos', 'Nombre, tipo, stock mínimo o código UdeC', 'edit', 'pizarra', url("{$base}/editar")];
     $tareas[] = ['Agregar código de barras', 'Otro envase de este mismo producto', 'barcode', 'turquesa', url("{$base}/codigos/nuevo")];
 }
@@ -47,23 +46,6 @@ if ($activo && $puedeAdministrar) {
     'titulo' => $insumo['nombre'],
     'texto' => $insumo['codigo'] . ' · ' . $categoria,
 ]) ?>
-
-<?php if (!$activo) : ?>
-    <div class="alert alert--warning inactive-notice" role="status">
-        <?= icon('alert') ?>
-        <div>
-            <p><strong>Este producto está desactivado.</strong> No aparece en la lista y no se puede retirar.</p>
-            <?php if ($puedeAdministrar) : ?>
-                <form method="post" action="<?= e(url($base . '/activar')) ?>" data-submit-once>
-                    <?= csrf_field() ?>
-                    <button class="btn btn--lg btn--si" type="submit" data-loading-text="Activando…">
-                        <?= icon('ok') ?>Volver a activar
-                    </button>
-                </form>
-            <?php endif; ?>
-        </div>
-    </div>
-<?php endif; ?>
 
 <?php $foto = foto_producto($insumo['codigo_udec']); ?>
 <section class="producto" aria-label="El producto">
@@ -178,7 +160,7 @@ if ($activo && $puedeAdministrar) {
                                 <span class="text-muted"><?= e($codigo['descripcion']) ?></span>
                             <?php endif; ?>
                         </span>
-                        <?php if ($activo && $puedeAdministrar) : ?>
+                        <?php if ($puedeAdministrar) : ?>
                             <a class="btn btn-outline-secondary btn-sm"
                                 href="<?= e(url($base . '/codigos/' . $codigo['id'] . '/quitar')) ?>"><?= icon('close') ?>Quitar</a>
                         <?php endif; ?>
@@ -189,11 +171,9 @@ if ($activo && $puedeAdministrar) {
     </section>
 </div>
 
-<?php if ($activo && $puedeAdministrar) : ?>
-    <section class="card card-body ficha__desactivar">
-        <p class="text-muted">
-            ¿Ya no se usa este producto? Al desactivarlo deja de aparecer en la lista. Su historial se conserva.
-        </p>
-        <a class="btn btn-outline-danger btn-sm" href="<?= e(url($base . '/desactivar')) ?>">Desactivar este producto</a>
+<?php if ($puedeAdministrar) : ?>
+    <section class="card card-body ficha__eliminar">
+        <p class="text-muted">¿Ya no se usa este producto?</p>
+        <a class="btn btn-outline-danger btn-sm" href="<?= e(url($base . '/eliminar')) ?>">Eliminar este producto</a>
     </section>
 <?php endif; ?>

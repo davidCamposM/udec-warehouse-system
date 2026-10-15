@@ -50,19 +50,13 @@ final class LectorDeProducto
     }
 
     /**
-     * El producto elegido o leído, si se puede usar.
+     * El producto elegido o leído, si se puede usar (los eliminados ya no existen).
      *
      * @return array<string, mixed>
-     * @throws ValidationException si no existe o está desactivado
+     * @throws ValidationException si no existe
      */
     public function productoActivo(int $id): array
     {
-        $insumo = $this->insumos->buscarPorId($id) ?? throw new ValidationException(['codigo' => 'Ese producto no existe.']);
-
-        if ((int) $insumo['activo'] !== 1) {
-            throw new ValidationException(['codigo' => "«{$insumo['nombre']}» está desactivado. Primero actívalo desde su ficha."]);
-        }
-
-        return $insumo;
+        return $this->insumos->buscarPorId($id) ?? throw new ValidationException(['codigo' => 'Ese producto no existe.']);
     }
 }

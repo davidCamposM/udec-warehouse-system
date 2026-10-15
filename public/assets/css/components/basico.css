@@ -275,7 +275,7 @@ a.list-group-item:hover {
   color: #fff;
 }
 
-/* Con borde: blanco, con el borde y el texto de color; al pasar encima se rellena (para lo delicado, como desactivar) */
+/* Con borde: blanco, con el borde y el texto de color; al pasar encima se rellena (para lo delicado, como eliminar) */
 .btn-outline-danger {
   border-color: var(--bs-danger);
   background: #fff;
@@ -562,8 +562,7 @@ a.nav-link.active:hover {
    <ul class="registros"> <li class="registro">
      <div class="registro__cabecera"> <span class="registro__icono"> <div> <p class="registro__nombre"> <p class="registro__detalle">
      <span class="registro__etiqueta"> ícono <span class="registro__codigo">SEC001</span>   (el código, como etiqueta impresa)
-     <div class="registro__acciones"> botones pequeños
-   Debajo, si hay, una tarjeta con los desactivados: <li class="list-group-item desactivado"> código · nombre · botón */
+     <div class="registro__acciones"> botones pequeños */
 .registros {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(19rem, 1fr));
@@ -661,31 +660,6 @@ a.nav-link.active:hover {
   gap: var(--space-2);
   padding-top: var(--space-3);
   border-top: 1px solid var(--bs-gray-200);
-}
-
-/* Los desactivados: una tarjeta aparte, con una lista simple y más discreta */
-.desactivados {
-  margin-top: var(--space-6);
-}
-
-.desactivados__ayuda {
-  font-size: var(--text-sm);
-}
-
-.desactivado {
-  flex-wrap: wrap;
-}
-
-.desactivado__codigo {
-  font-family: var(--font-mono);
-  font-weight: 700;
-  color: var(--bs-muted);
-}
-
-.desactivado__nombre {
-  flex: 1;
-  min-width: 8rem;
-  color: var(--bs-muted);
 }
 
 /* ---------- Aviso informativo, en verde suave: <p class="nota-info"> ícono <span>texto</span> ---------- */

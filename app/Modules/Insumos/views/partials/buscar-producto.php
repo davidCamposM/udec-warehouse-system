@@ -15,13 +15,15 @@ defined('APP_ROOT') || exit;
  * - $ayuda: la línea bajo «Producto».
  * - $recientes y $tituloRecientes (opcionales): productos para elegir sin escribir nada.
  * - $agregar (opcional): URL de «Agregar nuevo producto», que se ofrece cuando no se encuentra (lleva lo escrito).
+ * - $sinEtiqueta (opcional): la ventana ya pregunta por el producto en su título; «Producto» queda solo para lectores
+ *   de pantalla.
  */
 $elegir = static fn (array $insumo): string => url($ruta, ['producto' => $insumo['id']]);
 $recientes ??= [];
 $cuantos = count($resultados);
 ?>
 <div class="campo">
-    <label class="campo__etiqueta" for="codigo">Producto<span class="campo__obligatorio" aria-hidden="true">*</span></label>
+    <label class="<?= !empty($sinEtiqueta) ? 'visually-hidden' : 'campo__etiqueta' ?>" for="codigo">Producto<span class="campo__obligatorio" aria-hidden="true">*</span></label>
     <p class="campo__ayuda" id="codigo-ayuda"><?= e($ayuda) ?></p>
     <div class="field__control field__control--with-icon sugerencias">
         <span class="field__icon"><?= icon('search') ?></span>

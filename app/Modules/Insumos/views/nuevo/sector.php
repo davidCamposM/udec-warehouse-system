@@ -1,31 +1,33 @@
 <?php
 
-use App\Modules\Insumos\NuevoProductoController;
-
 defined('APP_ROOT') || exit;
 
-// Etapa 4, en la ventana: lo de las etapas anteriores (con «Cambiar») y dónde quedó. Si el sector tiene etiqueta,
-// también se puede escanear. «Agregar producto» crea el producto y registra sus unidades.
+// Etapa 4, su propia ventana («¿Dónde quedó?»). Lo principal es escanear la etiqueta de la repisa (al leerla, se agrega
+// el producto con sus unidades). Sin etiqueta, la lista de sectores va plegada debajo: se toca uno y se confirma.
+// Arriba, lo de las etapas anteriores (con «Cambiar»).
 $marcado = old('sector_id', $nuevo['sector_id']);
 ?>
-<?= partial('Insumos::partials/pasos', ['paso' => 4, 'pasos' => NuevoProductoController::PASOS, 'color' => 'turquesa']) ?>
 
 <form class="formulario" method="post" action="<?= e(url('insumos/nuevo/sector')) ?>" data-submit-once>
     <?= csrf_field() ?>
 
-    <?= partial('campo-fijo', [
-        'etiqueta' => 'Producto',
-        'icono' => 'box',
-        'valor' => $nuevo['nombre'],
-        'detalle' => $categoria,
-        'cambiar' => url('insumos/nuevo/producto'),
-    ]) ?>
-    <?= partial('campo-fijo', [
-        'etiqueta' => 'Cantidad',
-        'icono' => 'layers',
-        'valor' => unidades((int) $nuevo['cantidad']),
-        'cambiar' => url('insumos/nuevo/cantidad'),
-    ]) ?>
+    <div class="resumen-fijo">
+        <?= partial('campo-fijo', [
+            'etiqueta' => 'Producto',
+            'icono' => 'box',
+            'valor' => $nuevo['nombre'],
+            'detalle' => $categoria,
+            'cambiar' => url('insumos/nuevo/producto'),
+            'compacto' => true,
+        ]) ?>
+        <?= partial('campo-fijo', [
+            'etiqueta' => 'Cantidad',
+            'icono' => 'layers',
+            'valor' => unidades((int) $nuevo['cantidad']),
+            'cambiar' => url('insumos/nuevo/cantidad'),
+            'compacto' => true,
+        ]) ?>
+    </div>
 
     <?php if ($sectores === []) : ?>
         <div class="campo">
@@ -43,32 +45,37 @@ $marcado = old('sector_id', $nuevo['sector_id']);
             </div>
         </div>
     <?php else : ?>
-        <fieldset class="campo<?= error_de('sector_id') !== null ? ' has-error' : '' ?>">
-            <legend class="campo__etiqueta">¿Dónde quedó?<span class="campo__obligatorio" aria-hidden="true">*</span></legend>
-            <div class="options options--wide">
-                <?php foreach ($sectores as $sector) : ?>
-                    <label class="option">
-                        <input class="option__input" type="radio" name="sector_id" value="<?= e($sector['id']) ?>"
-                            <?= (string) $sector['id'] === $marcado || count($sectores) === 1 ? 'checked' : '' ?>>
-                        <span class="option__box option__box--detalle">
-                            <?= icon('map-pin') ?>
-                            <span>
-                                <?= e($sector['nombre']) ?>
-                                <small><?= e($sector['codigo']) ?></small>
-                            </span>
-                        </span>
-                    </label>
-                <?php endforeach; ?>
-            </div>
-            <?= mensaje_error('sector_id') ?>
-        </fieldset>
-
-        <div class="campo">
-            <label class="campo__etiqueta campo__etiqueta--suave" for="codigo"><?= icon('scan') ?>¿Tiene etiqueta? También puedes escanearla</label>
-            <input class="input input--relleno input--code" id="codigo" name="codigo" type="text" autocomplete="off"
-                placeholder="Código del sector" data-foco data-lectura <?= aria_error('codigo') ?>>
+        <div class="escaneo-foco<?= error_de('codigo') !== null ? ' has-error' : '' ?>">
+            <span class="escaneo-foco__icono" aria-hidden="true"><?= icon('scan') ?></span>
+            <label class="escaneo-foco__pregunta" for="codigo">Escanea la etiqueta de la repisa</label>
+            <input class="escaneo-foco__campo" id="codigo" name="codigo" type="text" autocomplete="off" autofocus
+                placeholder="Ejemplo: A03" aria-describedby="codigo-ayuda" data-lectura <?= aria_error('codigo') ?>>
             <?= mensaje_error('codigo') ?>
+            <p class="escaneo-foco__ayuda" id="codigo-ayuda">Al escanearla se agrega el producto con sus unidades.</p>
         </div>
+
+        <details class="lista-plegada"<?= error_de('sector_id') !== null || $marcado !== '' ? ' open' : '' ?>>
+            <summary>No tiene etiqueta: elegir de la lista</summary>
+            <fieldset class="campo<?= error_de('sector_id') !== null ? ' has-error' : '' ?>">
+                <legend class="visually-hidden">Sectores</legend>
+                <div class="options options--wide">
+                    <?php foreach ($sectores as $sector) : ?>
+                        <label class="option">
+                            <input class="option__input" type="radio" name="sector_id" value="<?= e($sector['id']) ?>"
+                                <?= (string) $sector['id'] === $marcado ? 'checked' : '' ?>>
+                            <span class="option__box option__box--detalle">
+                                <?= icon('map-pin') ?>
+                                <span>
+                                    <?= e($sector['nombre']) ?>
+                                    <small><?= e($sector['codigo']) ?></small>
+                                </span>
+                            </span>
+                        </label>
+                    <?php endforeach; ?>
+                </div>
+                <?= mensaje_error('sector_id') ?>
+            </fieldset>
+        </details>
     <?php endif; ?>
 
     <div class="formulario__acciones">

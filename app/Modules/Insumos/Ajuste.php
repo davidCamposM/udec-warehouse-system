@@ -9,8 +9,8 @@ use App\Core\Session;
 defined('APP_ROOT') || exit;
 
 /**
- * El ajuste en curso, paso a paso: el producto, lo que se contó, con qué stock a la vista y por qué. Vive en la sesión
- * hasta que se confirma.
+ * El producto que se está actualizando, entre la etapa 1 y la 2 de «Actualizar cantidad». Vive en la sesión hasta que
+ * se actualiza (lo contado y el motivo llegan con el formulario de la etapa 2).
  */
 final class Ajuste
 {
@@ -21,36 +21,12 @@ final class Ajuste
         Session::put(self::CLAVE, ['insumo_id' => $insumoId]);
     }
 
-    /** @return array{insumo_id: int, contado?: int, stock_visto?: int, motivo?: string, detalle?: string}|null */
+    /** @return array{insumo_id: int}|null */
     public static function actual(): ?array
     {
         $ajuste = Session::get(self::CLAVE);
 
         return is_array($ajuste) ? $ajuste : null;
-    }
-
-    public static function contar(int $contado, int $stockVisto, string $motivo, string $detalle): void
-    {
-        $ajuste = self::actual();
-
-        if ($ajuste !== null) {
-            Session::put(self::CLAVE, [
-                'contado' => $contado,
-                'stock_visto' => $stockVisto,
-                'motivo' => $motivo,
-                'detalle' => $detalle,
-            ] + $ajuste);
-        }
-    }
-
-    /** El stock cambió mientras se contaba: se confirma de nuevo contra el stock nuevo. */
-    public static function actualizarStockVisto(int $stock): void
-    {
-        $ajuste = self::actual();
-
-        if ($ajuste !== null) {
-            Session::put(self::CLAVE, ['stock_visto' => $stock] + $ajuste);
-        }
     }
 
     public static function terminar(): void

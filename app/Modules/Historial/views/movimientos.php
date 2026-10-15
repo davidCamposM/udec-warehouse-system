@@ -76,7 +76,14 @@ $tipoActual = $filtros['tipo'] ?? '';
                         <tr>
                             <td class="movimientos__fecha"><?= e(Fecha::mostrar($fila['fecha'])) ?></td>
                             <td><span class="tipo-mov tipo-mov--<?= e($fila['tipo']) ?>"><?= e(rtrim(MovimientoService::TIPOS[$fila['tipo']], 's')) ?></span></td>
-                            <td><a class="movimientos__producto" href="<?= e(url('insumos/' . $fila['insumo_id'])) ?>"><?= e($fila['nombre']) ?></a></td>
+                            <td>
+                                <?php if ((int) $fila['insumo_activo'] === 1) : ?>
+                                    <a class="movimientos__producto" href="<?= e(url('insumos/' . $fila['insumo_id'])) ?>"><?= e($fila['nombre']) ?></a>
+                                <?php else : ?>
+                                    <?php // Un producto eliminado: su historial queda, pero ya no tiene ficha. ?>
+                                    <span class="movimientos__producto"><?= e($fila['nombre']) ?></span>
+                                <?php endif; ?>
+                            </td>
                             <td class="text-end movimientos__cantidad movimientos__cantidad--<?= $cantidad > 0 ? 'mas' : 'menos' ?>"><?= e(($cantidad > 0 ? '+' : '−') . abs($cantidad)) ?></td>
                             <td class="text-end movimientos__numero"><?= e($fila['stock_resultante']) ?></td>
                             <td><?= e($fila['quien'] ?? '—') ?></td>

@@ -220,7 +220,7 @@
 /* ---------- Ficha del producto: con los componentes básicos (basico.css), como el inicio ----------
    Un solo recuadro con los datos a la izquierda y la foto a la derecha (en teléfono, la foto arriba). La foto ocupa
    un tercio del ancho y es cuadrada, así crece y se achica con la pantalla. Debajo, las tareas (.lista-acciones), y en dos
-   columnas los últimos movimientos y los códigos de barra. Al final, desactivar, separado y discreto. */
+   columnas los últimos movimientos y los códigos de barra. Al final, eliminar, separado y discreto. */
 .producto {
   display: grid;
   margin-bottom: var(--space-6);
@@ -487,22 +487,11 @@
   overflow-wrap: anywhere;
 }
 
-/* Desactivar queda al final, separado y discreto, para no tocarlo sin querer */
-.ficha__desactivar {
+/* Eliminar queda al final, separado y discreto, para no tocarlo sin querer */
+.ficha__eliminar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-3);
-}
-
-/* ---------- Producto desactivado ---------- */
-.inactive-notice {
-  margin-bottom: var(--space-6);
-}
-
-.inactive-notice > div {
-  display: grid;
-  justify-items: start;
   gap: var(--space-3);
 }

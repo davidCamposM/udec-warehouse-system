@@ -1,13 +1,10 @@
 <?php
 
-use App\Modules\Insumos\GuardarController;
-
 defined('APP_ROOT') || exit;
 
 // Etapa 1, en la ventana: se escaneó un código que no tiene ningún producto. ¿Es nuevo, u otro envase de uno que ya
 // existe?
 ?>
-<?= partial('Insumos::partials/pasos', ['paso' => 1, 'pasos' => GuardarController::PASOS, 'color' => 'verde']) ?>
 
 <div class="formulario">
     <div class="alert alert--warning" role="status">

@@ -1,15 +1,13 @@
 <?php
 
-use App\Modules\Insumos\NuevoProductoController;
-
 defined('APP_ROOT') || exit;
 
-// Etapa 2, en la ventana: lo de la etapa 1 (con «Cambiar») y el tipo: una de las categorías principales.
+// Etapa 2, su propia ventana («¿De qué tipo es?»): lo de la etapa 1 (con «Cambiar») y el tipo: una de las categorías
+// principales. Tocar una avanza sola a la etapa siguiente (data-enviar-al-elegir); «Siguiente» queda para el teclado.
 $elegida = old('categoria_id', $nuevo['categoria_id']);
 ?>
-<?= partial('Insumos::partials/pasos', ['paso' => 2, 'pasos' => NuevoProductoController::PASOS, 'color' => 'turquesa']) ?>
 
-<form class="formulario" method="post" action="<?= e(url('insumos/nuevo/tipo')) ?>" data-submit-once>
+<form class="formulario" method="post" action="<?= e(url('insumos/nuevo/tipo')) ?>" data-submit-once data-enviar-al-elegir>
     <?= csrf_field() ?>
 
     <?= partial('campo-fijo', [
@@ -21,7 +19,7 @@ $elegida = old('categoria_id', $nuevo['categoria_id']);
     ]) ?>
 
     <fieldset class="campo<?= error_de('categoria_id') !== null ? ' has-error' : '' ?>">
-        <legend class="campo__etiqueta">¿De qué tipo es?<span class="campo__obligatorio" aria-hidden="true">*</span></legend>
+        <legend class="campo__etiqueta campo__etiqueta--suave">Tócalo y sigue solo</legend>
         <div class="options options--wide">
             <?php foreach ($categorias as $categoria) : ?>
                 <label class="option">

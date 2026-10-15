@@ -1,28 +1,25 @@
 <?php
 
-use App\Modules\Insumos\AjusteController;
-
 defined('APP_ROOT') || exit;
 
-// Etapa 1, en la ventana: el producto que se va a actualizar. Tocar un producto lo elige; «Siguiente» busca lo escrito
-// o escaneado.
+// Etapa 1, su propia ventana («¿Qué producto vas a actualizar?»): el producto que se va a actualizar. Tocar un producto
+// lo elige; «Siguiente» busca lo escrito o escaneado.
 ?>
 <?php if ($actualizado !== null) : ?>
-    <?php
-    $diferencia = abs($actualizado['diferencia']);
-    $cambio = $actualizado['diferencia'] > 0
-        ? ($diferencia === 1 ? 'se sumó ' : 'se sumaron ') . unidades($diferencia)
-        : ($diferencia === 1 ? 'se restó ' : 'se restaron ') . unidades($diferencia);
-    ?>
-    <?= partial('listo', [
-        'titulo' => 'Listo, quedó actualizado',
-        'detalle' => 'Ahora hay <strong>' . e(unidades($actualizado['ahora'])) . '</strong> de <strong>' . e($actualizado['nombre'])
-            . '</strong>. Antes había ' . e(unidades($actualizado['antes'])) . ': ' . e($cambio) . '. Motivo: ' . e($actualizado['motivo']) . '.',
-        'enlaces' => [['Ver el producto', url('insumos/' . $actualizado['insumo_id'])]],
+    <?= partial('boleta', [
+        'titulo' => '¡Listo! Quedó actualizado',
+        'filas' => [
+            ['box', '<strong>' . e($actualizado['nombre']) . '</strong>'],
+            ['refresh', 'Antes había ' . e(cantidad($actualizado['antes'])) . '.'],
+            [$actualizado['diferencia'] > 0 ? 'plus' : 'minus', (abs($actualizado['diferencia']) === 1
+                ? ($actualizado['diferencia'] > 0 ? 'Se sumó ' : 'Se restó ')
+                : ($actualizado['diferencia'] > 0 ? 'Se sumaron ' : 'Se restaron '))
+                . '<strong>' . e(unidades(abs($actualizado['diferencia']))) . '</strong>.'],
+            ['info', 'Motivo: ' . e($actualizado['motivo'])],
+            ['layers', 'Stock: <strong>' . e(cantidad($actualizado['ahora'])) . '</strong>'],
+        ],
     ]) ?>
 <?php endif; ?>
-
-<?= partial('Insumos::partials/pasos', ['paso' => 1, 'pasos' => AjusteController::PASOS, 'color' => 'naranja']) ?>
 
 <form class="formulario" method="post" action="<?= e(url('ajustar/producto')) ?>" data-submit-once>
     <?= csrf_field() ?>
@@ -31,6 +28,7 @@ defined('APP_ROOT') || exit;
         'texto' => $texto,
         'resultados' => $resultados,
         'ruta' => 'ajustar',
+        'sinEtiqueta' => true,
         'ayuda' => ($actualizado !== null ? '¿Otro producto? ' : '') . 'Escanea su código, o escribe su nombre y elígelo en la lista.',
     ]) ?>
 

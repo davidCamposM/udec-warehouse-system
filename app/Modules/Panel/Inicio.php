@@ -55,6 +55,8 @@ final class Inicio
      * @param list<string> $estilos hojas propias de la tarea
      * @param list<string> $scripts scripts propios de la tarea
      * @param bool         $ancha   ventana más ancha, para un formulario con varias columnas
+     * @param ?string      $titulo  el título de la ventana; si no se indica, el nombre de la tarea. Las tareas en las
+     *                              que cada etapa es su propia ventana ponen aquí la pregunta de la etapa
      */
     public static function conVentana(
         string $tarea,
@@ -63,9 +65,10 @@ final class Inicio
         array $estilos = [],
         array $scripts = [],
         bool $ancha = false,
+        ?string $titulo = null,
     ): Response
     {
-        $titulo = Tareas::tarea($tarea)['texto'];
+        $titulo ??= Tareas::tarea($tarea)['texto'];
 
         return Response::view('Panel::inicio', self::datos(deFondo: true) + [
             'titulo' => $titulo,

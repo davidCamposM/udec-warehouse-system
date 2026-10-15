@@ -41,7 +41,7 @@ final class MovimientoRepository
 
         return Database::fetchAll(
             'SELECT m.id, m.tipo, m.fecha, m.motivo, mi.cantidad, mi.stock_resultante,
-                    i.id AS insumo_id, i.codigo, i.nombre,
+                    i.id AS insumo_id, i.codigo, i.nombre, i.activo AS insumo_activo,
                     us.nombre AS quien, se.nombre AS sector
                FROM ' . self::DESDE . "
               WHERE {$condicion}

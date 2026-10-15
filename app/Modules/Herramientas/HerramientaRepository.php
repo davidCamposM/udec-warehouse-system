@@ -30,30 +30,30 @@ final class HerramientaRepository
         );
     }
 
-    /** @return list<array<string, mixed>> las desactivadas, por nombre */
-    public function desactivadas(): array
-    {
-        return Database::fetchAll(
-            'SELECT ' . self::COLUMNAS . '
-               FROM herramientas h LEFT JOIN categorias c ON c.id = h.categoria_id
-              WHERE h.activo = 0
-              ORDER BY h.nombre'
-        );
-    }
-
-    /** @return array<string, mixed>|null */
+    /**
+     * @return array<string, mixed>|null solo si no está eliminada: para las personas, una herramienta eliminada no
+     *                                   existe (los préstamos antiguos la siguen mostrando por su cuenta)
+     */
     public function findById(int $id): ?array
     {
         return Database::fetch(
-            'SELECT ' . self::COLUMNAS . ' FROM herramientas h LEFT JOIN categorias c ON c.id = h.categoria_id WHERE h.id = ?',
+            'SELECT ' . self::COLUMNAS . '
+               FROM herramientas h LEFT JOIN categorias c ON c.id = h.categoria_id
+              WHERE h.id = ? AND h.activo = 1',
             [$id]
         );
     }
 
-    /** Si ya hay otra herramienta con ese nombre (sin distinguir mayúsculas ni tildes, por la intercalación). */
+    /**
+     * Si ya hay otra herramienta con ese nombre (sin distinguir mayúsculas ni tildes, por la intercalación). Las
+     * eliminadas no cuentan: su nombre queda libre.
+     */
     public function nombreEnUso(string $nombre, ?int $exceptoId = null): bool
     {
-        return Database::fetchValue('SELECT 1 FROM herramientas WHERE nombre = ? AND id <> ?', [$nombre, $exceptoId ?? 0]) !== null;
+        return Database::fetchValue(
+            'SELECT 1 FROM herramientas WHERE nombre = ? AND id <> ? AND activo = 1',
+            [$nombre, $exceptoId ?? 0]
+        ) !== null;
     }
 
     /** @return list<array{id: int, nombre: string}> las categorías de herramientas activas, por nombre */
@@ -74,8 +74,9 @@ final class HerramientaRepository
         Database::execute('UPDATE herramientas SET nombre = ?, categoria_id = ? WHERE id = ?', [$nombre, $categoriaId, $id]);
     }
 
-    public function cambiarActivo(int $id, bool $activo): void
+    /** «Eliminar»: por dentro solo se desactiva, para conservar los préstamos en que aparece. */
+    public function eliminar(int $id): void
     {
-        Database::execute('UPDATE herramientas SET activo = ? WHERE id = ?', [$activo ? 1 : 0, $id]);
+        Database::execute('UPDATE herramientas SET activo = 0 WHERE id = ?', [$id]);
     }
 }

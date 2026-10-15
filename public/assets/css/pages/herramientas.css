@@ -581,7 +581,7 @@
   height: 1.125rem;
 }
 
-.catalogo__desactivar {
+.catalogo__eliminar {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
