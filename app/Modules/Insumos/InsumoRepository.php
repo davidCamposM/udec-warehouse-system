@@ -118,22 +118,25 @@ final class InsumoRepository
     }
 
     /**
-     * Los últimos productos activos que entraron a bodega, sin repetir, del más reciente al más antiguo.
+     * Los últimos productos activos con un movimiento de ese tipo (los que entraron o los que se retiraron), sin
+     * repetir, del más reciente al más antiguo.
      *
+     * @param 'entrada'|'salida' $tipo
      * @return list<array<string, mixed>>
      */
-    public function ultimosRegistrados(int $limite): array
+    public function ultimosConMovimiento(string $tipo, int $limite): array
     {
         return Database::fetchAll(
-            'SELECT ' . self::COLUMNAS . ' FROM ' . self::DESDE . "
+            'SELECT ' . self::COLUMNAS . ' FROM ' . self::DESDE . '
                JOIN (SELECT mi.insumo_id, MAX(mi.movimiento_id) AS ultimo
                        FROM movimiento_items mi
                        JOIN movimientos m ON m.id = mi.movimiento_id
-                      WHERE m.tipo = 'entrada'
+                      WHERE m.tipo = ?
                       GROUP BY mi.insumo_id) r ON r.insumo_id = i.id
               WHERE i.activo = 1
               ORDER BY r.ultimo DESC
-              LIMIT " . max(1, $limite)
+              LIMIT ' . max(1, $limite),
+            [$tipo]
         );
     }
 
@@ -155,10 +158,9 @@ final class InsumoRepository
     {
         return Database::fetchAll(
             'SELECT m.id, m.tipo, m.fecha, m.documento, m.motivo, mi.cantidad, mi.stock_resultante,
-                    COALESCE(pe.nombre, us.nombre) AS quien, se.nombre AS sector
+                    us.nombre AS quien, se.nombre AS sector
                FROM movimiento_items mi
                JOIN movimientos m ON m.id = mi.movimiento_id
-               LEFT JOIN personas pe ON pe.id = m.persona_id
                LEFT JOIN usuarios us ON us.id = m.usuario_id
                LEFT JOIN sectores se ON se.id = mi.sector_id
               WHERE mi.insumo_id = ?
@@ -257,11 +259,9 @@ final class InsumoRepository
                FROM herramienta_unidades hu JOIN herramientas h ON h.id = hu.herramienta_id
               WHERE hu.codigo = ?
              UNION ALL
-             SELECT 'la credencial de una persona' FROM personas WHERE codigo_credencial = ?
-             UNION ALL
              SELECT CONCAT('el sector ', nombre) FROM sectores WHERE codigo = ?
              LIMIT 1",
-            [$codigo, $codigo, $codigo, $exceptoInsumo ?? 0, $codigo, $codigo, $codigo]
+            [$codigo, $codigo, $codigo, $exceptoInsumo ?? 0, $codigo, $codigo]
         );
 
         return $fila['duenio'] ?? null;

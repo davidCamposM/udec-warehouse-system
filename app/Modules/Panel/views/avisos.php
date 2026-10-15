@@ -30,7 +30,7 @@ $definiciones = [
     ],
     'salidas_hoy' => [
         'arrow-out', 'info', 'retiro hoy', 'retiros hoy',
-        'Lo que se llevó cada persona en el punto de retiro.',
+        'Lo que se retiró hoy de la bodega.',
         Permission::can('historial.ver') ? url('movimientos', ['periodo' => 'hoy', 'tipo' => 'salida']) : null,
     ],
 ];

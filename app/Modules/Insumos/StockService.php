@@ -12,9 +12,9 @@ use App\Modules\Sectores\SectorRepository;
 defined('APP_ROOT') || exit;
 
 /**
- * El ÚNICO lugar que cambia el stock de los productos: entradas (Registrar producto), ajustes y salidas (punto de
- * retiro). Cada cambio queda como un movimiento con su ítem y el stock que resultó, así la suma de los movimientos
- * siempre explica la cantidad actual.
+ * El ÚNICO lugar que cambia el stock de los productos: entradas (Registrar producto), ajustes (Actualizar cantidad) y
+ * salidas (Retirar producto). Cada cambio queda como un movimiento con su ítem y el stock que resultó, así la suma de
+ * los movimientos siempre explica la cantidad actual.
  */
 final class StockService
 {
@@ -119,106 +119,41 @@ final class StockService
     }
 
     /**
-     * Entrada en el punto de retiro (la registra un auxiliar): suma todo lo que llegó en una sola operación y deja cada
-     * producto en el sector elegido.
+     * Salida: descuenta lo que se retira de la bodega. Si no alcanza, no descuenta nada (el stock nunca queda negativo).
      *
-     * @param array<int, int> $items insumo_id => cantidad, en el orden en que se escanearon
-     * @return list<array{insumo_id: int, nombre: string, cantidad: int, stock: int}> lo que se registró
-     * @throws ValidationException si no hay nada, una cantidad no sirve, un producto o el sector no está activo
+     * @return array{insumo_id: int, nombre: string, cantidad: int, stock: int}
+     * @throws ValidationException si la cantidad no sirve, el producto no está activo o no alcanza
      */
-    public function registrarEntradaEnPunto(int $personaId, int $estacionId, array $items, int $sectorId): array
+    public function retirar(int $insumoId, int $cantidad): array
     {
-        if ($items === []) {
-            throw new ValidationException(['carrito' => 'Escanea lo que llegó.']);
-        }
-        foreach ($items as $cantidad) {
-            self::validarCantidad($cantidad);
+        if ($cantidad < 1 || $cantidad > self::MAXIMO) {
+            throw new ValidationException(['cantidad' => 'Escribe cuántas unidades se retiran, con un número entero desde 1. Ejemplo: 2.']);
         }
 
-        return Database::transaction(function () use ($personaId, $estacionId, $items, $sectorId): array {
-            $sector = $this->sectores->findById($sectorId);
-            if ($sector === null || (int) $sector['activo'] !== 1) {
-                throw new ValidationException(['sector_id' => 'Ese sector no existe o está desactivado. Elige otro.']);
+        return Database::transaction(function () use ($insumoId, $cantidad): array {
+            $insumo = $this->stock->bloquearInsumo($insumoId);
+            if ($insumo === null || (int) $insumo['activo'] !== 1) {
+                throw new ValidationException(['codigo' => 'Ese producto ya no está activo. Empieza de nuevo.']);
             }
 
-            // Se bloquean en orden de id, como en los retiros.
-            $ids = array_keys($items);
-            sort($ids);
-            $insumos = [];
-            foreach ($ids as $id) {
-                $insumo = $this->stock->bloquearInsumo($id);
-                if ($insumo === null || (int) $insumo['activo'] !== 1) {
-                    throw new ValidationException(['carrito' => 'Un producto de la lista ya no está activo. Quítalo y confirma otra vez.']);
-                }
-                $insumos[$id] = $insumo;
+            $hay = (int) $insumo['stock_actual'];
+            if ($hay < $cantidad) {
+                throw new ValidationException(['cantidad' => $hay === 0
+                    ? "No quedan unidades de «{$insumo['nombre']}» en bodega."
+                    : 'No alcanza: en bodega ' . ($hay === 1 ? 'queda ' : 'quedan ') . unidades($hay) . '. Corrige la cantidad.']);
             }
 
-            $movimiento = $this->stock->crearEntradaEnPunto($personaId, $estacionId);
-            $registrado = [];
+            $stock = $hay - $cantidad;
+            $movimiento = $this->stock->crearMovimiento('salida', (int) Auth::id());
+            $this->stock->agregarItem($movimiento, $insumoId, -$cantidad, $stock, null);
+            $this->stock->actualizarStock($insumoId, $stock, null);
 
-            foreach ($items as $id => $cantidad) {
-                $stock = (int) $insumos[$id]['stock_actual'] + $cantidad;
-                $this->stock->agregarItem($movimiento, $id, $cantidad, $stock, $sectorId);
-                $this->stock->actualizarStock($id, $stock, $sectorId);
-                $registrado[] = ['insumo_id' => $id, 'nombre' => $insumos[$id]['nombre'], 'cantidad' => $cantidad, 'stock' => $stock];
-            }
-
-            return $registrado;
-        });
-    }
-
-    /**
-     * Salida en el punto de retiro: descuenta todo lo que la persona lleva en una sola operación. Si de algún producto
-     * no alcanza, no se descuenta nada (el stock nunca queda negativo).
-     *
-     * @param array<int, int> $items insumo_id => cantidad, en el orden en que se escanearon
-     * @return list<array{insumo_id: int, nombre: string, cantidad: int, stock: int}> lo que se retiró
-     * @throws ValidationException si no hay nada, una cantidad no sirve o no alcanza
-     */
-    public function retirar(int $personaId, int $estacionId, array $items): array
-    {
-        if ($items === []) {
-            throw new ValidationException(['carrito' => 'Escanea lo que vas a retirar.']);
-        }
-        foreach ($items as $cantidad) {
-            if ($cantidad < 1 || $cantidad > self::MAXIMO) {
-                throw new ValidationException(['carrito' => 'Revisa las cantidades: cada una debe ser un número entero desde 1.']);
-            }
-        }
-
-        return Database::transaction(function () use ($personaId, $estacionId, $items): array {
-            // Se bloquean en orden de id: dos retiros simultáneos con los mismos productos no se traban entre sí.
-            $ids = array_keys($items);
-            sort($ids);
-            $insumos = [];
-            $faltan = [];
-
-            foreach ($ids as $id) {
-                $insumo = $this->stock->bloquearInsumo($id);
-                if ($insumo === null || (int) $insumo['activo'] !== 1) {
-                    $faltan[] = 'un producto ya no está disponible';
-                } elseif ((int) $insumo['stock_actual'] < $items[$id]) {
-                    $faltan[] = "de «{$insumo['nombre']}» " . ((int) $insumo['stock_actual'] === 1 ? 'queda ' : 'quedan ')
-                        . unidades($insumo['stock_actual']);
-                }
-                $insumos[$id] = $insumo;
-            }
-
-            if ($faltan !== []) {
-                throw new ValidationException(['carrito' => 'No alcanza: ' . implode('; ', $faltan) . '. Corrige la cantidad.']);
-            }
-
-            $movimiento = $this->stock->crearSalida($personaId, $estacionId);
-            $retirado = [];
-
-            foreach ($items as $id => $cantidad) {
-                $stock = (int) $insumos[$id]['stock_actual'] - $cantidad;
-                $this->stock->agregarItem($movimiento, $id, -$cantidad, $stock, null);
-                $this->stock->actualizarStock($id, $stock, null);
-                $retirado[] = ['insumo_id' => $id, 'nombre' => $insumos[$id]['nombre'], 'cantidad' => $cantidad, 'stock' => $stock];
-            }
-
-            return $retirado;
+            return [
+                'insumo_id' => $insumoId,
+                'nombre' => $insumo['nombre'],
+                'cantidad' => $cantidad,
+                'stock' => $stock,
+            ];
         });
     }
 

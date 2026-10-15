@@ -7,8 +7,7 @@ namespace App\Support;
 defined('APP_ROOT') || exit;
 
 /**
- * RUT chileno. En la base de datos se guarda normalizado ('12345678-K'); en pantalla se muestra
- * con puntos ('12.345.678-K').
+ * RUT chileno, para la regla «rut» de Validator. En la base de datos se guarda normalizado ('12345678-K').
  */
 final class Rut
 {
@@ -35,20 +34,6 @@ final class Rut
         [$cuerpo, $digito] = explode('-', $normalizado);
 
         return self::digitoVerificador($cuerpo) === $digito;
-    }
-
-    /** '12345678-K' → '12.345.678-K'. Si no es un RUT, lo retorna tal cual. */
-    public static function formatear(string $rut): string
-    {
-        $normalizado = self::normalizar($rut);
-
-        if ($normalizado === null) {
-            return $rut;
-        }
-
-        [$cuerpo, $digito] = explode('-', $normalizado);
-
-        return number_format((int) $cuerpo, 0, '', '.') . '-' . $digito;
     }
 
     /** Dígito verificador por módulo 11. */

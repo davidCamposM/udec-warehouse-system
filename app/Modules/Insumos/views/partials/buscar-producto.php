@@ -5,13 +5,13 @@ use App\Modules\Insumos\InsumoService;
 defined('APP_ROOT') || exit;
 
 /**
- * Etapa «el producto» de un formulario en ventana (Registrar producto, Actualizar cantidad): el campo para escanear
+ * Etapa «el producto» de un formulario en ventana (Registrar, Actualizar cantidad, Retirar): el campo para escanear
  * el código o escribir el nombre. Va dentro del formulario de la etapa, que envía lo escrito como «codigo».
  *
  * Mientras se escribe, bajo el campo aparecen los productos que coinciden (insumos.js) y tocar uno lo elige. Si se
  * envía un nombre que coincide con varios, la etapa vuelve con todos ellos a la vista (también sin JavaScript).
  * - $texto: lo enviado. $resultados: los productos que coinciden con $texto.
- * - $ruta: la de la tarea (guardar o ajustar); elegir un producto lleva a $ruta?producto=id.
+ * - $ruta: la de la tarea (guardar, ajustar o retirar); elegir un producto lleva a $ruta?producto=id.
  * - $ayuda: la línea bajo «Producto».
  * - $recientes y $tituloRecientes (opcionales): productos para elegir sin escribir nada.
  * - $agregar (opcional): URL de «Agregar nuevo producto», que se ofrece cuando no se encuentra (lleva lo escrito).

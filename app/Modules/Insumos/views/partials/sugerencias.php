@@ -6,7 +6,7 @@ defined('APP_ROOT') || exit;
  * La lista bajo una barra de búsqueda, que pide insumos.js mientras se escribe (InsumoController::sugerencias).
  * - $productos: los primeros que coinciden con $texto. $total: cuántos coinciden en total; si son más, un botón envía
  *   la búsqueda para verlos todos.
- * - $para: qué hace tocar uno. ficha, guardar y ajustar: es un enlace. envase: es un botón del formulario
+ * - $para: qué hace tocar uno. ficha, guardar, ajustar y retirar: es un enlace. envase: es un botón del formulario
  *   #envase-elegir (en guardar/envase), que lo elige como el producto del envase.
  * - $agregar: URL de «Agregar nuevo producto», que se ofrece cuando ninguno coincide (o null).
  * El nombre y los datos llevan data-resaltar: insumos.js marca en ellos lo escrito.
@@ -14,6 +14,7 @@ defined('APP_ROOT') || exit;
 $elegir = match ($para) {
     'guardar' => static fn (array $insumo): string => 'href="' . e(url('guardar', ['producto' => $insumo['id']])) . '"',
     'ajustar' => static fn (array $insumo): string => 'href="' . e(url('ajustar', ['producto' => $insumo['id']])) . '"',
+    'retirar' => static fn (array $insumo): string => 'href="' . e(url('retirar', ['producto' => $insumo['id']])) . '"',
     'envase' => static fn (array $insumo): string => 'type="submit" form="envase-elegir" name="insumo_id" value="' . e($insumo['id']) . '"',
     default => static fn (array $insumo): string => 'href="' . e(url('insumos/' . $insumo['id'])) . '"',
 };

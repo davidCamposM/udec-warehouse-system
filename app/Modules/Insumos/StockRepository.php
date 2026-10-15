@@ -31,24 +31,6 @@ final class StockRepository
         );
     }
 
-    /** Salida en el punto de retiro: la registra la persona identificada en ese equipo, sin cuenta de usuario. */
-    public function crearSalida(int $personaId, int $estacionId): int
-    {
-        return Database::insert(
-            "INSERT INTO movimientos (tipo, persona_id, estacion_id) VALUES ('salida', ?, ?)",
-            [$personaId, $estacionId]
-        );
-    }
-
-    /** Entrada en el punto de retiro: la registra un auxiliar identificado en ese equipo, sin cuenta de usuario. */
-    public function crearEntradaEnPunto(int $personaId, int $estacionId): int
-    {
-        return Database::insert(
-            "INSERT INTO movimientos (tipo, persona_id, estacion_id) VALUES ('entrada', ?, ?)",
-            [$personaId, $estacionId]
-        );
-    }
-
     public function agregarItem(int $movimientoId, int $insumoId, int $cantidad, int $stockResultante, ?int $sectorId): void
     {
         Database::insert(

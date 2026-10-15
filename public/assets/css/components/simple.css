@@ -7,7 +7,7 @@
    ========================================================== */
 
 /* ---------- Tonos: el color de cada tarea ----------
-   class="tono-azul" deja el color en --tono; los componentes lo usan (botón de tarea, encabezado).
+   class="tono-azul" deja el color en --tono; los componentes lo usan (encabezado, pasos, botones de tarea).
    Valores en tokens.css (--tarea-*). --rojo es para confirmar algo delicado. */
 .tono-azul {
   --tono: var(--tarea-azul);
@@ -44,11 +44,8 @@
   --tono-texto: var(--tarea-ocre-texto);
 }
 
-/* Degradados del color de la tarea (--tono): para íconos (el color tal cual, como en las tarjetas del inicio) y para
-   rellenos con texto blanco (desde --tono-texto, que cumple el contraste AA) */
+/* Degradado del color de la tarea para rellenos con texto blanco (desde --tono-texto, que cumple el contraste AA) */
 .tono-azul, .tono-verde, .tono-naranja, .tono-turquesa, .tono-grafito, .tono-pizarra, .tono-ocre, .tono-rojo {
-  --tono-degradado: linear-gradient(135deg, color-mix(in srgb, var(--tono) 82%, #fff) 0%, var(--tono) 50%,
-    color-mix(in srgb, var(--tono) 82%, #000) 100%);
   --tono-relleno: linear-gradient(180deg, var(--tono-texto) 0%, color-mix(in srgb, var(--tono-texto) 85%, #000) 100%);
 }
 
@@ -242,75 +239,6 @@
   }
 }
 
-/* ---------- Botón de tarea: rectángulo vertical de color, con ícono, nombre y una línea que explica ----------
-   <button class="tarea tono-grafito"><span class="tarea__icono"> <span class="tarea__texto"> <span class="tarea__descripcion">
-   Se usa en el punto de retiro, para elegir entre retirar y registrar una entrada (Retiro::modo). */
-
-/* Más alto que ancho; si el nombre no cabe, crece. Toda la fila queda del mismo alto. */
-.tarea {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-3);
-  height: 100%;
-  aspect-ratio: 4 / 5;
-  padding: var(--space-4) var(--space-3);
-  border-radius: var(--radius-md);
-  background: var(--tono-relleno, var(--tono, var(--color-brand-800)));
-  color: #fff;
-  text-align: center;
-  text-decoration: none;
-  box-shadow: 0 8px 20px color-mix(in srgb, var(--tono, var(--color-brand-800)) 25%, transparent);
-  transition: transform var(--transition), box-shadow var(--transition), filter var(--transition);
-}
-
-.tarea:hover {
-  color: #fff;
-  filter: brightness(0.95);
-  transform: translateY(-2px);
-  box-shadow: 0 12px 28px color-mix(in srgb, var(--tono, var(--color-brand-800)) 32%, transparent);
-}
-
-.tarea:active {
-  transform: translateY(1px);
-  box-shadow: var(--shadow-sm);
-}
-
-.tarea:focus-visible {
-  outline: 4px solid var(--color-text);
-  outline-offset: 3px;
-}
-
-.tarea__icono {
-  display: grid;
-  flex: none;
-  place-items: center;
-  width: 4rem;
-  height: 4rem;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.16);
-}
-
-.tarea__icono .icon {
-  width: 2.25rem;
-  height: 2.25rem;
-}
-
-/* Espacio para dos líneas: con nombres cortos y largos, los íconos de una fila quedan a la misma altura */
-.tarea__texto {
-  min-height: 2.5em;
-  font-size: var(--text-lg);
-  font-weight: 800;
-  line-height: 1.25;
-}
-
-.tarea__descripcion {
-  font-size: var(--text-sm);
-  font-weight: 500;
-  line-height: 1.35;
-}
-
 /* ---------- Lista bajo una barra de búsqueda: los productos que coinciden con lo escrito ----------
    <div class="sugerencias"> <input data-sugerencias> … </div>; insumos.js agrega al final <div class="sugerencias__panel">
    con <a class="sugerencia" role="option"> (nombre y cantidad; código, tipo, sector y estado). Va encima de lo que
@@ -489,109 +417,8 @@
   overflow-wrap: anywhere;
 }
 
-/* ---------- Cuadro de lectura: escanear con la pistola o escribir ----------
-   <form class="scan-box">
-     <label class="scan-box__label"><span class="scan-box__icono"> Escanea el código o escribe el nombre</label>
-     <div class="scan-box__fila"><input class="scan-box__input"> <button class="btn scan-box__boton">
-   Toma el tono de la pantalla (la tarea); si no hay, el verde del sistema. */
-.scan-box {
-  --scan: var(--tono, var(--color-brand-700));
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: var(--space-3);
-  margin-bottom: var(--space-5);
-  padding: var(--space-4);
-  border: 1px dashed color-mix(in srgb, var(--scan) 55%, transparent);
-  border-radius: var(--radius-md);
-  background: color-mix(in srgb, var(--scan) 7%, var(--color-surface));
-}
-
-.scan-box__label {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  font-size: var(--text-lg);
-  font-weight: 800;
-  line-height: 1.25;
-}
-
-.scan-box__o {
-  font-weight: 500;
-  color: var(--color-text-muted);
-}
-
-.scan-box__icono {
-  display: grid;
-  flex: none;
-  place-items: center;
-  width: 2.75rem;
-  height: 2.75rem;
-  border-radius: var(--radius-md);
-  background: var(--tono-degradado, var(--scan));
-  box-shadow: 0 3px 8px color-mix(in srgb, var(--scan) 30%, transparent);
-  color: #fff;
-}
-
-.scan-box__icono .icon {
-  width: 1.5rem;
-  height: 1.5rem;
-}
-
-.scan-box__fila {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-3);
-}
-
-.scan-box__input {
-  width: 100%;
-  min-width: 0;
-  height: 3.25rem;
-  padding: 0 var(--space-4);
-  border: 1px solid var(--color-border-strong);
-  border-radius: var(--radius-md);
-  background: var(--color-surface);
-  color: var(--color-text);
-  font: inherit;
-  font-size: var(--text-lg);
-}
-
-.scan-box__input:focus {
-  outline: 2px solid transparent;
-  border-color: var(--scan);
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--scan) 25%, transparent);
-}
-
-.scan-box__boton {
-  flex: 1 0 auto;
-  min-height: 3.25rem;
-  background: var(--tono-relleno, var(--scan));
-  color: #fff;
-  font-weight: 700;
-  box-shadow: var(--shadow-sm);
-}
-
-.scan-box__boton:hover {
-  color: #fff;
-  filter: brightness(0.94);
-  box-shadow: 0 6px 16px color-mix(in srgb, var(--scan) 30%, transparent);
-}
-
-@media (min-width: 40em) {
-  .scan-box__boton {
-    flex-grow: 0;
-  }
-}
-
-/* ---------- Lista de productos: una tarjeta grande por producto ----------
-   <ul class="item-list"><li><a class="item-row"> nombre | cantidad | estado </a></li></ul> */
-.item-list {
-  display: grid;
-  gap: var(--space-2);
-  padding: 0;
-  list-style: none;
-}
-
+/* ---------- Producto en una lista: una tarjeta grande por producto ----------
+   <a class="item-row"> nombre | estado / datos (parcial Insumos::partials/opcion) */
 .item-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -910,8 +737,6 @@ a.item-row:hover {
   color: var(--color-text-muted);
 }
 
-/* Un segundo campo dentro de la misma pregunta (el detalle de un motivo) */
-
 /* Códigos leídos con la pistola: letra de ancho fijo, más fácil de comparar con la etiqueta */
 .input--code {
   font-family: var(--font-mono);
@@ -949,43 +774,6 @@ a.item-row:hover {
   display: grid;
   gap: var(--space-2);
   padding-left: var(--space-6);
-}
-
-/* ---------- Pantalla de resultado (el «Listo» del punto de retiro) ----------
-   <div class="result"><span class="result__icon">✓</span><h1 class="result__title">Listo</h1> <p> resumen y botones */
-.result {
-  display: grid;
-  justify-items: center;
-  gap: var(--space-3);
-  max-width: 36rem;
-  margin: var(--space-6) auto;
-  padding: var(--space-8) var(--space-6);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-md);
-  text-align: center;
-}
-
-.result__icon {
-  display: grid;
-  place-items: center;
-  width: 4.5rem;
-  height: 4.5rem;
-  border-radius: 50%;
-  background: var(--color-si);
-  color: #fff;
-}
-
-.result__icon .icon {
-  width: 2.5rem;
-  height: 2.5rem;
-  stroke-width: 2.4;
-}
-
-.result__title {
-  font-size: var(--text-2xl);
-  font-weight: 800;
 }
 
 /* ---------- Pasos de una tarea: <ol class="pasos tono-verde"> (parcial Insumos::partials/pasos) ---------- */
@@ -1057,15 +845,6 @@ a.item-row:hover {
   }
 }
 
-/* ---------- Pregunta sin número ---------- */
-.question__label--sin-numero {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  min-height: 0;
-  padding: 0;
-}
-
 /* ---------- Producto que se elige de una lista: toda la tarjeta es el botón ---------- */
 .item-row--elegir {
   width: 100%;
@@ -1092,25 +871,7 @@ a.item-row:hover {
   font-weight: 700;
 }
 
-/* ---------- Resultado: textos ---------- */
-.result__texto {
-  font-size: var(--text-lg);
-}
-
-.result__detalle {
-  color: var(--color-text-muted);
-}
-
-/* ---------- Bloques, cajas y estado vacío ---------- */
-.block + .block {
-  margin-top: var(--space-8);
-}
-
-.block__title {
-  margin-bottom: var(--space-3);
-  font-size: var(--text-lg);
-  font-weight: 800;
-}
+/* ---------- Cajas y estado vacío ---------- */
 
 /* Caja blanca simple */
 .caja {
@@ -1548,7 +1309,6 @@ fieldset.campo > .campo__etiqueta {
 
 /* ---------- Mensajes: con la letra del texto (en el login van más chicos) ---------- */
 .app .alert,
-.kiosco .alert,
 .ventana .alert {
   align-items: center;
   padding: var(--space-3) var(--space-4);
@@ -1558,7 +1318,6 @@ fieldset.campo > .campo__etiqueta {
 }
 
 .app .alert > .icon,
-.kiosco .alert > .icon,
 .ventana .alert > .icon {
   width: 1.5rem;
   height: 1.5rem;

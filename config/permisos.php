@@ -12,8 +12,9 @@ declare(strict_types=1);
 defined('APP_ROOT') || exit;
 
 return [
-    // Encargado de bodega: acceso total, incluidos insumos.administrar (crear, editar, desactivar),
-    // insumos.entrada (registrar producto), insumos.ajuste (actualizar cantidad) y sectores.administrar.
+    // Encargado de bodega: la cuenta que maneja todo el sistema. Acceso total, incluidos insumos.administrar
+    // (crear, editar, desactivar), insumos.entrada (registrar producto), insumos.salida (retirar producto),
+    // insumos.ajuste (actualizar cantidad) y sectores.administrar.
     'administrador' => ['*'],
 
     // Ven todo, pero no registran ni modifican (por ahora).

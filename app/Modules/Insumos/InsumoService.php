@@ -12,7 +12,7 @@ use App\Modules\Historial\AuditoriaService;
 defined('APP_ROOT') || exit;
 
 /**
- * Catálogo de insumos: búsqueda, ficha y estado de cada producto. Otros módulos (panel, punto de retiro,
+ * Catálogo de insumos: búsqueda, ficha y estado de cada producto. Otros módulos (panel, historial,
  * inventario) usan este servicio, nunca el repositorio directamente.
  */
 final class InsumoService
@@ -190,7 +190,17 @@ final class InsumoService
      */
     public function ultimosRegistrados(int $limite): array
     {
-        return $this->insumos->ultimosRegistrados($limite);
+        return $this->insumos->ultimosConMovimiento('entrada', $limite);
+    }
+
+    /**
+     * Los últimos productos que se retiraron: en «Retirar producto» se eligen con un toque.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function ultimosRetirados(int $limite): array
+    {
+        return $this->insumos->ultimosConMovimiento('salida', $limite);
     }
 
     // ---------- Crear, editar, activar y desactivar ----------

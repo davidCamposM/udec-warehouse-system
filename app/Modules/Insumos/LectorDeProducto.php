@@ -11,7 +11,7 @@ defined('APP_ROOT') || exit;
 
 /**
  * Interpreta lo que llega del cuadro «Escanea el código del producto o escribe su nombre» (Registrar producto,
- * Actualizar cantidad): un código de producto, un código que nadie tiene o un nombre para buscar.
+ * Actualizar cantidad, Retirar producto): un código de producto, un código que nadie tiene o un nombre para buscar.
  */
 final class LectorDeProducto
 {

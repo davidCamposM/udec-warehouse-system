@@ -11,9 +11,6 @@ defined('APP_ROOT') || exit;
 /**
  * Usuario con cuenta que tiene la sesión iniciada. La verificación de correo y contraseña la
  * hace el módulo Auth; esta clase solo guarda y entrega al usuario ya verificado.
- *
- * Las personas que se identifican en la estación de retiro NO pasan por aquí: tienen su propia
- * identificación, separada y de corta duración.
  */
 final class Auth
 {

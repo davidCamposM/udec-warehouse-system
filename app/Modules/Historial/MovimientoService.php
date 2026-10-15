@@ -7,8 +7,8 @@ namespace App\Modules\Historial;
 defined('APP_ROOT') || exit;
 
 /**
- * «Entradas y salidas»: lo que entró, salió o se ajustó en la bodega, por período y tipo, por páginas. También las
- * salidas de hoy por persona y la descarga para Excel.
+ * «Entradas y salidas»: lo que entró, salió o se ajustó en la bodega, por período y tipo, por páginas. También la
+ * descarga para Excel.
  */
 final class MovimientoService
 {
@@ -51,8 +51,7 @@ final class MovimientoService
 
     /**
      * @param array{periodo: string, tipo: ?string, pagina: int} $filtros
-     * @return array{movimientos: list<array<string, mixed>>, total: int, pagina: int, paginas: int, desde: int,
-     *     porPersona: list<array<string, mixed>>}
+     * @return array{movimientos: list<array<string, mixed>>, total: int, pagina: int, paginas: int, desde: int}
      */
     public function listar(array $filtros): array
     {
@@ -67,10 +66,6 @@ final class MovimientoService
             'pagina' => $pagina,
             'paginas' => $paginas,
             'desde' => $desde,
-            // El resumen por persona solo se muestra al mirar las salidas (o todo) de hoy.
-            'porPersona' => $filtros['periodo'] === 'hoy' && in_array($filtros['tipo'], [null, 'salida'], true)
-                ? $this->movimientos->salidasDeHoyPorPersona()
-                : [],
         ];
     }
 

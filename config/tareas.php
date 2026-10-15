@@ -41,6 +41,15 @@ return [
         'permiso' => 'insumos.entrada',
     ],
     [
+        'clave' => 'retirar-producto',
+        'texto' => 'Retirar producto',
+        'descripcion' => 'Descontar lo que sale de la bodega',
+        'ruta' => '/retirar',
+        'icono' => 'arrow-out',
+        'color' => 'ocre',
+        'permiso' => 'insumos.salida',
+    ],
+    [
         'clave' => 'ajustar-cantidad',
         'texto' => 'Actualizar cantidad',
         'descripcion' => 'Dejar lo que realmente hay, después de contar',
@@ -129,15 +138,6 @@ return [
         'icono' => 'map-pin',
         'color' => 'grafito',
         'permiso' => 'sectores.administrar',
-    ],
-    [
-        'clave' => 'personas',
-        'texto' => 'Personas autorizadas',
-        'descripcion' => 'Quiénes pueden retirar en el punto de retiro',
-        'ruta' => '/personas',
-        'icono' => 'id-card',
-        'color' => 'ocre',
-        'permiso' => 'personas.administrar',
     ],
     [
         'clave' => 'usuarios',

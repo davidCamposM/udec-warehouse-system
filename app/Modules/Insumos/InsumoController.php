@@ -19,7 +19,7 @@ final class InsumoController
     private const SUGERENCIAS = 8;
 
     /** Qué hace tocar un producto de esa lista (?para=), según la pantalla donde está la barra. */
-    private const DESTINOS = ['ficha', 'guardar', 'ajustar', 'envase'];
+    private const DESTINOS = ['ficha', 'guardar', 'ajustar', 'retirar', 'envase'];
 
     private InsumoService $insumos;
 
@@ -54,7 +54,7 @@ final class InsumoController
     /**
      * La lista que aparece bajo una barra de búsqueda mientras se escribe (la pide insumos.js): los productos que
      * coinciden con ?q=. Tocar uno hace lo que toca en esa pantalla (?para=): abrir su ficha, elegirlo en «Registrar
-     * producto» o en «Actualizar cantidad», o elegirlo como el producto de un envase nuevo.
+     * producto», «Actualizar cantidad» o «Retirar producto», o elegirlo como el producto de un envase nuevo.
      */
     public function sugerencias(Request $request): Response
     {
@@ -93,6 +93,7 @@ final class InsumoController
             'puedeAdministrar' => Permission::can('insumos.administrar'),
             'puedeGuardar' => Permission::can('insumos.entrada'),
             'puedeAjustar' => Permission::can('insumos.ajuste'),
+            'puedeRetirar' => Permission::can('insumos.salida'),
             'estilos' => ['css/pages/insumos.css'],
         ]);
     }

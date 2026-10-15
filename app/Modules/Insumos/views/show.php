@@ -29,6 +29,9 @@ $tareas = [];
 if ($activo && $puedeGuardar) {
     $tareas[] = ['Registrar producto', 'Anotar lo que llegó y dónde quedó', 'box', 'verde', url('guardar', ['producto' => $insumo['id']])];
 }
+if ($activo && $puedeRetirar && (int) $insumo['stock_actual'] > 0) {
+    $tareas[] = ['Retirar producto', 'Descontar lo que sale de la bodega', 'arrow-out', 'ocre', url('retirar', ['producto' => $insumo['id']])];
+}
 if ($activo && $puedeAjustar) {
     $tareas[] = ['Actualizar cantidad', 'Dejar lo que realmente hay, después de contar', 'refresh', 'naranja', url('ajustar', ['producto' => $insumo['id']])];
 }

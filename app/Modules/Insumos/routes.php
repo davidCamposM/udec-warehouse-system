@@ -12,6 +12,7 @@ use App\Modules\Insumos\AjusteController;
 use App\Modules\Insumos\GuardarController;
 use App\Modules\Insumos\InsumoController;
 use App\Modules\Insumos\NuevoProductoController;
+use App\Modules\Insumos\RetirarController;
 
 defined('APP_ROOT') || exit;
 
@@ -61,3 +62,9 @@ $router->get('/ajustar/contar', [AjusteController::class, 'contar'], 'insumos.aj
 $router->post('/ajustar/contar', [AjusteController::class, 'leerConteo'], 'insumos.ajuste');
 $router->get('/ajustar/confirmar', [AjusteController::class, 'confirmar'], 'insumos.ajuste');
 $router->post('/ajustar/confirmar', [AjusteController::class, 'guardar'], 'insumos.ajuste');
+
+// Retirar producto: 1) el producto, 2) cuántos se retiran (y se descuenta).
+$router->get('/retirar', [RetirarController::class, 'producto'], 'insumos.salida');
+$router->post('/retirar/producto', [RetirarController::class, 'leerProducto'], 'insumos.salida');
+$router->get('/retirar/cantidad', [RetirarController::class, 'cantidad'], 'insumos.salida');
+$router->post('/retirar/cantidad', [RetirarController::class, 'retirar'], 'insumos.salida');

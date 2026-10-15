@@ -74,13 +74,3 @@ $enfocarPassword = old('email') !== '' && $errorEmail === null;
 </details>
 
 <p class="auth__account">¿No tienes cuenta? <strong>Pídela al encargado de bodega.</strong></p>
-
-<aside class="auth__station">
-    <span class="auth__station-icon"><?= icon('scan') ?></span>
-    <div>
-        <p class="auth__station-title">¿Retiras sin cuenta?</p>
-        <p class="auth__station-text">
-            Auxiliares y personas autorizadas se identifican con su credencial en el punto de retiro.
-        </p>
-    </div>
-</aside>

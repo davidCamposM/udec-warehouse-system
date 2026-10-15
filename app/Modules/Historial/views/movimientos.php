@@ -6,7 +6,8 @@ use App\Support\Fecha;
 defined('APP_ROOT') || exit;
 
 // «Entradas y salidas», con los componentes básicos (basico.css): los filtros (período y tipo) como pastillas en una
-// tarjeta, el resumen de las salidas de hoy por persona y la tabla por páginas. Cada fila es un producto movido: fecha, tipo, producto, cantidad (+ o −), quién y dónde.
+// tarjeta y la tabla por páginas. Cada fila es un producto movido: fecha, tipo, producto, cantidad (+ o −), quién y
+// dónde.
 $enlace = static fn (array $cambios): string => url('movimientos', array_filter([
     'periodo' => $cambios['periodo'] ?? $filtros['periodo'],
     'tipo' => array_key_exists('tipo', $cambios) ? $cambios['tipo'] : $filtros['tipo'],
@@ -44,25 +45,6 @@ $tipoActual = $filtros['tipo'] ?? '';
     </div>
 </div>
 
-<?php if ($porPersona !== []) : ?>
-    <section class="card movimientos__bloque" aria-labelledby="titulo-personas">
-        <div class="card-header">
-            <h2 class="card-title" id="titulo-personas">Salidas de hoy por persona</h2>
-        </div>
-        <ul class="personas-hoy">
-            <?php foreach ($porPersona as $fila) : ?>
-                <li class="persona-hoy">
-                    <span class="persona-hoy__inicial" aria-hidden="true"><?= e(mb_strtoupper(mb_substr(trim((string) $fila['quien']), 0, 1))) ?></span>
-                    <span class="persona-hoy__texto">
-                        <strong><?= e($fila['quien']) ?></strong>
-                        <span class="text-muted"><?= e((int) $fila['retiros'] === 1 ? '1 retiro' : $fila['retiros'] . ' retiros') ?> · <?= e(unidades((int) $fila['unidades'])) ?></span>
-                    </span>
-                </li>
-            <?php endforeach; ?>
-        </ul>
-    </section>
-<?php endif; ?>
-
 <?php if ($movimientos === []) : ?>
     <div class="card card-body vacio-simple">
         <span class="vacio-simple__icono"><?= icon('history') ?></span>
@@ -97,10 +79,7 @@ $tipoActual = $filtros['tipo'] ?? '';
                             <td><a class="movimientos__producto" href="<?= e(url('insumos/' . $fila['insumo_id'])) ?>"><?= e($fila['nombre']) ?></a></td>
                             <td class="text-end movimientos__cantidad movimientos__cantidad--<?= $cantidad > 0 ? 'mas' : 'menos' ?>"><?= e(($cantidad > 0 ? '+' : '−') . abs($cantidad)) ?></td>
                             <td class="text-end movimientos__numero"><?= e($fila['stock_resultante']) ?></td>
-                            <td>
-                                <?= e($fila['quien'] ?? '—') ?>
-                                <?php if ((int) $fila['en_punto'] === 1) : ?><span class="text-muted movimientos__punto">punto de retiro</span><?php endif; ?>
-                            </td>
+                            <td><?= e($fila['quien'] ?? '—') ?></td>
                             <td class="text-muted"><?= e($fila['sector'] ?? $fila['motivo'] ?? '—') ?></td>
                         </tr>
                     <?php endforeach; ?>

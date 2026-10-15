@@ -58,7 +58,7 @@ public/      Única carpeta expuesta a la web: index.php y assets (CSS, JS, fuen
 app/
   Core/      Núcleo propio: router, petición/respuesta, vistas, base de datos, sesión, CSRF, permisos
   Support/   Utilidades sin estado: fechas, RUT, números, íconos, tareas del inicio
-  Modules/   Un módulo por área funcional (Insumos, Retiro, Personas, Sectores, ...)
+  Modules/   Un módulo por área funcional (Insumos, Historial, Panel, Sectores, ...)
   views/     Layouts y fragmentos compartidos
 config/      config.example.php (plantilla). config.php real fuera de git
 database/    migrations/ (SQL numerado) y seeds/ (datos iniciales)

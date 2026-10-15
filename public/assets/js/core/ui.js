@@ -75,7 +75,8 @@
   });
 
   /* Cantidad con botones − y +, para no tener que escribir. Solo números enteros: todo se cuenta por unidad.
-     <div data-stepper data-min="0">
+     data-max (opcional) es el tope del +, como lo que hay en bodega al retirar.
+     <div data-stepper data-min="0" data-max="12">
        <button type="button" data-step="-1"> <input> <button type="button" data-step="1"> */
   const initSteppers = (root) => {
     root.querySelectorAll("[data-stepper]").forEach((stepper) => {
@@ -83,6 +84,7 @@
       if (!input) return;
 
       const min = Number(stepper.dataset.min ?? 0);
+      const max = stepper.dataset.max === undefined ? Infinity : Number(stepper.dataset.max);
 
       // Al tocar el número queda seleccionado: lo que se escriba lo reemplaza (escribir 5 sobre «0» da 5, no 50).
       input.addEventListener("focus", () => input.select());
@@ -91,7 +93,7 @@
       stepper.querySelectorAll("[data-step]").forEach((button) => {
         button.addEventListener("click", () => {
           const actual = Number.parseInt(input.value, 10) || 0;
-          input.value = String(Math.max(min, actual + Number(button.dataset.step)));
+          input.value = String(Math.min(max, Math.max(min, actual + Number(button.dataset.step))));
           input.dispatchEvent(new Event("change", { bubbles: true }));
         });
       });

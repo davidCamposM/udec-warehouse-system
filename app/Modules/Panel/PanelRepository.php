@@ -15,7 +15,7 @@ defined('APP_ROOT') || exit;
  */
 final class PanelRepository
 {
-    /** Retiros de insumos registrados hoy (cada confirmación en el punto de retiro cuenta como uno). */
+    /** Retiros de insumos registrados hoy (cada «Retirar producto» confirmado cuenta como uno). */
     public function contarSalidasDeHoy(): int
     {
         return (int) Database::fetchValue("SELECT COUNT(*) FROM movimientos WHERE tipo = 'salida' AND fecha >= CURDATE()");
@@ -35,8 +35,8 @@ final class PanelRepository
     }
 
     /**
-     * Préstamos atrasados del docente: aquellos de los que es responsable y los que retiró él mismo en el
-     * punto de retiro (con la persona ligada a su cuenta).
+     * Préstamos atrasados del docente: aquellos de los que es responsable y los que retiró él mismo (con la
+     * persona ligada a su cuenta).
      */
     public function contarPrestamosAtrasadosDe(int $usuarioId): int
     {

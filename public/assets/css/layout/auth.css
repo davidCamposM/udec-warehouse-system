@@ -125,39 +125,6 @@
   color: var(--color-text);
 }
 
-/* ---------- Al pie de la tarjeta, separado: quienes retiran sin cuenta ---------- */
-.auth__station {
-  display: flex;
-  gap: var(--space-3);
-  margin-top: var(--space-5);
-  padding-top: var(--space-5);
-  border-top: 1px solid var(--color-border);
-}
-
-.auth__station-icon {
-  display: grid;
-  flex: none;
-  place-items: center;
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: var(--radius-md);
-  /* En el color del punto de retiro (grafito), el mismo que verá la persona al llegar ahí */
-  background: linear-gradient(135deg, color-mix(in srgb, var(--tarea-grafito) 82%, #fff) 0%, var(--tarea-grafito) 50%,
-    color-mix(in srgb, var(--tarea-grafito) 82%, #000) 100%);
-  box-shadow: 0 3px 8px color-mix(in srgb, var(--tarea-grafito) 30%, transparent);
-  color: #fff;
-}
-
-.auth__station-title {
-  font-weight: 700;
-}
-
-.auth__station-text {
-  margin-top: 2px;
-  font-size: var(--text-sm);
-  color: var(--color-text-muted);
-}
-
 /* ---------- Pie, fuera de la tarjeta ---------- */
 .auth__footer {
   margin-top: var(--space-6);

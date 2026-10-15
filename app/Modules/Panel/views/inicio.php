@@ -20,7 +20,7 @@ $saludo = match (true) {
 $nombre = explode(' ', trim((string) ($usuario['nombre'] ?? '')))[0];
 
 // Las tareas de administración (se usan poco) van aparte, debajo de las del día a día
-$administracion = ['sectores', 'personas', 'usuarios', 'etiquetas', 'configuracion'];
+$administracion = ['sectores', 'usuarios', 'etiquetas', 'configuracion'];
 $grupos = ['Tareas' => [], 'Administración' => []];
 foreach ($tareas as $tarea) {
     $grupos[in_array($tarea['clave'], $administracion, true) ? 'Administración' : 'Tareas'][] = $tarea;
