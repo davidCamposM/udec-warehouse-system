@@ -3,7 +3,8 @@
 defined('APP_ROOT') || exit;
 
 // «Recibir devolución»: el «Estado en la recepción» del formulario en papel. Por cada herramienta, cuántas volvieron
-// (parte con todas) y en qué estado; abajo, una nota opcional. Al guardar, el préstamo queda devuelto.
+// (parte con todas), en qué estado y, si volvieron con daños o faltan, qué pasó (obligatorio en ese caso). Al guardar,
+// el préstamo queda devuelto y lo dañado o perdido queda por resolver.
 ?>
 <?= partial('encabezado', [
     'volver' => [url('prestamos/' . $solicitud['id']), 'Volver a la solicitud'],
@@ -23,6 +24,7 @@ defined('APP_ROOT') || exit;
             <?php
             $devueltas = 'devueltas_' . $item['id'];
             $estado = 'estado_' . $item['id'];
+            $detalle = 'detalle_' . $item['id'];
             $elegido = old($estado, 'bien');
             ?>
             <li class="recepcion__linea">
@@ -52,17 +54,15 @@ defined('APP_ROOT') || exit;
                         <?= mensaje_error($estado) ?>
                     </fieldset>
                 </div>
+                <div class="campo">
+                    <label class="campo__etiqueta" for="<?= e($detalle) ?>">¿Qué pasó? <span class="campo__opcional">(solo si volvió con daños o faltan)</span></label>
+                    <input class="input input--relleno" id="<?= e($detalle) ?>" name="<?= e($detalle) ?>" type="text" maxlength="255"
+                        placeholder="Ejemplo: lente rayado · se perdió una en terreno" value="<?= e(old($detalle)) ?>" <?= aria_error($detalle) ?>>
+                    <?= mensaje_error($detalle) ?>
+                </div>
             </li>
         <?php endforeach; ?>
     </ul>
-
-    <div class="campo">
-        <label class="campo__etiqueta" for="observacion_recepcion">Nota</label>
-        <p class="campo__ayuda" id="observacion_recepcion-ayuda">Opcional. Ejemplo: un hipsómetro volvió sin su estuche.</p>
-        <textarea class="input hoja__texto" id="observacion_recepcion" name="observacion_recepcion" rows="2" maxlength="500"
-            aria-describedby="observacion_recepcion-ayuda" <?= aria_error('observacion_recepcion') ?>><?= e(old('observacion_recepcion')) ?></textarea>
-        <?= mensaje_error('observacion_recepcion') ?>
-    </div>
 
     <div class="formulario__acciones">
         <a class="btn btn--secondary" href="<?= e(url('prestamos/' . $solicitud['id'])) ?>"><?= icon('close') ?>Cancelar</a>

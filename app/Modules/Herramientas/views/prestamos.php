@@ -10,6 +10,7 @@ $vacios = [
     'pendientes' => 'No hay solicitudes por entregar.',
     'prestadas' => 'No hay herramientas prestadas.',
     'atrasadas' => 'No hay préstamos atrasados.',
+    'problemas' => 'No hay herramientas dañadas ni perdidas por resolver.',
     'devueltas' => 'Todavía no se ha devuelto ningún préstamo.',
     'todas' => 'Todavía no hay solicitudes de herramientas.',
 ];

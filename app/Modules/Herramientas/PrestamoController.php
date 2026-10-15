@@ -15,8 +15,9 @@ defined('APP_ROOT') || exit;
 
 /**
  * Lo del encargado: «Préstamos de herramientas». Las solicitudes de los docentes por estado (por entregar, prestadas,
- * atrasadas, devueltas); en cada una, entregar las herramientas o rechazarla y, cuando vuelven, recibirlas anotando
- * cuántas volvieron y en qué estado. Las administrativas solo miran.
+ * atrasadas, con daños o faltas, devueltas); en cada una, entregar las herramientas o rechazarla, extender el plazo y,
+ * cuando vuelven, recibirlas anotando cuántas volvieron, en qué estado y qué pasó. Las que volvieron con daños o no
+ * volvieron quedan por resolver (se reparó, se repuso o se dio de baja). Las administrativas solo miran.
  */
 final class PrestamoController
 {
@@ -87,6 +88,26 @@ final class PrestamoController
         $id = (int) $this->ficha($request)['solicitud']['id'];
         $this->solicitudes->recibir($id, $request->post());
         Session::flash('exito', 'Listo. La devolución quedó registrada.');
+
+        return Response::redirect(Url::to("prestamos/{$id}"));
+    }
+
+    public function extender(Request $request): Response
+    {
+        $id = (int) $this->ficha($request)['solicitud']['id'];
+        $this->solicitudes->extenderPlazo($id, $request->input('fecha_devolucion'));
+        Session::flash('exito', 'Listo. Se extendió el plazo: la nueva fecha de recepción quedó en la solicitud.');
+
+        return Response::redirect(Url::to("prestamos/{$id}"));
+    }
+
+    /** Una herramienta que volvió con daños o no volvió: cómo se resolvió. */
+    public function resolver(Request $request): Response
+    {
+        $id = (int) $this->ficha($request)['solicitud']['id'];
+        $item = (string) $request->param('item');
+        $this->solicitudes->resolver($id, ctype_digit($item) ? (int) $item : 0, $request->input('resolucion'));
+        Session::flash('exito', 'Listo. Quedó resuelto.');
 
         return Response::redirect(Url::to("prestamos/{$id}"));
     }

@@ -30,6 +30,8 @@ $router->post('/prestamos/{id}/entregar', [PrestamoController::class, 'entregar'
 $router->post('/prestamos/{id}/rechazar', [PrestamoController::class, 'rechazar'], 'prestamos.administrar');
 $router->get('/prestamos/{id}/recibir', [PrestamoController::class, 'recepcion'], 'prestamos.administrar');
 $router->post('/prestamos/{id}/recibir', [PrestamoController::class, 'recibir'], 'prestamos.administrar');
+$router->post('/prestamos/{id}/extender', [PrestamoController::class, 'extender'], 'prestamos.administrar');
+$router->post('/prestamos/{id}/items/{item}/resolver', [PrestamoController::class, 'resolver'], 'prestamos.administrar');
 
 // El catálogo
 $router->get('/herramientas', [HerramientaController::class, 'index'], 'herramientas.ver');

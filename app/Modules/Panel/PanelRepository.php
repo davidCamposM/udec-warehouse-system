@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Panel;
 
 use App\Core\Database;
+use App\Modules\Herramientas\SolicitudRepository;
 
 defined('APP_ROOT') || exit;
 
@@ -26,6 +27,14 @@ final class PanelRepository
     {
         return (int) Database::fetchValue(
             "SELECT COUNT(*) FROM solicitudes WHERE estado = 'prestada' AND fecha_devolucion < CURDATE()"
+        );
+    }
+
+    /** Herramientas que volvieron con daños o no volvieron, y aún no se resuelven (una por línea de solicitud). */
+    public function contarHerramientasPorResolver(): int
+    {
+        return (int) Database::fetchValue(
+            'SELECT COUNT(*) FROM solicitud_items si WHERE ' . SolicitudRepository::PROBLEMA
         );
     }
 

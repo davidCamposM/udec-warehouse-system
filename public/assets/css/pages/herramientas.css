@@ -618,28 +618,149 @@
   margin: 0 0 var(--space-4);
 }
 
-.hoja__rechazar {
+.hoja__plegable {
   padding: var(--space-3) var(--space-4);
   border: 1px solid var(--bs-gray-200);
   border-radius: var(--radius-md);
   background: #fff;
 }
 
-.hoja__rechazar summary {
+.hoja__plegable summary {
   color: var(--bs-muted);
   font-weight: 600;
   cursor: pointer;
 }
 
-.hoja__rechazar form {
+.hoja__plegable form {
   display: grid;
   gap: var(--space-2);
   justify-items: start;
   margin-top: var(--space-3);
 }
 
-.hoja__rechazar .input {
+.hoja__plegable .input {
   width: 100%;
+}
+
+/* Mientras está prestada: recibir arriba y, plegado, extender el plazo */
+.hoja__decision--arriba {
+  margin: 0 0 var(--space-4);
+}
+
+.hoja__extender {
+  display: grid;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.hoja__extender-fila {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.hoja__extender-fila .input {
+  width: auto;
+  min-width: 11rem;
+}
+
+.hoja__extendido {
+  display: block;
+  color: var(--bs-muted);
+  font-size: var(--text-xs);
+  font-weight: 500;
+}
+
+.hoja__resuelto {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-left: var(--space-2);
+  color: var(--color-brand-800);
+  font-size: var(--text-xs);
+  font-weight: 600;
+}
+
+.hoja__resuelto .icon {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.hoja__pendiente-resolver {
+  display: inline-block;
+  margin-left: var(--space-2);
+  padding: 0 var(--space-2);
+  border-radius: 999px;
+  background: var(--bs-danger-subtle);
+  font-size: var(--text-xs);
+  font-weight: 700;
+}
+
+/* ---------- Por resolver: lo que volvió con daños o no volvió ---------- */
+.hoja__problemas {
+  display: grid;
+  gap: var(--space-2);
+  margin-top: var(--space-5);
+}
+
+.problemas {
+  display: grid;
+  gap: var(--space-2);
+  padding: 0;
+  list-style: none;
+}
+
+.problema {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid color-mix(in srgb, var(--bs-danger) 30%, var(--bs-gray-200));
+  border-radius: var(--radius-md);
+  background: #fff;
+}
+
+.problema__texto {
+  display: grid;
+  gap: 2px;
+}
+
+.problema__form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+}
+
+.problema__opciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+}
+
+.problema__opcion {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+
+.problema__opcion input {
+  width: 1.125rem;
+  height: 1.125rem;
+  margin: 0;
+  accent-color: var(--color-brand-700);
+}
+
+.problema__form .field__error {
+  flex-basis: 100%;
+}
+
+@media (min-width: 48em) {
+  .problema {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+  }
 }
 
 /* ---------- Devolución: una línea por herramienta ---------- */

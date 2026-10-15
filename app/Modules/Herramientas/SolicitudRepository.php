@@ -11,17 +11,26 @@ defined('APP_ROOT') || exit;
 /** Solicitudes de herramientas: la solicitud, su entrega (préstamo) y su devolución. Solo lo usa SolicitudService. */
 final class SolicitudRepository
 {
+    /**
+     * Una línea con un problema por resolver: volvió con daños o faltaron unidades, y nadie lo ha resuelto. (Sobre el
+     * alias si de solicitud_items.)
+     */
+    public const PROBLEMA = "si.resolucion IS NULL
+        AND (si.estado_recepcion = 'danada' OR si.cantidad_devuelta < si.cantidad)";
+
     /** Filtro de la lista => condición SQL (fija, sin datos del usuario). */
     public const FILTROS = [
         'pendientes' => "s.estado = 'pendiente'",
         'prestadas' => "s.estado = 'prestada'",
         'atrasadas' => "s.estado = 'prestada' AND s.fecha_devolucion < CURDATE()",
+        'problemas' => 'EXISTS (SELECT 1 FROM solicitud_items si WHERE si.solicitud_id = s.id AND ' . self::PROBLEMA . ')',
         'devueltas' => "s.estado = 'devuelta'",
         'todas' => '1 = 1',
     ];
 
     private const COLUMNAS = 's.*, u.nombre AS docente,
-        (SELECT COALESCE(SUM(si.cantidad), 0) FROM solicitud_items si WHERE si.solicitud_id = s.id) AS unidades';
+        (SELECT COALESCE(SUM(si.cantidad), 0) FROM solicitud_items si WHERE si.solicitud_id = s.id) AS unidades,
+        (SELECT COUNT(*) FROM solicitud_items si WHERE si.solicitud_id = s.id AND ' . self::PROBLEMA . ') AS problemas';
 
     /**
      * @param array{departamento: string, tipo_actividad: string, autoriza_retiro: ?string, fecha_retiro: string,
@@ -61,15 +70,31 @@ final class SolicitudRepository
         );
     }
 
-    /** @return list<array<string, mixed>> las líneas del detalle, con el nombre de cada herramienta */
+    /**
+     * Las líneas del detalle, con el nombre de cada herramienta, si tienen un problema por resolver y quién lo
+     * resolvió.
+     *
+     * @return list<array<string, mixed>>
+     */
     public function items(int $solicitudId): array
     {
         return Database::fetchAll(
-            'SELECT si.*, h.nombre
-               FROM solicitud_items si JOIN herramientas h ON h.id = si.herramienta_id
+            'SELECT si.*, h.nombre, (' . self::PROBLEMA . ') AS problema, r.nombre AS resuelta_por_nombre
+               FROM solicitud_items si
+               JOIN herramientas h ON h.id = si.herramienta_id
+               LEFT JOIN usuarios r ON r.id = si.resuelta_por
               WHERE si.solicitud_id = ?
               ORDER BY h.nombre',
             [$solicitudId]
+        );
+    }
+
+    /** @return array<string, mixed>|null una línea de la solicitud, bloqueada hasta que termine la transacción */
+    public function bloquearItem(int $solicitudId, int $itemId): ?array
+    {
+        return Database::fetch(
+            'SELECT si.*, (' . self::PROBLEMA . ') AS problema FROM solicitud_items si WHERE si.id = ? AND si.solicitud_id = ? FOR UPDATE',
+            [$itemId, $solicitudId]
         );
     }
 
@@ -124,21 +149,41 @@ final class SolicitudRepository
         Database::execute("UPDATE solicitudes SET estado = 'cancelada' WHERE id = ?", [$id]);
     }
 
-    /** @param 'bien'|'danada'|null $estado null si no volvió ninguna */
-    public function recibirItem(int $itemId, int $devueltas, ?string $estado): void
+    /**
+     * @param 'bien'|'danada'|null $estado  null si no volvió ninguna
+     * @param ?string              $detalle qué le pasó, si volvió con daños o faltaron
+     */
+    public function recibirItem(int $itemId, int $devueltas, ?string $estado, ?string $detalle): void
     {
         Database::execute(
-            'UPDATE solicitud_items SET cantidad_devuelta = ?, estado_recepcion = ? WHERE id = ?',
-            [$devueltas, $estado, $itemId]
+            'UPDATE solicitud_items SET cantidad_devuelta = ?, estado_recepcion = ?, detalle_recepcion = ? WHERE id = ?',
+            [$devueltas, $estado, $detalle, $itemId]
         );
     }
 
-    public function marcarDevuelta(int $id, int $usuarioId, ?string $observacion): void
+    public function marcarDevuelta(int $id, int $usuarioId): void
     {
         Database::execute(
-            "UPDATE solicitudes SET estado = 'devuelta', recibida_por = ?, recibida_en = NOW(), observacion_recepcion = ?
-              WHERE id = ?",
-            [$usuarioId, $observacion, $id]
+            "UPDATE solicitudes SET estado = 'devuelta', recibida_por = ?, recibida_en = NOW() WHERE id = ?",
+            [$usuarioId, $id]
+        );
+    }
+
+    /** Nueva fecha de recepción. La primera vez guarda la que se había pedido en plazo_original. */
+    public function extenderPlazo(int $id, string $fecha): void
+    {
+        Database::execute(
+            'UPDATE solicitudes SET plazo_original = COALESCE(plazo_original, fecha_devolucion), fecha_devolucion = ? WHERE id = ?',
+            [$fecha, $id]
+        );
+    }
+
+    /** @param 'reparada'|'repuesta'|'baja' $resolucion */
+    public function resolverItem(int $itemId, string $resolucion, int $usuarioId): void
+    {
+        Database::execute(
+            'UPDATE solicitud_items SET resolucion = ?, resuelta_por = ?, resuelta_en = NOW() WHERE id = ?',
+            [$resolucion, $usuarioId, $itemId]
         );
     }
 }

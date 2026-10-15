@@ -243,7 +243,7 @@ final class InsumoRepository
 
     /**
      * Dónde se usa un código en todo el sistema, para que un código lleve siempre a una sola cosa (RF17).
-     * Retorna la descripción de su dueño ("el producto CLORO…", "la herramienta GPS…", "el sector Estante A"…) o null.
+     * Retorna la descripción de su dueño ("el producto CLORO…", "el sector Estante A"…) o null.
      * $exceptoInsumo deja fuera el código interno y el código UdeC de ese producto (al editarlo).
      */
     public function codigoEnUso(string $codigo, ?int $exceptoInsumo = null): ?string
@@ -255,13 +255,9 @@ final class InsumoRepository
              UNION ALL
              SELECT CONCAT('el producto ', nombre) FROM insumos WHERE (codigo = ? OR codigo_udec = ?) AND id <> ?
              UNION ALL
-             SELECT CONCAT('la herramienta ', h.nombre)
-               FROM herramienta_unidades hu JOIN herramientas h ON h.id = hu.herramienta_id
-              WHERE hu.codigo = ?
-             UNION ALL
              SELECT CONCAT('el sector ', nombre) FROM sectores WHERE codigo = ?
              LIMIT 1",
-            [$codigo, $codigo, $codigo, $exceptoInsumo ?? 0, $codigo, $codigo]
+            [$codigo, $codigo, $codigo, $exceptoInsumo ?? 0, $codigo]
         );
 
         return $fila['duenio'] ?? null;

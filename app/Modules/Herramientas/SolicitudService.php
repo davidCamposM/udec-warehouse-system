@@ -9,6 +9,7 @@ use App\Core\Database;
 use App\Core\ValidationException;
 use App\Modules\Historial\AuditoriaService;
 use App\Support\Fecha;
+use DateTimeImmutable;
 
 defined('APP_ROOT') || exit;
 
@@ -39,8 +40,16 @@ final class SolicitudService
         'pendientes' => 'Por entregar',
         'prestadas' => 'Prestadas',
         'atrasadas' => 'Atrasadas',
+        'problemas' => 'Con daños o faltas',
         'devueltas' => 'Devueltas',
         'todas' => 'Todas',
+    ];
+
+    /** Cómo se resolvió una herramienta que volvió con daños o no volvió: clave => como se muestra. */
+    public const RESOLUCIONES = [
+        'reparada' => 'Se reparó',
+        'repuesta' => 'Se repuso',
+        'baja' => 'Se dio de baja',
     ];
 
     /** Máximo de unidades de una herramienta en una solicitud: evita errores de tipeo como 100. */
@@ -92,7 +101,23 @@ final class SolicitudService
     /** @param array<string, mixed> $solicitud */
     public static function atrasada(array $solicitud): bool
     {
-        return $solicitud['estado'] === 'prestada' && $solicitud['fecha_devolucion'] < Fecha::hoy();
+        return self::diasDeAtraso($solicitud) > 0;
+    }
+
+    /**
+     * Días desde la fecha de recepción, si está prestada y ya pasó (0 si no está atrasada).
+     *
+     * @param array<string, mixed> $solicitud
+     */
+    public static function diasDeAtraso(array $solicitud): int
+    {
+        if ($solicitud['estado'] !== 'prestada' || $solicitud['fecha_devolucion'] >= Fecha::hoy()) {
+            return 0;
+        }
+
+        $recepcion = new DateTimeImmutable($solicitud['fecha_devolucion']);
+
+        return (int) $recepcion->diff(new DateTimeImmutable(Fecha::hoy()))->days;
     }
 
     // ---------- El docente ----------
@@ -166,9 +191,10 @@ final class SolicitudService
     }
 
     /**
-     * La devolución: cuántas volvieron de cada línea y en qué estado. La solicitud pasa a «Devuelta».
+     * La devolución: cuántas volvieron de cada línea, en qué estado y, si volvieron con daños o faltan, qué pasó. La
+     * solicitud pasa a «Devuelta»; las líneas con daños o faltas quedan como problemas por resolver.
      *
-     * @param array<string, mixed> $datos devueltas_{item} y estado_{item} por línea, y observacion_recepcion
+     * @param array<string, mixed> $datos devueltas_{item}, estado_{item} y detalle_{item} por línea
      * @throws ValidationException
      */
     public function recibir(int $id, array $datos): void
@@ -197,23 +223,87 @@ final class SolicitudService
                     continue;
                 }
 
+                // Con daños o con unidades que no volvieron, se anota qué pasó: así se sabe qué resolver.
+                $campoDetalle = 'detalle_' . $item['id'];
+                $detalle = trim((string) ($datos[$campoDetalle] ?? ''));
+                $problema = $estado === 'danada' || $devueltas < (int) $item['cantidad'];
+                if ($problema && $detalle === '') {
+                    $errores[$campoDetalle] = $devueltas < (int) $item['cantidad']
+                        ? 'Escribe qué pasó con las que no volvieron. Ejemplo: se perdió en terreno.'
+                        : 'Escribe qué daño tiene. Ejemplo: lente rayado.';
+                    continue;
+                }
+                if (mb_strlen($detalle) > 255) {
+                    $errores[$campoDetalle] = 'Puede tener hasta 255 letras.';
+                    continue;
+                }
+
                 // Si no volvió ninguna, no hay estado que anotar: la línea muestra «No volvió».
-                $lineas[(int) $item['id']] = [$devueltas, $devueltas > 0 ? $estado : null];
+                $lineas[(int) $item['id']] = [$devueltas, $devueltas > 0 ? $estado : null, $problema ? $detalle : null];
             }
 
-            $observacion = trim((string) ($datos['observacion_recepcion'] ?? ''));
-            if (mb_strlen($observacion) > 500) {
-                $errores['observacion_recepcion'] = 'La nota puede tener hasta 500 letras.';
-            }
             if ($errores !== []) {
                 throw new ValidationException($errores);
             }
 
-            foreach ($lineas as $itemId => [$devueltas, $estado]) {
-                $this->solicitudes->recibirItem($itemId, $devueltas, $estado);
+            foreach ($lineas as $itemId => [$devueltas, $estado, $detalle]) {
+                $this->solicitudes->recibirItem($itemId, $devueltas, $estado, $detalle);
             }
-            $this->solicitudes->marcarDevuelta($id, (int) Auth::id(), $observacion === '' ? null : $observacion);
+            $this->solicitudes->marcarDevuelta($id, (int) Auth::id());
             $this->auditoria->registrar('recibir', 'solicitud', $id, ['lineas' => $lineas]);
+        });
+    }
+
+    /**
+     * Extiende el plazo de un préstamo: nueva fecha de recepción, desde hoy en adelante.
+     *
+     * @throws ValidationException
+     */
+    public function extenderPlazo(int $id, mixed $fecha): void
+    {
+        $nueva = Fecha::normalizar(is_string($fecha) ? $fecha : '');
+        if ($nueva === null) {
+            throw new ValidationException(['fecha_devolucion' => 'Elige la nueva fecha de recepción.']);
+        }
+        if ($nueva < Fecha::hoy()) {
+            throw new ValidationException(['fecha_devolucion' => 'Ese día ya pasó. Elige hoy o un día que venga.']);
+        }
+
+        Database::transaction(function () use ($id, $nueva): void {
+            $solicitud = $this->solicitudes->buscar($id, bloquear: true);
+            if ($solicitud === null || $solicitud['estado'] !== 'prestada') {
+                throw new ValidationException(['fecha_devolucion' => 'Solo se extiende el plazo de un préstamo que está prestado.']);
+            }
+            if ($nueva === $solicitud['fecha_devolucion']) {
+                throw new ValidationException(['fecha_devolucion' => 'Es la misma fecha que ya tiene.']);
+            }
+
+            $this->solicitudes->extenderPlazo($id, $nueva);
+            $this->auditoria->registrar('extender_plazo', 'solicitud', $id, [
+                'fecha_devolucion' => [$solicitud['fecha_devolucion'], $nueva],
+            ]);
+        });
+    }
+
+    /**
+     * Resuelve una herramienta que volvió con daños o no volvió: se reparó, se repuso o se dio de baja.
+     *
+     * @throws ValidationException
+     */
+    public function resolver(int $id, int $itemId, mixed $resolucion): void
+    {
+        if (!is_string($resolucion) || !isset(self::RESOLUCIONES[$resolucion])) {
+            throw new ValidationException(['resolucion_' . $itemId => 'Elige cómo se resolvió.']);
+        }
+
+        Database::transaction(function () use ($id, $itemId, $resolucion): void {
+            $item = $this->solicitudes->bloquearItem($id, $itemId);
+            if ($item === null || (int) $item['problema'] !== 1) {
+                throw new ValidationException(['resolucion_' . $itemId => 'Esa herramienta no tiene nada por resolver.']);
+            }
+
+            $this->solicitudes->resolverItem($itemId, $resolucion, (int) Auth::id());
+            $this->auditoria->registrar('resolver', 'solicitud', $id, ['item' => $itemId, 'resolucion' => $resolucion]);
         });
     }
 

@@ -34,6 +34,7 @@ final class PanelService
             'sin_unidades' => $insumos['no-queda'],
             'por_reponer' => $insumos['reponer'],
             'prestamos_atrasados' => $this->panel->contarPrestamosAtrasados(),
+            'herramientas_por_resolver' => $this->panel->contarHerramientasPorResolver(),
             'solicitudes_pendientes' => $this->panel->contarSolicitudesPendientes(),
             // Informativo (no urgente): se muestra aunque todo esté en orden.
             'salidas_hoy' => $this->panel->contarSalidasDeHoy(),

@@ -29,6 +29,11 @@ $definiciones = [
         'Herramientas que debieron volver a la bodega.',
         $prestamos('atrasadas'),
     ],
+    'herramientas_por_resolver' => [
+        'tool', 'danger', 'herramienta dañada o perdida', 'herramientas dañadas o perdidas',
+        'Volvieron con daños o no volvieron: falta anotar si se repararon, repusieron o dieron de baja.',
+        $prestamos('problemas'),
+    ],
     'solicitudes_pendientes' => [
         'inbox', 'warning', 'solicitud por entregar', 'solicitudes por entregar',
         'Herramientas que piden los docentes.',

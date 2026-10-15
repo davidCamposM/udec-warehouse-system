@@ -7,29 +7,38 @@ defined('APP_ROOT') || exit;
 
 /**
  * Una solicitud dibujada como el formulario en papel «Solicitud de instrumentos y herramientas»: los datos arriba y el
- * detalle (descripción, unidades y estado en la recepción) abajo. Recibe $solicitud, $items y $atrasada.
+ * detalle (descripción, unidades y estado en la recepción) abajo. Recibe $solicitud, $items y $atrasada. Muestra los
+ * días de atraso, si se extendió el plazo y, en cada línea que volvió con daños o no volvió, qué pasó y si ya se
+ * resolvió.
  */
 [$estadoTexto, $estadoClase] = SolicitudService::ESTADOS[$solicitud['estado']];
+$diasAtraso = SolicitudService::diasDeAtraso($solicitud);
 
-/** Lo que va en «Estado en la recepción» de cada línea. */
+/** Lo que va en «Estado en la recepción» de cada línea: cómo volvió y, si hubo daños o faltas, qué pasó. */
 $recepcion = static function (array $item) use ($solicitud): string {
     if ($solicitud['estado'] !== 'devuelta') {
         return '';
     }
     $volvieron = (int) $item['cantidad_devuelta'];
-    if ($volvieron === 0) {
-        return 'No volvió';
+    $estado = match (true) {
+        $volvieron === 0 => 'No volvió',
+        $item['estado_recepcion'] === 'danada' => 'Con daños',
+        default => 'Bien',
+    };
+    if ($volvieron > 0 && $volvieron < (int) $item['cantidad']) {
+        $estado .= " · volvieron {$volvieron} de {$item['cantidad']}";
     }
-    $estado = $item['estado_recepcion'] === 'danada' ? 'Con daños' : 'Bien';
 
-    return $volvieron === (int) $item['cantidad'] ? $estado : "{$estado} · volvieron {$volvieron} de {$item['cantidad']}";
+    return $item['detalle_recepcion'] !== null ? "{$estado}: {$item['detalle_recepcion']}" : $estado;
 };
 ?>
 <article class="hoja">
     <?= partial('Herramientas::partials/membrete') ?>
 
     <p class="hoja__estado">
-        <span class="status status--<?= e($atrasada ? 'out' : $estadoClase) ?>"><?= e($atrasada ? 'Atrasada' : $estadoTexto) ?></span>
+        <span class="status status--<?= e($atrasada ? 'out' : $estadoClase) ?>">
+            <?= e($atrasada ? 'Atrasada ' . ($diasAtraso === 1 ? '1 día' : "{$diasAtraso} días") : $estadoTexto) ?>
+        </span>
         <span class="text-muted">N° <?= e($solicitud['id']) ?> · enviada el <?= e(Fecha::mostrar($solicitud['creado_en'])) ?></span>
     </p>
 
@@ -56,7 +65,12 @@ $recepcion = static function (array $item) use ($solicitud): string {
         </div>
         <div class="hoja__dato">
             <dt>Fecha de recepción</dt>
-            <dd<?= $atrasada ? ' class="hoja__atrasada"' : '' ?>><?= e(Fecha::mostrar($solicitud['fecha_devolucion'])) ?></dd>
+            <dd<?= $atrasada ? ' class="hoja__atrasada"' : '' ?>>
+                <?= e(Fecha::mostrar($solicitud['fecha_devolucion'])) ?>
+                <?php if ($solicitud['plazo_original'] !== null) : ?>
+                    <span class="hoja__extendido">Plazo extendido · antes era el <?= e(Fecha::mostrar($solicitud['plazo_original'])) ?></span>
+                <?php endif; ?>
+            </dd>
         </div>
     </dl>
 
@@ -75,8 +89,16 @@ $recepcion = static function (array $item) use ($solicitud): string {
                     <tr>
                         <td><?= e($item['nombre']) ?></td>
                         <td class="text-end hoja__unidades"><?= e($item['cantidad']) ?></td>
-                        <td class="<?= $item['estado_recepcion'] === 'danada' || ($solicitud['estado'] === 'devuelta' && (int) $item['cantidad_devuelta'] < (int) $item['cantidad']) ? 'hoja__problema' : '' ?>">
+                        <td class="<?= (int) $item['problema'] === 1 ? 'hoja__problema' : '' ?>">
                             <?= e($recepcion($item)) ?>
+                            <?php if ($item['resolucion'] !== null) : ?>
+                                <span class="hoja__resuelto">
+                                    <?= icon('check') ?><?= e(SolicitudService::RESOLUCIONES[$item['resolucion']]) ?>
+                                    el <?= e(Fecha::mostrar($item['resuelta_en'])) ?><?= $item['resuelta_por_nombre'] !== null ? ' · ' . e($item['resuelta_por_nombre']) : '' ?>
+                                </span>
+                            <?php elseif ((int) $item['problema'] === 1) : ?>
+                                <span class="hoja__pendiente-resolver">Por resolver</span>
+                            <?php endif; ?>
                         </td>
                     </tr>
                 <?php endforeach; ?>
@@ -91,8 +113,5 @@ $recepcion = static function (array $item) use ($solicitud): string {
         <p class="hoja__pie">Entregada el <?= e(Fecha::mostrar($solicitud['entregada_en'])) ?>.
             <?php if ($solicitud['recibida_en'] !== null) : ?>Recibida el <?= e(Fecha::mostrar($solicitud['recibida_en'])) ?>.<?php endif; ?>
         </p>
-    <?php endif; ?>
-    <?php if ($solicitud['observacion_recepcion'] !== null) : ?>
-        <p class="hoja__nota"><strong>Nota de la bodega:</strong> <?= e($solicitud['observacion_recepcion']) ?></p>
     <?php endif; ?>
 </article>
