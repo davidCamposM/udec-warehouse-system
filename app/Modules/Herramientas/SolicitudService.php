@@ -236,7 +236,7 @@ final class SolicitudService
      * @param array<string, mixed>                               $datos
      * @param list<array{id: int, nombre: string, descripcion: ?string}> $herramientas
      * @return array{0: array{departamento: string, tipo_actividad: string, autoriza_retiro: ?string, fecha_retiro: string,
-     *     fecha_devolucion: string, observacion: ?string}, 1: array<int, int>} los datos limpios y herramienta => unidades
+     *     fecha_devolucion: string}, 1: array<int, int>} los datos limpios y herramienta => unidades
      * @throws ValidationException
      */
     private function validar(array $datos, array $herramientas): array
@@ -274,11 +274,6 @@ final class SolicitudService
             $errores['fecha_devolucion'] = 'Debe ser el mismo día del retiro o uno después.';
         }
 
-        $observacion = $texto('observacion');
-        if (mb_strlen($observacion) > 500) {
-            $errores['observacion'] = 'Puede tener hasta 500 letras.';
-        }
-
         $detalle = [];
         foreach ($herramientas as $herramienta) {
             $valor = $texto('unidades_' . $herramienta['id']);
@@ -306,7 +301,6 @@ final class SolicitudService
             'autoriza_retiro' => $autoriza === '' ? null : $autoriza,
             'fecha_retiro' => $retiro,
             'fecha_devolucion' => $devolucion,
-            'observacion' => $observacion === '' ? null : $observacion,
         ], $detalle];
     }
 }

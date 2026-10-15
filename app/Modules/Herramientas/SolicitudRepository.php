@@ -25,13 +25,13 @@ final class SolicitudRepository
 
     /**
      * @param array{departamento: string, tipo_actividad: string, autoriza_retiro: ?string, fecha_retiro: string,
-     *     fecha_devolucion: string, observacion: ?string} $datos
+     *     fecha_devolucion: string} $datos
      */
     public function crear(int $docenteId, array $datos): int
     {
         return Database::insert(
-            'INSERT INTO solicitudes (docente_id, departamento, tipo_actividad, autoriza_retiro, fecha_retiro, fecha_devolucion, observacion)
-             VALUES (?, ?, ?, ?, ?, ?, ?)',
+            'INSERT INTO solicitudes (docente_id, departamento, tipo_actividad, autoriza_retiro, fecha_retiro, fecha_devolucion)
+             VALUES (?, ?, ?, ?, ?, ?)',
             [
                 $docenteId,
                 $datos['departamento'],
@@ -39,7 +39,6 @@ final class SolicitudRepository
                 $datos['autoriza_retiro'],
                 $datos['fecha_retiro'],
                 $datos['fecha_devolucion'],
-                $datos['observacion'],
             ]
         );
     }

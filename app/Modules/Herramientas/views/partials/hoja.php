@@ -84,9 +84,6 @@ $recepcion = static function (array $item) use ($solicitud): string {
         </table>
     </div>
 
-    <?php if ($solicitud['observacion'] !== null) : ?>
-        <p class="hoja__nota"><strong>También necesita:</strong> <?= e($solicitud['observacion']) ?></p>
-    <?php endif; ?>
     <?php if ($solicitud['estado'] === 'rechazada' && $solicitud['motivo_rechazo'] !== null) : ?>
         <p class="hoja__nota hoja__nota--problema"><strong>Motivo del rechazo:</strong> <?= e($solicitud['motivo_rechazo']) ?></p>
     <?php endif; ?>

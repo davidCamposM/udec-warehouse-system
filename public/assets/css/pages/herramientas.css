@@ -173,22 +173,136 @@
   font-size: var(--text-sm);
 }
 
-/* ---------- «Solicitar herramientas»: el formulario en columnas, en la ventana ancha ----------
-   Arriba los datos, de a dos por fila; abajo una ficha por herramienta, varias por fila. */
-.pedir__datos {
+/* ---------- Formulario compacto, como los de Bootstrap (form-bs) ----------
+   Sobrio y de altura normal: la etiqueta arriba, campos de 38 px, filas de columnas que en el teléfono quedan en una.
+   <form class="form-bs"> <div class="form-row"> <div class="form-group col-md-6"> <label class="form-label">
+   <input class="form-control"> <small class="form-text"> · radios: <div class="form-checks"> <div class="form-check">
+   <input class="form-check-input"> <label class="form-check-label"> */
+.form-bs .form-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: var(--space-4) var(--space-6);
+  gap: 0 var(--space-4);
 }
 
-.pedir__departamentos {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.pedir__fechas {
+.form-bs .form-group {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  align-content: start;
+  gap: 0.375rem;
+  min-width: 0;
+  margin: 0 0 var(--space-3);
+  padding: 0;
+  border: 0;
+}
+
+.form-bs .form-label {
+  padding: 0;
+  color: var(--bs-body);
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.form-bs .form-requerido {
+  color: var(--bs-danger);
+}
+
+.form-bs .form-opcional,
+.form-bs .form-text {
+  color: var(--bs-muted);
+  font-size: var(--text-sm);
+  font-weight: 400;
+}
+
+.form-bs .form-control {
+  width: 100%;
+  height: 2.375rem;
+  padding: 0.375rem 0.75rem;
+  border: 1px solid #ced4da;
+  border-radius: 0.375rem;
+  background: #fff;
+  color: var(--bs-body);
+  font-size: 0.9375rem;
+}
+
+.form-bs .form-control:focus {
+  border-color: var(--color-brand-500);
+  outline: none;
+  box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--color-brand-600) 25%, transparent);
+}
+
+.form-bs .form-control[readonly] {
+  background: var(--bs-gray-50);
+  color: var(--bs-body);
+  font-weight: 600;
+}
+
+.form-bs .form-control.is-invalid {
+  border-color: var(--bs-danger);
+}
+
+.form-bs .field__error {
+  font-size: var(--text-sm);
+}
+
+/* Opciones de una sola elección, en línea y a la altura de un campo */
+.form-bs .form-checks {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-5);
+  min-height: 2.375rem;
+}
+
+.form-bs .form-check {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.form-bs .form-check-input {
+  width: 1.125rem;
+  height: 1.125rem;
+  margin: 0;
+  accent-color: var(--color-brand-700);
+  cursor: pointer;
+}
+
+.form-bs .form-check-label {
+  font-size: 0.9375rem;
+  cursor: pointer;
+}
+
+.form-bs .btn {
+  min-height: 2.375rem;
+  padding: 0 var(--space-4);
+  font-size: 0.9375rem;
+}
+
+@media (min-width: 48em) {
+  .form-bs .form-row {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+  }
+
+  .form-bs .col-md-6 { grid-column: span 6; }
+}
+
+/* ---------- «Solicitar herramientas»: en la ventana ancha ---------- */
+.pedir .hoja {
   gap: var(--space-3);
+}
+
+.pedir .hoja__membrete {
+  font-size: var(--text-xs);
+}
+
+.pedir .hoja__facultad .icon {
+  width: 1.375rem;
+  height: 1.375rem;
+}
+
+.pedir .hoja__titulo {
+  margin-bottom: var(--space-1);
+  padding-bottom: var(--space-2);
+  font-size: var(--text-sm);
 }
 
 .pedir__detalles {
@@ -196,9 +310,9 @@
   gap: var(--space-3);
   min-width: 0;
   margin: 0;
-  padding: var(--space-4) 0 0;
+  padding: var(--space-3) 0 0;
   border: 0;
-  border-top: 1px dashed var(--bs-gray-200);
+  border-top: 1px solid var(--bs-gray-200);
 }
 
 .pedir__titulo {
@@ -207,96 +321,19 @@
   align-items: baseline;
   gap: var(--space-1) var(--space-3);
   padding: 0;
-  font-size: var(--text-base);
-  font-weight: 800;
+  font-size: 0.9375rem;
+  font-weight: 700;
 }
 
 .pedir__instruccion {
   color: var(--bs-muted);
   font-size: var(--text-sm);
-  font-weight: 500;
+  font-weight: 400;
 }
 
-.pedir__herramientas {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
-  gap: var(--space-2) var(--space-3);
-  padding: 0;
-  list-style: none;
-}
-
-/* Una ficha por herramienta: el nombre a la izquierda y sus unidades a la derecha. Con unidades, se marca. */
-.pedir__herramienta {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-  min-height: 3.75rem;
-  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3);
-  border: 1px solid var(--bs-gray-200);
-  border-radius: var(--radius-md);
-  background: #fff;
-  transition: border-color var(--bs-transition), background-color var(--bs-transition), box-shadow var(--bs-transition);
-}
-
-.pedir__herramienta:hover {
-  border-color: color-mix(in srgb, var(--tono, var(--bs-primary)) 45%, var(--bs-gray-200));
-}
-
-.pedir__herramienta.is-elegida {
-  border-color: var(--tono, var(--bs-primary));
-  background: color-mix(in srgb, var(--tono, var(--bs-primary)) 7%, #fff);
-  box-shadow: 0 0 0 1px var(--tono, var(--bs-primary));
-}
-
-.pedir__nombre {
-  display: grid;
-  min-width: 0;
-  line-height: 1.25;
-}
-
-.pedir__nombre label {
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.pedir__descripcion {
-  color: var(--bs-muted);
-  font-size: var(--text-xs);
-}
-
-.pedir__pie {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: var(--space-1) var(--space-4);
-  font-size: var(--text-sm);
-}
-
-.pedir__total {
-  color: var(--tono-texto, var(--bs-body));
-  font-weight: 700;
-}
-
-/* En la ventana, la hoja del formulario va más junta: todo se ve con poco desplazamiento */
-.pedir .hoja {
-  gap: var(--space-4);
-}
-
-.pedir .hoja__titulo {
-  padding-bottom: var(--space-2);
-}
-
-@media (min-width: 48em) {
-  .pedir__datos {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-/* Las herramientas por categoría, cada grupo con su título */
 .pedir__grupos {
   display: grid;
-  gap: var(--space-4);
+  gap: var(--space-3);
 }
 
 .pedir__grupo {
@@ -312,42 +349,181 @@
   text-transform: uppercase;
 }
 
-/* ---------- Buscador de herramientas (parcial Herramientas::partials/buscador) ---------- */
-.buscador-herramientas {
+.pedir__herramientas {
   display: grid;
-  gap: var(--space-3);
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: var(--space-2);
+  padding: 0;
+  list-style: none;
+}
+
+/* Una línea por herramienta: el nombre a la izquierda y sus unidades a la derecha. Con unidades, se marca. */
+.pedir__herramienta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: 0.3125rem 0.375rem 0.3125rem 0.75rem;
+  border: 1px solid var(--bs-gray-200);
+  border-radius: 0.375rem;
+  background: #fff;
+  transition: border-color var(--bs-transition), background-color var(--bs-transition);
+}
+
+.pedir__herramienta:hover {
+  border-color: #ced4da;
+}
+
+.pedir__herramienta.is-elegida {
+  border-color: var(--color-brand-500);
+  background: var(--color-brand-50);
+}
+
+.pedir__nombre {
+  display: grid;
+  min-width: 0;
+  font-size: 0.9375rem;
+  line-height: 1.25;
+  cursor: pointer;
+}
+
+.pedir__herramienta.is-elegida .pedir__nombre {
+  font-weight: 600;
+}
+
+.pedir__prestadas {
+  color: var(--bs-muted);
+  font-size: var(--text-xs);
+  font-weight: 400;
+}
+
+/* − y + compactos, como un input-group pequeño */
+.pedir .stepper {
+  flex: none;
+  gap: 0;
+}
+
+.pedir .stepper__button {
+  width: 1.875rem;
+  height: 1.875rem;
+  min-height: 0;
+  border-radius: 0.375rem;
+  box-shadow: none;
+}
+
+.pedir .stepper__button .icon {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.pedir .stepper [data-step="-1"] {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.pedir .stepper [data-step="1"] {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.pedir .stepper__input {
+  width: 2.5rem;
+  height: 1.875rem;
+  min-height: 0;
+  margin: 0 -1px;
+  padding: 0;
+  border-radius: 0;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.pedir__pie {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-4);
+  font-size: var(--text-sm);
+}
+
+.pedir__total {
+  color: var(--color-brand-800);
+  font-weight: 700;
+}
+
+.pedir__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--bs-gray-200);
+}
+
+/* ---------- Buscador de herramientas (parcial Herramientas::partials/buscador) ----------
+   El campo y las categorías en una misma franja, compactos. */
+.buscador-herramientas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
 }
 
 .buscador-herramientas__campo {
   position: relative;
-  max-width: 28rem;
+  flex: 1 1 14rem;
+  max-width: 20rem;
 }
 
 .buscador-herramientas__icono {
   position: absolute;
   top: 50%;
-  left: var(--space-3);
+  left: 0.625rem;
   display: grid;
   color: var(--bs-muted);
   transform: translateY(-50%);
   pointer-events: none;
 }
 
+.buscador-herramientas__icono .icon {
+  width: 1rem;
+  height: 1rem;
+}
+
 .buscador-herramientas__campo .input {
   width: 100%;
-  padding-left: 2.5rem;
+  height: 2.375rem;
+  min-height: 0;
+  padding: 0.375rem 0.75rem 0.375rem 2.125rem;
+  border: 1px solid #ced4da;
+  border-radius: 0.375rem;
+  font-size: 0.9375rem;
 }
 
 .buscador-herramientas__grupos {
   flex-wrap: wrap;
+  gap: 0.375rem;
+}
+
+.buscador-herramientas__grupos .nav-link {
+  min-height: 2rem;
+  padding: 0 0.75rem;
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+
+.buscador-herramientas__grupos .nav-count {
+  font-size: var(--text-xs);
 }
 
 .buscador-herramientas__vacio {
-  margin-top: var(--space-3);
-  padding: var(--space-4);
+  margin-top: var(--space-2);
+  padding: var(--space-3);
   border: 1px dashed var(--bs-gray-200);
-  border-radius: var(--radius-md);
+  border-radius: 0.375rem;
   color: var(--bs-muted);
+  font-size: var(--text-sm);
   text-align: center;
 }
 
