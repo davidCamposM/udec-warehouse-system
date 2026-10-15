@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use App\Core\Auth;
 use App\Core\Permission;
 use App\Core\Url;
 use InvalidArgumentException;
@@ -69,10 +70,12 @@ final class Tareas
         throw new InvalidArgumentException("Tarea desconocida: {$clave}");
     }
 
-    /** @param array{ruta: ?string, permiso: string} $tarea */
+    /** @param array{ruta: ?string, permiso: string, perfiles?: list<string>} $tarea */
     private static function disponible(array $tarea): bool
     {
-        return $tarea['ruta'] !== null && Permission::can($tarea['permiso']);
+        return $tarea['ruta'] !== null
+            && Permission::can($tarea['permiso'])
+            && (!isset($tarea['perfiles']) || in_array(Auth::perfil(), $tarea['perfiles'], true));
     }
 
     /** @return list<array{clave: string, texto: string, descripcion: string, ruta: ?string, icono: string, color: string, permiso: string, boton?: bool}> */

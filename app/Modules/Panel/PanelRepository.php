@@ -21,11 +21,11 @@ final class PanelRepository
         return (int) Database::fetchValue("SELECT COUNT(*) FROM movimientos WHERE tipo = 'salida' AND fecha >= CURDATE()");
     }
 
-    /** Préstamos abiertos cuya fecha de devolución ya pasó. */
+    /** Herramientas prestadas cuya fecha de recepción ya pasó. */
     public function contarPrestamosAtrasados(): int
     {
         return (int) Database::fetchValue(
-            'SELECT COUNT(*) FROM prestamos WHERE cerrado_en IS NULL AND fecha_pactada < CURDATE()'
+            "SELECT COUNT(*) FROM solicitudes WHERE estado = 'prestada' AND fecha_devolucion < CURDATE()"
         );
     }
 
@@ -34,18 +34,12 @@ final class PanelRepository
         return (int) Database::fetchValue("SELECT COUNT(*) FROM solicitudes WHERE estado = 'pendiente'");
     }
 
-    /**
-     * Préstamos atrasados del docente: aquellos de los que es responsable y los que retiró él mismo (con la
-     * persona ligada a su cuenta).
-     */
+    /** Préstamos atrasados del docente: lo que pidió, le entregaron y no ha vuelto a tiempo. */
     public function contarPrestamosAtrasadosDe(int $usuarioId): int
     {
         return (int) Database::fetchValue(
-            'SELECT COUNT(*)
-               FROM prestamos p
-              WHERE p.cerrado_en IS NULL AND p.fecha_pactada < CURDATE()
-                AND (p.responsable_id = ? OR p.persona_id IN (SELECT id FROM personas WHERE usuario_id = ?))',
-            [$usuarioId, $usuarioId]
+            "SELECT COUNT(*) FROM solicitudes WHERE docente_id = ? AND estado = 'prestada' AND fecha_devolucion < CURDATE()",
+            [$usuarioId]
         );
     }
 }

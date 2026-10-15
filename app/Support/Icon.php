@@ -55,6 +55,7 @@ final class Icon
         'tag' => '<path d="M3 3h8l10 10-8 8L3 11z"/><circle cx="7.5" cy="7.5" r="1.5"/>',
         'tool' => '<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/>',
         'tree' => '<path d="M12 3l4 6.5h-1.5l3 5h-2l3.5 5H5l3.5-5h-2l3-5H8z"/><path d="M12 19.5V22"/>',
+        'user' => '<circle cx="12" cy="8" r="4"/><path d="M4 21v-1a8 8 0 0 1 16 0v1"/>',
         'users' => '<circle cx="9" cy="8" r="4"/><path d="M1 21v-1a7 7 0 0 1 14 0v1"/>'
             . '<path d="M17 3.5a4 4 0 0 1 0 9M23 21v-1a7 7 0 0 0-5-6.7"/>',
         'x-circle' => '<circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/>',

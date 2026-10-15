@@ -5,6 +5,12 @@ use App\Core\Permission;
 defined('APP_ROOT') || exit;
 
 $verInsumos = Permission::can('insumos.ver');
+// El encargado y las administrativas van a «Préstamos de herramientas»; el docente, a «Mis solicitudes».
+$prestamos = static fn (string $filtro): ?string => match (true) {
+    Permission::can('prestamos.ver') => url('prestamos', ['ver' => $filtro]),
+    Permission::can('herramientas.solicitar') => url('herramientas/mis-solicitudes'),
+    default => null,
+};
 
 // aviso => [ícono, tono, singular, plural, explicación, a dónde lleva «Ver» (null: su pantalla aún no existe)]
 $definiciones = [
@@ -21,12 +27,12 @@ $definiciones = [
     'prestamos_atrasados' => [
         'clock', 'danger', 'préstamo atrasado', 'préstamos atrasados',
         'Herramientas que debieron volver a la bodega.',
-        null,
+        $prestamos('atrasadas'),
     ],
     'solicitudes_pendientes' => [
-        'inbox', 'warning', 'solicitud por revisar', 'solicitudes por revisar',
-        'Pedidos de herramientas que esperan respuesta.',
-        null,
+        'inbox', 'warning', 'solicitud por entregar', 'solicitudes por entregar',
+        'Herramientas que piden los docentes.',
+        $prestamos('pendientes'),
     ],
     'salidas_hoy' => [
         'arrow-out', 'info', 'retiro hoy', 'retiros hoy',

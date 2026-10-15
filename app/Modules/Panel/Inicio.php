@@ -54,8 +54,16 @@ final class Inicio
      * @param string       $cuerpo  HTML de la etapa
      * @param list<string> $estilos hojas propias de la tarea
      * @param list<string> $scripts scripts propios de la tarea
+     * @param bool         $ancha   ventana más ancha, para un formulario con varias columnas
      */
-    public static function conVentana(string $tarea, string $texto, string $cuerpo, array $estilos = [], array $scripts = []): Response
+    public static function conVentana(
+        string $tarea,
+        string $texto,
+        string $cuerpo,
+        array $estilos = [],
+        array $scripts = [],
+        bool $ancha = false,
+    ): Response
     {
         $titulo = Tareas::tarea($tarea)['texto'];
 
@@ -67,6 +75,7 @@ final class Inicio
                 'texto' => $texto,
                 'cerrar' => Url::to(),
                 'cuerpo' => $cuerpo,
+                'ancha' => $ancha,
             ]),
             'estilos' => ['css/components/ventana-basico.css', 'css/pages/panel.css', ...$estilos],
             'scripts' => $scripts,

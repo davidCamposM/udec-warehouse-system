@@ -14,7 +14,8 @@ defined('APP_ROOT') || exit;
 return [
     // Encargado de bodega: la cuenta que maneja todo el sistema. Acceso total, incluidos insumos.administrar
     // (crear, editar, desactivar), insumos.entrada (registrar producto), insumos.salida (retirar producto),
-    // insumos.ajuste (actualizar cantidad) y sectores.administrar.
+    // insumos.ajuste (actualizar cantidad), sectores.administrar, herramientas.administrar (el catálogo) y
+    // prestamos.administrar (entregar y recibir herramientas).
     'administrador' => ['*'],
 
     // Ven todo, pero no registran ni modifican (por ahora).
@@ -24,11 +25,12 @@ return [
         'insumos.ver',
         'herramientas.ver',
         'historial.ver',
+        'prestamos.ver',    // los préstamos de herramientas, sin entregar ni recibir
         'reportes.ver',
         'avisos.ver',
     ],
 
-    // Módulo de herramientas: catálogo, sus solicitudes y sus préstamos.
+    // Módulo de herramientas: solicita con el formulario («Solicitar herramientas») y ve las suyas.
     'docente' => [
         'panel.ver',
         'herramientas.ver',

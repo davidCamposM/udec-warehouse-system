@@ -10,11 +10,12 @@ defined('APP_ROOT') || exit;
  * - $tarea: clave de config/tareas.php (de ahí salen el color y el ícono). $titulo y $texto (opcional): la cabecera.
  * - $cerrar: URL del botón «Cerrar» (también la usa la tecla Esc).
  * - $cuerpo: HTML de la etapa.
+ * - $ancha (opcional): más ancha, para un formulario con varias columnas (como «Solicitar herramientas»).
  * Los mensajes que deja la acción anterior (flash) se muestran dentro de la ventana, no detrás.
  */
 $datosTarea = Tareas::tarea($tarea);
 ?>
-<div class="ventana tono-<?= e($datosTarea['color']) ?>" data-ventana data-cerrar="<?= e($cerrar) ?>">
+<div class="ventana tono-<?= e($datosTarea['color']) ?><?= !empty($ancha) ? ' ventana--ancha' : '' ?>" data-ventana data-cerrar="<?= e($cerrar) ?>">
     <div class="ventana__fondo"></div>
     <section class="ventana__caja" role="dialog" aria-modal="true" aria-labelledby="ventana-titulo">
         <header class="ventana__cabecera">

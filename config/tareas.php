@@ -12,6 +12,8 @@
  * - 'ruta' => null marca una tarea que aún no se construye: no se muestra. Al terminarla se le pone su ruta
  *   y aparece sola en el inicio.
  * - 'boton' => false: no va como botón. «Buscar producto» es la barra de búsqueda de arriba del inicio.
+ * - 'perfiles' (opcional): solo esos perfiles la ven, aunque otro tenga el permiso (el encargado tiene todos los
+ *   permisos, pero no solicita herramientas: las entrega).
  *
  * Preliminar: se ajusta a medida que se construye cada módulo.
  */
@@ -78,39 +80,41 @@ return [
     ],
     [
         'clave' => 'ver-herramientas',
-        'texto' => 'Ver herramientas',
-        'descripcion' => 'Qué herramientas hay y cuáles están prestadas',
-        'ruta' => null,
+        'texto' => 'Catálogo de herramientas',
+        'descripcion' => 'Qué herramientas hay y cuántas están prestadas',
+        'ruta' => '/herramientas',
         'icono' => 'tool',
         'color' => 'azul',
         'permiso' => 'herramientas.ver',
     ],
     [
-        'clave' => 'pedir-herramientas',
-        'texto' => 'Pedir herramientas',
-        'descripcion' => 'Solicitar herramientas para una clase o salida',
-        'ruta' => null,
-        'icono' => 'inbox',
+        'clave' => 'solicitar-herramientas',
+        'texto' => 'Solicitar herramientas',
+        'descripcion' => 'Pedir herramientas para una clase o salida a terreno',
+        'ruta' => '/herramientas/solicitar',
+        'icono' => 'tool',
         'color' => 'verde',
         'permiso' => 'herramientas.solicitar',
+        'perfiles' => ['docente'],
     ],
     [
-        'clave' => 'solicitudes',
-        'texto' => 'Solicitudes',
-        'descripcion' => 'Pedidos de herramientas por revisar',
-        'ruta' => null,
+        'clave' => 'mis-solicitudes',
+        'texto' => 'Mis solicitudes',
+        'descripcion' => 'Lo que pediste y en qué va cada solicitud',
+        'ruta' => '/herramientas/mis-solicitudes',
         'icono' => 'clipboard',
-        'color' => 'grafito',
-        'permiso' => 'herramientas.ver',
+        'color' => 'azul',
+        'permiso' => 'herramientas.solicitar',
+        'perfiles' => ['docente'],
     ],
     [
         'clave' => 'prestamos',
-        'texto' => 'Préstamos',
-        'descripcion' => 'Herramientas prestadas y sus devoluciones',
-        'ruta' => null,
+        'texto' => 'Préstamos de herramientas',
+        'descripcion' => 'Entregar lo que piden los docentes y recibir lo que vuelve',
+        'ruta' => '/prestamos',
         'icono' => 'swap',
-        'color' => 'naranja',
-        'permiso' => 'herramientas.ver',
+        'color' => 'pizarra',
+        'permiso' => 'prestamos.ver',
     ],
     [
         'clave' => 'historial',

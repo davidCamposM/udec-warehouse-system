@@ -957,6 +957,11 @@ body.con-ventana {
   view-transition-name: ventana;
 }
 
+/* Más ancha, para un formulario en columnas (parcial «ventana» con $ancha) */
+.ventana--ancha .ventana__caja {
+  max-width: 72rem;
+}
+
 .ventana__cabecera {
   display: flex;
   align-items: flex-start;
