@@ -948,3 +948,161 @@
     transform: none;
   }
 }
+
+/* ---------- Ingresar abastecimiento: la reserva arriba; la fila para agregar (producto · cantidad · Agregar); la lista
+   de lo que llegó (producto · − cantidad + · quitar). Al final, «Ingresar a la bodega». ---------- */
+.ventana .abastecimiento {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.ventana .abastecimiento__nueva {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 6.5rem auto;
+  gap: var(--space-2);
+  align-items: end;
+}
+
+.ventana .abastecimiento__cuantas {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.ventana .abastecimiento__etiqueta {
+  color: var(--bs-muted);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.ventana .abastecimiento__cuantas .input {
+  text-align: center;
+  font-weight: 700;
+}
+
+.ventana .abastecimiento__cuantas.has-error .input {
+  border-color: var(--bs-danger);
+}
+
+.ventana .abastecimiento__agregar {
+  min-height: var(--control-height, 3rem);
+}
+
+.ventana .abastecimiento__titulo {
+  margin-bottom: var(--space-2);
+  color: var(--bs-muted);
+  font-size: var(--text-xs);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.ventana .abastecimiento__vacio {
+  padding: var(--space-4);
+  border: 1px dashed var(--bs-border);
+  border-radius: var(--bs-radius);
+  color: var(--bs-muted);
+  text-align: center;
+}
+
+.ventana .abastecimiento__filas {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--bs-border);
+  border-radius: var(--bs-radius);
+  list-style: none;
+}
+
+.ventana .abastecimiento__fila {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+}
+
+.ventana .abastecimiento__fila + .abastecimiento__fila {
+  border-top: 1px solid var(--bs-border);
+}
+
+.ventana .abastecimiento__producto {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  line-height: 1.3;
+}
+
+.ventana .abastecimiento__producto span {
+  color: var(--bs-muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+}
+
+/* La cantidad de cada producto: − número + */
+.ventana .abastecimiento__stepper {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  overflow: hidden;
+  border: 1px solid var(--bs-border);
+  border-radius: var(--bs-radius);
+  background: #fff;
+}
+
+.ventana .abastecimiento__paso {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.5rem;
+  border: 0;
+  background: var(--bs-gray-50, #f8f9fa);
+  color: var(--bs-body);
+  cursor: pointer;
+}
+
+.ventana .abastecimiento__paso:hover {
+  background: color-mix(in srgb, var(--tono) 10%, #fff);
+}
+
+.ventana .abastecimiento__paso .icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.ventana .abastecimiento__numero {
+  width: 3.5rem;
+  height: 2.5rem;
+  border: 0;
+  border-inline: 1px solid var(--bs-border);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.ventana .abastecimiento__numero:focus {
+  outline: 2px solid var(--tono);
+  outline-offset: -2px;
+}
+
+.ventana .abastecimiento__quitar {
+  flex: none;
+}
+
+/* Angosto (teléfono): producto arriba; cantidad y Agregar debajo */
+@media (max-width: 34em) {
+  .ventana .abastecimiento__nueva {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .ventana .abastecimiento__nueva > .campo {
+    grid-column: 1 / -1;
+  }
+
+  .ventana .abastecimiento__fila {
+    flex-wrap: wrap;
+  }
+
+  .ventana .abastecimiento__producto {
+    flex-basis: 100%;
+  }
+}

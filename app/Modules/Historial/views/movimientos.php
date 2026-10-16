@@ -68,7 +68,7 @@ $tipoActual = $filtros['tipo'] ?? '';
                         <th scope="col" class="text-end">Cantidad</th>
                         <th scope="col" class="text-end">Quedaron</th>
                         <th scope="col">Quién</th>
-                        <th scope="col">Sector o motivo</th>
+                        <th scope="col">Sector, reserva o motivo</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -88,7 +88,7 @@ $tipoActual = $filtros['tipo'] ?? '';
                             <td class="text-end movimientos__cantidad movimientos__cantidad--<?= $cantidad > 0 ? 'mas' : 'menos' ?>"><?= e(($cantidad > 0 ? '+' : '−') . abs($cantidad)) ?></td>
                             <td class="text-end movimientos__numero"><?= e($fila['stock_resultante']) ?></td>
                             <td><?= e($fila['quien'] ?? '—') ?></td>
-                            <td class="text-muted"><?= e($fila['sector'] ?? $fila['motivo'] ?? '—') ?></td>
+                            <td class="text-muted"><?= e($fila['sector'] ?? $fila['motivo'] ?? ($fila['reserva'] !== null ? 'Reserva ' . $fila['reserva'] : '—')) ?></td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>

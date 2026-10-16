@@ -40,7 +40,7 @@ if ($puedeAdministrar) {
 }
 ?>
 <?= partial('encabezado', [
-    'volver' => [url('insumos'), 'Volver a Buscar producto'],
+    'volver' => $volver,
     'tarea' => 'buscar-producto',
     'icono' => 'box',
     'titulo' => $insumo['nombre'],
@@ -126,8 +126,8 @@ if ($puedeAdministrar) {
                                 <?php if ($movimiento['quien'] !== null) : ?> · <?= e($movimiento['quien']) ?><?php endif; ?>
                                 <?php if ($movimiento['sector'] !== null) : ?> · se guardó en <?= e($movimiento['sector']) ?><?php endif; ?>
                             </span>
-                            <?php if ($movimiento['motivo'] !== null || $movimiento['documento'] !== null) : ?>
-                                <span class="mov__datos"><?= e($movimiento['motivo'] ?? $movimiento['documento']) ?></span>
+                            <?php if ($movimiento['motivo'] !== null || $movimiento['reserva'] !== null) : ?>
+                                <span class="mov__datos"><?= e($movimiento['motivo'] ?? 'Reserva ' . $movimiento['reserva']) ?></span>
                             <?php endif; ?>
                         </span>
                         <span class="mov__saldo">

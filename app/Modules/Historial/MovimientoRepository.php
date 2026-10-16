@@ -43,7 +43,7 @@ final class MovimientoRepository
         [$condicion, $parametros] = self::condicion($periodo, $tipo);
 
         return Database::fetchAll(
-            'SELECT m.id, m.tipo, m.fecha, m.motivo, mi.cantidad, mi.stock_resultante,
+            'SELECT m.id, m.tipo, m.fecha, m.motivo, m.reserva, mi.cantidad, mi.stock_resultante,
                     i.id AS insumo_id, i.codigo, i.nombre, i.activo AS insumo_activo,
                     us.nombre AS quien, se.nombre AS sector, se.codigo AS sector_codigo
                FROM ' . self::DESDE . "

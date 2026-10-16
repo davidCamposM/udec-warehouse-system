@@ -6,6 +6,7 @@ namespace App\Modules\Panel;
 
 use App\Core\Database;
 use App\Modules\Herramientas\SolicitudRepository;
+use App\Modules\Insumos\InsumoRepository;
 
 defined('APP_ROOT') || exit;
 
@@ -44,19 +45,20 @@ final class PanelRepository
     }
 
     /**
-     * Los productos activos según lo que queda: sin unidades, por reponer (quedan, pero llegaron a su mínimo) y con
-     * stock; cada uno cuenta en un solo grupo. Más las unidades en bodega y las que entraron y salieron este mes.
+     * Los insumos de consumo activos (sin el equipo de la Práctica de Invierno) según lo que queda: sin unidades, por
+     * reponer (quedan, pero llegaron a su mínimo) y con stock; cada uno cuenta en un solo grupo. Más las unidades en bodega y las que entraron y salieron este mes.
      *
      * @return array{con_stock: int, por_reponer: int, sin_stock: int, unidades: int, salieron_mes: int, entraron_mes: int}
      */
     public function resumenInsumos(): array
     {
         $productos = Database::fetch(
-            'SELECT COALESCE(SUM(stock_actual <= 0), 0) AS sin_stock,
-                    COALESCE(SUM(stock_actual > 0 AND stock_minimo > 0 AND stock_actual <= stock_minimo), 0) AS por_reponer,
-                    COALESCE(SUM(stock_actual > 0 AND (stock_minimo = 0 OR stock_actual > stock_minimo)), 0) AS con_stock,
-                    COALESCE(SUM(GREATEST(stock_actual, 0)), 0) AS unidades
-               FROM insumos WHERE activo = 1'
+            'SELECT COALESCE(SUM(i.stock_actual <= 0), 0) AS sin_stock,
+                    COALESCE(SUM(i.stock_actual > 0 AND i.stock_minimo > 0 AND i.stock_actual <= i.stock_minimo), 0) AS por_reponer,
+                    COALESCE(SUM(i.stock_actual > 0 AND (i.stock_minimo = 0 OR i.stock_actual > i.stock_minimo)), 0) AS con_stock,
+                    COALESCE(SUM(GREATEST(i.stock_actual, 0)), 0) AS unidades
+               FROM ' . self::INSUMOS_CON_CATEGORIA . '
+              WHERE i.activo = 1 AND ' . InsumoRepository::SOLO_CONSUMO
         ) ?? [];
         $mes = Database::fetch(
             "SELECT COALESCE(SUM(CASE WHEN m.tipo = 'salida' THEN ABS(mi.cantidad) END), 0) AS salieron_mes,
@@ -120,7 +122,7 @@ final class PanelRepository
                     SUM(i.stock_actual > 0 AND i.stock_minimo > 0 AND i.stock_actual <= i.stock_minimo) AS por_reponer,
                     SUM(i.stock_actual <= 0) AS sin_stock
                FROM ' . self::INSUMOS_CON_CATEGORIA . '
-              WHERE i.activo = 1
+              WHERE i.activo = 1 AND ' . InsumoRepository::SOLO_CONSUMO . '
               GROUP BY categoria
               ORDER BY categoria = \'Sin categoría\', categoria'
         );
@@ -150,7 +152,7 @@ final class PanelRepository
             'SELECT i.codigo, i.nombre, i.stock_actual, i.stock_minimo, ' . self::CATEGORIA_PRINCIPAL . ' AS categoria,
                     s.codigo AS sector_codigo
                FROM ' . self::INSUMOS_CON_CATEGORIA . "
-              WHERE i.activo = 1 AND {$condicion}
+              WHERE i.activo = 1 AND {$condicion} AND " . InsumoRepository::SOLO_CONSUMO . "
               ORDER BY categoria, i.nombre"
         );
     }

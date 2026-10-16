@@ -24,6 +24,12 @@ final class InsumoRepository
         'no-queda' => 'i.activo = 1 AND i.stock_actual <= 0',
     ];
 
+    /**
+     * Solo los insumos de consumo: deja fuera el equipo de montaña de la Práctica de Invierno (su categoría principal),
+     * que tiene su propia pantalla. Lo usan los avisos y el gráfico del inicio, y «Buscar producto» con ?de=consumo.
+     */
+    public const SOLO_CONSUMO = "COALESCE(cp.nombre, c.nombre, '') <> '" . InsumoService::PRACTICA_INVIERNO . "'";
+
     private const COLUMNAS = 'i.id, i.codigo, i.codigo_udec, i.nombre, i.stock_actual, i.stock_minimo, i.activo,
         i.categoria_id, c.nombre AS categoria, cp.nombre AS categoria_padre,
         i.sector_id, s.nombre AS sector, s.codigo AS sector_codigo';
@@ -38,9 +44,10 @@ final class InsumoRepository
      *
      * @return list<array<string, mixed>>
      */
-    public function buscar(string $texto, string $filtro): array
+    public function buscar(string $texto, string $filtro, bool $soloConsumo = false): array
     {
         [$condicion, $parametros] = self::condicionTexto($texto);
+        $condicion .= $soloConsumo ? ' AND ' . self::SOLO_CONSUMO : '';
 
         return Database::fetchAll(
             'SELECT ' . self::COLUMNAS . ' FROM ' . self::DESDE
@@ -74,9 +81,10 @@ final class InsumoRepository
      *
      * @return array<string, int> filtro => cantidad
      */
-    public function contar(string $texto): array
+    public function contar(string $texto, bool $soloConsumo = false): array
     {
         [$condicion, $parametros] = self::condicionTexto($texto);
+        $condicion .= $soloConsumo ? ' AND ' . self::SOLO_CONSUMO : '';
         $columnas = [];
 
         foreach (self::FILTROS as $filtro => $sql) {
@@ -144,7 +152,7 @@ final class InsumoRepository
     public function ultimosMovimientos(int $insumoId, int $limite): array
     {
         return Database::fetchAll(
-            'SELECT m.id, m.tipo, m.fecha, m.documento, m.motivo, mi.cantidad, mi.stock_resultante,
+            'SELECT m.id, m.tipo, m.fecha, m.reserva, m.motivo, mi.cantidad, mi.stock_resultante,
                     us.nombre AS quien, se.nombre AS sector
                FROM movimiento_items mi
                JOIN movimientos m ON m.id = mi.movimiento_id

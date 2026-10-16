@@ -24,8 +24,10 @@ return [
         'panel.ver',
         'panel.bodega',     // avisos y gráficos de toda la bodega; sin él, el inicio muestra solo lo propio
         'insumos.ver',
+        'insumos.abastecimiento', // «Ingresar abastecimiento»: lo que llega con una reserva de SAP
         'herramientas.ver',
         'historial.ver',    // «Entradas y salidas», con su descarga para Excel
+        'difusion.ver',     // «Difusión»: pedidos a proveedores fuera de abasto (pendiente)
         'reportes.ver',
         'avisos.ver',
     ],

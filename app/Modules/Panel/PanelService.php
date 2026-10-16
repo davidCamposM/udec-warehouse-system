@@ -28,8 +28,8 @@ final class PanelService
      */
     public function avisosBodega(): array
     {
-        // Los mismos números que los filtros de la lista de insumos.
-        $insumos = $this->insumos->contar('');
+        // Los mismos números que los filtros de la lista de insumos, solo de los de consumo (sin la Práctica de Invierno).
+        $insumos = $this->insumos->contar('', true);
 
         return [
             'sin_unidades' => $insumos['no-queda'],
@@ -54,7 +54,7 @@ final class PanelService
         $insumos = $this->panel->resumenInsumos();
         $herramientas = $this->panel->resumenHerramientas();
         $verInsumos = Permission::can('insumos.ver');
-        $enlace = static fn (string $ver): ?string => $verInsumos ? url('insumos', ['ver' => $ver]) : null;
+        $enlace = static fn (string $ver): ?string => $verInsumos ? url('insumos', ['ver' => $ver, 'de' => 'consumo']) : null;
         $verHerramientas = Permission::can('herramientas.ver');
         $catalogo = static fn (string $ver): ?string => $verHerramientas ? url('herramientas', ['ver' => $ver]) : null;
         $unidades = static fn (int $n): string => unidades($n);

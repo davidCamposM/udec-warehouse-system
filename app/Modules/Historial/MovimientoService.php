@@ -159,7 +159,7 @@ final class MovimientoService
             );
 
         // 3) Detalle
-        $libro->hoja('Detalle', [12, 8, 12, 40, 10, 9, 9, 9, 11, 34, 30]);
+        $libro->hoja('Detalle', [12, 8, 12, 40, 10, 9, 9, 9, 11, 13, 34, 30]);
         $encabezado($libro, 'Detalle de entradas y salidas');
         $filas = array_map(static function (array $m): array {
             $cantidad = (int) $m['cantidad'];
@@ -173,6 +173,7 @@ final class MovimientoService
                 $m['tipo'] === 'salida' ? abs($cantidad) : null,
                 $m['tipo'] === 'ajuste' ? $cantidad : null,
                 (int) $m['stock_resultante'],
+                (string) ($m['reserva'] ?? ''),
                 $m['sector'] !== null ? $m['sector_codigo'] . ' · ' . $m['sector'] : '',
                 (string) ($m['motivo'] ?? ''),
             ];
@@ -180,7 +181,7 @@ final class MovimientoService
         $filas === []
             ? $libro->fila(['No hubo movimientos en este período.'], 'gris')
             : $libro->tabla(
-                ['Fecha', 'Hora', 'Código', 'Producto', 'Tipo', 'Entró', 'Salió', 'Ajuste', 'Quedaron', 'Ubicación', 'Motivo'],
+                ['Fecha', 'Hora', 'Código', 'Producto', 'Tipo', 'Entró', 'Salió', 'Ajuste', 'Quedaron', 'Reserva', 'Ubicación', 'Motivo'],
                 $filas,
             );
 

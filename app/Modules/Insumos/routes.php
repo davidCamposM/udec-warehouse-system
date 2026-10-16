@@ -8,10 +8,12 @@
 
 declare(strict_types=1);
 
+use App\Modules\Insumos\AbastecimientoController;
 use App\Modules\Insumos\AjusteController;
 use App\Modules\Insumos\GuardarController;
 use App\Modules\Insumos\InsumoController;
 use App\Modules\Insumos\NuevoProductoController;
+use App\Modules\Insumos\PracticaInviernoController;
 use App\Modules\Insumos\RetirarController;
 
 defined('APP_ROOT') || exit;
@@ -20,6 +22,15 @@ $router->get('/insumos', [InsumoController::class, 'index'], 'insumos.ver');
 
 // La lista que aparece bajo una barra de búsqueda mientras se escribe.
 $router->get('/insumos/sugerencias', [InsumoController::class, 'sugerencias'], 'insumos.ver');
+
+// Insumos Práctica de Invierno (administrativas): el equipo de montaña y cuántos hay.
+$router->get('/practica-invierno', [PracticaInviernoController::class, 'index'], 'insumos.ver');
+
+// Ingresar abastecimiento (administrativas): 1) la reserva, 2) lo que llegó (la lista, con la cantidad de cada uno).
+$router->get('/abastecimiento', [AbastecimientoController::class, 'reserva'], 'insumos.abastecimiento');
+$router->post('/abastecimiento', [AbastecimientoController::class, 'leerReserva'], 'insumos.abastecimiento');
+$router->get('/abastecimiento/productos', [AbastecimientoController::class, 'productos'], 'insumos.abastecimiento');
+$router->post('/abastecimiento/productos', [AbastecimientoController::class, 'leerProducto'], 'insumos.abastecimiento');
 
 // Agregar nuevo producto: 1) el producto, 2) el tipo, 3) cuántos llegaron, 4) dónde quedó.
 $router->get('/insumos/nuevo', [NuevoProductoController::class, 'empezar'], 'insumos.administrar');

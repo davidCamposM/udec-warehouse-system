@@ -12,8 +12,8 @@ use App\Modules\Sectores\SectorRepository;
 defined('APP_ROOT') || exit;
 
 /**
- * El ÚNICO lugar que cambia el stock de los productos: entradas (Registrar producto), ajustes (Actualizar cantidad) y
- * salidas (Retirar producto). Cada cambio queda como un movimiento con su ítem y el stock que resultó, así la suma de
+ * El ÚNICO lugar que cambia el stock de los productos: entradas (Registrar producto e Ingresar abastecimiento), ajustes
+ * (Actualizar cantidad) y salidas (Retirar producto). Cada cambio queda como un movimiento con su ítem y el stock que resultó, así la suma de
  * los movimientos siempre explica la cantidad actual.
  */
 final class StockService
@@ -71,6 +71,65 @@ final class StockService
                 'sector_codigo' => $sector['codigo'],
             ];
         });
+    }
+
+    /**
+     * Abastecimiento: suma todo lo que llegó con una reserva, en una sola entrada con su número. Los productos siguen en
+     * su lugar de siempre (sin lugar, si nunca se guardaron): las administrativas no eligen dónde queda.
+     *
+     * @param array<int, int> $productos insumo_id => cantidad
+     * @return list<array{insumo_id: int, nombre: string, cantidad: int, stock: int}>
+     * @throws ValidationException si una cantidad no sirve o un producto ya no existe
+     */
+    public function ingresarReserva(string $reserva, array $productos): array
+    {
+        if ($productos === []) {
+            throw new ValidationException(['codigo' => 'Agrega al menos un producto de los que llegaron.']);
+        }
+        foreach ($productos as $cantidad) {
+            self::validarCantidad($cantidad);
+        }
+
+        return Database::transaction(function () use ($reserva, $productos): array {
+            $movimiento = $this->stock->crearMovimiento('entrada', (int) Auth::id(), $reserva);
+            $ingresados = [];
+            foreach ($productos as $insumoId => $cantidad) {
+                $insumo = $this->stock->bloquearInsumo($insumoId);
+                if ($insumo === null || (int) $insumo['activo'] !== 1) {
+                    throw new ValidationException(['codigo' => 'Uno de los productos de la lista ya no existe. Quítalo y vuelve a ingresar.']);
+                }
+                $stock = (int) $insumo['stock_actual'] + $cantidad;
+                $this->stock->agregarItem($movimiento, $insumoId, $cantidad, $stock, null);
+                $this->stock->actualizarStock($insumoId, $stock, null);
+                $ingresados[] = ['insumo_id' => $insumoId, 'nombre' => (string) $insumo['nombre'], 'cantidad' => $cantidad, 'stock' => $stock];
+            }
+
+            return $ingresados;
+        });
+    }
+
+    /**
+     * El N° de reserva como lo muestra SAP: 10 dígitos («18857» → «0000018857»). Acepta lo que se copió del correo
+     * («Reserva 0000018857»).
+     *
+     * @throws ValidationException si no es un número de hasta 10 dígitos
+     */
+    public static function numeroReserva(mixed $valor): string
+    {
+        $digitos = preg_replace('/\D/', '', is_string($valor) ? $valor : '') ?? '';
+        if ($digitos === '' || strlen(ltrim($digitos, '0')) === 0 || strlen($digitos) > 10) {
+            throw new ValidationException(['reserva' => 'Escribe el número de la reserva, solo con números. Ejemplo: 0000018857 (o 18857).']);
+        }
+
+        return str_pad(ltrim($digitos, '0'), 10, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * @return array{fecha: string, quien: ?string, productos: int}|null la última vez que se ingresó esa reserva
+     */
+    public function reservaIngresada(string $reserva): ?array
+    {
+        return $this->stock->reservaIngresada($reserva);
     }
 
     /**

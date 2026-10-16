@@ -495,3 +495,95 @@
   justify-content: space-between;
   gap: var(--space-3);
 }
+
+/* ---------- Insumos Práctica de Invierno: una tarjeta por tipo de equipo; cada fila, el producto y cuántos hay ---------- */
+.invierno__filtros {
+  margin-bottom: var(--space-4);
+}
+
+.invierno {
+  columns: 2 24rem;
+  column-gap: var(--space-4);
+}
+
+/* Cada tarjeta entera en su columna, una debajo de otra: sin huecos aunque tengan distinto largo */
+.invierno__grupo {
+  display: block;
+  width: 100%;
+  margin-bottom: var(--space-4);
+  break-inside: avoid;
+}
+
+.invierno__lista {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.invierno__lista li + li {
+  border-top: 1px solid var(--bs-border);
+}
+
+.invierno__fila {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  color: var(--bs-body);
+  text-decoration: none;
+  transition: background-color var(--bs-transition);
+}
+
+.invierno__fila:hover {
+  background: color-mix(in srgb, var(--estado-bien) 6%, #fff);
+}
+
+.invierno__nombre {
+  flex: 1;
+  min-width: 0;
+  line-height: 1.35;
+}
+
+/* Cuántos hay: el número en grande, verde si hay; si no hay, el 0 en gris y «Sin stock» en rojo (como el filtro) */
+.invierno__hay {
+  display: grid;
+  flex: none;
+  justify-items: end;
+  line-height: 1.1;
+}
+
+.invierno__hay strong {
+  color: var(--estado-bien);
+  font-size: var(--text-xl, 1.25rem);
+  font-variant-numeric: tabular-nums;
+}
+
+.invierno__hay span {
+  color: var(--bs-muted);
+  font-size: var(--text-xs);
+}
+
+.invierno__fila--sin .invierno__hay strong {
+  color: var(--bs-muted);
+}
+
+.invierno__fila--sin .invierno__hay span {
+  color: var(--estado-grave);
+  font-weight: 600;
+}
+
+/* «Solo insumos de consumo»: cuando se llega desde un aviso o el gráfico del inicio */
+.buscar__alcance {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+  color: var(--bs-muted);
+  font-size: var(--text-sm);
+}
+
+.buscar__alcance .icon {
+  width: 1rem;
+  height: 1rem;
+}

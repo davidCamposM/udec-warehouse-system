@@ -22,10 +22,13 @@ final class InsumoService
 
     /** Estado de un producto => [texto, ícono]. Siempre se muestra escrito, no solo con color. */
     public const ESTADOS = [
-        'ok' => ['Hay', 'check'],
-        'low' => ['Queda poco', 'alert'],
-        'out' => ['No queda', 'x-circle'],
+        'ok' => ['Con stock', 'check'],
+        'low' => ['Por reponer', 'alert'],
+        'out' => ['Sin stock', 'x-circle'],
     ];
+
+    /** La categoría principal del equipo de montaña de la Práctica de Invierno (seed 050_practica_invierno.php). */
+    public const PRACTICA_INVIERNO = 'Práctica de Invierno';
 
     public function __construct(
         private readonly InsumoRepository $insumos = new InsumoRepository(),
@@ -70,15 +73,15 @@ final class InsumoService
     }
 
     /** @return list<array<string, mixed>> */
-    public function buscar(string $texto, string $filtro): array
+    public function buscar(string $texto, string $filtro, bool $soloConsumo = false): array
     {
-        return $this->insumos->buscar($texto, $filtro);
+        return $this->insumos->buscar($texto, $filtro, $soloConsumo);
     }
 
     /** @return array<string, int> */
-    public function contar(string $texto): array
+    public function contar(string $texto, bool $soloConsumo = false): array
     {
-        return $this->insumos->contar($texto);
+        return $this->insumos->contar($texto, $soloConsumo);
     }
 
     /**
@@ -144,6 +147,36 @@ final class InsumoService
             'total' => $total,
             'desde' => $desde,
         ];
+    }
+
+    /**
+     * «Insumos Práctica de Invierno»: los productos de esa categoría principal, agrupados por su subcategoría (Esquí y
+     * fijaciones, Bastones…), con cuántos hay con y sin stock. Con $filtro ('con-stock', 'sin-stock') solo esos.
+     *
+     * @return array{grupos: array<string, list<array<string, mixed>>>, conteo: array{todos: int, con-stock: int, sin-stock: int}}
+     */
+    public function practicaInvierno(string $filtro): array
+    {
+        $grupos = [];
+        $conteo = ['todos' => 0, 'con-stock' => 0, 'sin-stock' => 0];
+        foreach ($this->insumos->buscar('', 'todos') as $insumo) {
+            $esDeLaPractica = $insumo['categoria_padre'] === self::PRACTICA_INVIERNO
+                || ($insumo['categoria_padre'] === null && $insumo['categoria'] === self::PRACTICA_INVIERNO);
+            if (!$esDeLaPractica) {
+                continue;
+            }
+
+            $estado = (int) $insumo['stock_actual'] > 0 ? 'con-stock' : 'sin-stock';
+            $conteo['todos']++;
+            $conteo[$estado]++;
+            if ($filtro === 'todos' || $filtro === $estado) {
+                $grupos[$insumo['categoria_padre'] !== null ? $insumo['categoria'] : 'Otros'][] = $insumo;
+            }
+        }
+        // Por nombre, con «Otros» al final.
+        uksort($grupos, static fn (string $a, string $b): int => [$a === 'Otros', $a] <=> [$b === 'Otros', $b]);
+
+        return ['grupos' => $grupos, 'conteo' => $conteo];
     }
 
     /**

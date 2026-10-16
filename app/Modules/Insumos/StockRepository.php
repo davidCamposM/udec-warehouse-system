@@ -22,12 +22,32 @@ final class StockRepository
         return Database::fetch('SELECT id, codigo, nombre, stock_actual, activo FROM insumos WHERE id = ? FOR UPDATE', [$id]);
     }
 
-    /** @param 'entrada'|'salida'|'ajuste' $tipo */
-    public function crearMovimiento(string $tipo, int $usuarioId, ?string $documento = null, ?string $motivo = null): int
+    /**
+     * @param 'entrada'|'salida'|'ajuste' $tipo
+     * @param ?string $reserva el N° de reserva SAP, en las entradas de abastecimiento
+     */
+    public function crearMovimiento(string $tipo, int $usuarioId, ?string $reserva = null, ?string $motivo = null): int
     {
         return Database::insert(
-            'INSERT INTO movimientos (tipo, usuario_id, documento, motivo) VALUES (?, ?, ?, ?)',
-            [$tipo, $usuarioId, $documento, $motivo]
+            'INSERT INTO movimientos (tipo, usuario_id, reserva, motivo) VALUES (?, ?, ?, ?)',
+            [$tipo, $usuarioId, $reserva, $motivo]
+        );
+    }
+
+    /**
+     * La última vez que se ingresó esa reserva (puede llegar en partes), o null si nunca.
+     *
+     * @return array{fecha: string, quien: ?string, productos: int}|null
+     */
+    public function reservaIngresada(string $reserva): ?array
+    {
+        return Database::fetch(
+            'SELECT m.fecha, u.nombre AS quien, (SELECT COUNT(*) FROM movimiento_items mi WHERE mi.movimiento_id = m.id) AS productos
+               FROM movimientos m LEFT JOIN usuarios u ON u.id = m.usuario_id
+              WHERE m.reserva = ?
+              ORDER BY m.fecha DESC, m.id DESC
+              LIMIT 1',
+            [$reserva]
         );
     }
 
