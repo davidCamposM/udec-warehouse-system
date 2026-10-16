@@ -14,3 +14,4 @@ defined('APP_ROOT') || exit;
 
 $router->get('/', [PanelController::class, 'index'], 'panel.ver');
 $router->get('/panel/resumen', [PanelController::class, 'actualizar'], 'panel.ver');
+$router->get('/panel/estado-bodega', [PanelController::class, 'estadoBodega'], 'panel.bodega');

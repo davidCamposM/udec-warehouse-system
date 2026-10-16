@@ -61,6 +61,13 @@
   --tarea-ocre-texto: #8a6a1c;
   --tarea-pizarra: #5d7a5d; /* salvia */
   --tarea-pizarra-texto: #4f684f;
+
+  /* Estados (productos: con stock, por reponer, sin stock; herramientas: en bodega, prestadas, atrasadas): los gráficos
+     del inicio y los filtros de «Buscar producto» y del catálogo usan los mismos colores, así se reconocen */
+  --estado-bien: #539452;
+  --estado-atencion: #d4a017;
+  --estado-grave: #c0392b;
+  --estado-fuera: #3f6fae; /* herramientas prestadas a tiempo: fuera de la bodega, sin problema */
   /* Sí / No: la pareja de botones al final de formularios y confirmaciones (verde = sí, rojo = no) */
   --color-si: #477e46; /* el verde del sistema */
   --color-no: #dc3545;

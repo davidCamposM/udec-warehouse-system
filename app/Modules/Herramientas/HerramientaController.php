@@ -30,10 +30,14 @@ final class HerramientaController
     public function index(Request $request): Response
     {
         $administrar = Permission::can('herramientas.administrar');
+        // ?ver= en-bodega, prestadas o atrasadas (desde el gráfico del inicio o las pastillas de arriba)
+        $estado = HerramientaService::filtro($request->query('ver'));
 
         return Response::view('Herramientas::catalogo', [
             'titulo' => 'Catálogo de herramientas',
-            'grupos' => $this->herramientas->porCategoria(),
+            'grupos' => $this->herramientas->porCategoria($estado),
+            'estado' => $estado,
+            'conteo' => $this->herramientas->contarPorEstado(),
             'puedeAdministrar' => $administrar,
             'puedeSolicitar' => Permission::can('herramientas.solicitar') && Auth::perfil() === 'docente',
             'estilos' => ['css/pages/herramientas.css'],

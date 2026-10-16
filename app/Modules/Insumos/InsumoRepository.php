@@ -13,10 +13,14 @@ defined('APP_ROOT') || exit;
  */
 final class InsumoRepository
 {
-    /** Condición SQL de cada filtro de la lista. */
+    /**
+     * Condición SQL de cada filtro de la lista. Con stock, por reponer y sin stock no se cruzan: cada producto está en
+     * uno solo (los mismos grupos del gráfico del inicio).
+     */
     public const FILTROS = [
         'todos' => 'i.activo = 1',
-        'reponer' => 'i.activo = 1 AND i.stock_minimo > 0 AND i.stock_actual <= i.stock_minimo',
+        'con-stock' => 'i.activo = 1 AND i.stock_actual > 0 AND (i.stock_minimo = 0 OR i.stock_actual > i.stock_minimo)',
+        'reponer' => 'i.activo = 1 AND i.stock_actual > 0 AND i.stock_minimo > 0 AND i.stock_actual <= i.stock_minimo',
         'no-queda' => 'i.activo = 1 AND i.stock_actual <= 0',
     ];
 

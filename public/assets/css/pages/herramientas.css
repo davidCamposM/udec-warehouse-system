@@ -886,3 +886,8 @@
     transform: none;
   }
 }
+
+/* Los filtros por dónde están las herramientas, sobre el buscador */
+.catalogo__estados {
+  margin-bottom: var(--space-4);
+}

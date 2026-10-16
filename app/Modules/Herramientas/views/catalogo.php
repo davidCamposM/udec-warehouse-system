@@ -1,10 +1,14 @@
 <?php
 
+use App\Modules\Herramientas\HerramientaService;
+
 defined('APP_ROOT') || exit;
 
 // «Catálogo de herramientas»: lo que tiene la bodega para prestar, en una tarjeta por categoría, con cuántas están
-// prestadas ahora. Arriba, el buscador y las categorías (herramientas.js). El encargado además agrega, edita y
-// elimina (desde Editar).
+// prestadas ahora. Arriba, los filtros por dónde están (todas, en bodega, prestadas, atrasadas; ?ver=) y debajo el
+// buscador y las categorías (herramientas.js). El encargado además agrega, edita y elimina (desde Editar).
+// Cada estado con su color, el mismo del gráfico del inicio (verde, azul, rojo).
+$colores = ['en-bodega' => 'bien', 'prestadas' => 'fuera', 'atrasadas' => 'grave'];
 $acciones = match (true) {
     $puedeAdministrar => '<a class="btn btn-success" href="' . e(url('herramientas/nueva')) . '">' . icon('plus') . 'Agregar herramienta</a>',
     $puedeSolicitar => '<a class="btn btn-success" href="' . e(url('herramientas/solicitar')) . '">' . icon('tool') . 'Solicitar herramientas</a>',
@@ -19,10 +23,23 @@ $acciones = match (true) {
     'acciones' => $acciones,
 ]) ?>
 
+<?php // Arriba, dónde están: todas, en bodega, prestadas o atrasadas, con los colores del gráfico del inicio. ?>
+<nav class="nav-pills catalogo__estados" aria-label="Mostrar">
+    <?php foreach (HerramientaService::ESTADOS as $clave => $nombre) : ?>
+        <a class="nav-link<?= isset($colores[$clave]) ? ' nav-link--' . e($colores[$clave]) : '' ?><?= $clave === $estado ? ' active' : '' ?>"
+            href="<?= e(url('herramientas', $clave === 'todas' ? [] : ['ver' => $clave])) ?>"
+            <?= $clave === $estado ? 'aria-current="true"' : '' ?>>
+            <?= e($nombre) ?> <span class="nav-count"><?= e($conteo[$clave]) ?></span>
+        </a>
+    <?php endforeach; ?>
+</nav>
+
 <?php if ($grupos === []) : ?>
     <div class="card card-body vacio-simple">
         <span class="vacio-simple__icono"><?= icon('tool') ?></span>
-        <p class="vacio-simple__titulo">Todavía no hay herramientas en el catálogo</p>
+        <p class="vacio-simple__titulo"><?= $estado === 'todas'
+            ? 'Todavía no hay herramientas en el catálogo'
+            : 'No hay herramientas ' . e(mb_strtolower(HerramientaService::ESTADOS[$estado])) . ' ahora' ?></p>
     </div>
 <?php else : ?>
     <?= partial('Herramientas::partials/buscador', ['grupos' => $grupos]) ?>
@@ -39,8 +56,12 @@ $acciones = match (true) {
                         <?php $prestadas = (int) $herramienta['prestadas']; ?>
                         <li class="catalogo__herramienta" data-herramienta data-nombre="<?= e($herramienta['nombre']) ?>">
                             <span class="catalogo__nombre"><?= e($herramienta['nombre']) ?></span>
-                            <?php if ($prestadas > 0) : ?>
-                                <span class="status status--low"><?= e($prestadas === 1 ? '1 prestada' : "{$prestadas} prestadas") ?></span>
+                            <?php if ((int) $herramienta['atrasadas'] > 0) : ?>
+                                <span class="status status--out"><?= e((int) $herramienta['atrasadas'] === 1 ? '1 atrasada' : "{$herramienta['atrasadas']} atrasadas") ?></span>
+                            <?php endif; ?>
+                            <?php if ($prestadas - (int) $herramienta['atrasadas'] > 0) : ?>
+                                <?php $aTiempo = $prestadas - (int) $herramienta['atrasadas']; ?>
+                                <span class="status status--low"><?= e($aTiempo === 1 ? '1 prestada' : "{$aTiempo} prestadas") ?></span>
                             <?php endif; ?>
                             <?php if ($puedeAdministrar) : ?>
                                 <a class="catalogo__editar" href="<?= e(url('herramientas/' . $herramienta['id'] . '/editar')) ?>"

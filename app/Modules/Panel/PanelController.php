@@ -26,6 +26,16 @@ final class PanelController
         ]);
     }
 
+    /** «Imprimir estado de bodega»: el documento Word con el estado completo de la bodega en este momento. */
+    public function estadoBodega(Request $request): Response
+    {
+        return Response::descarga(
+            'Estado_de_bodega_' . date('Y-m-d_Hi') . '.docx',
+            (new EstadoBodega())->documento(),
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        );
+    }
+
     /** Solo los avisos, sin la página: los pide panel.js cada cierto tiempo para mantenerlos al día. */
     public function actualizar(Request $request): Response
     {

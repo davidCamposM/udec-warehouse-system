@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Modules\Historial;
 
+use App\Core\Auth;
 use App\Core\Request;
 use App\Core\Response;
 
@@ -30,14 +31,20 @@ final class MovimientoController
         ]);
     }
 
-    public function csv(Request $request): Response
+    /**
+     * «Descargar para Excel»: un libro con las hojas Resumen, Por producto y Detalle, de lo que muestran los filtros
+     * elegidos (período y tipo).
+     */
+    public function excel(Request $request): Response
     {
         $filtros = $this->filtros($request);
+        $nombre = 'Entradas y salidas - ' . MovimientoService::PERIODOS[$filtros['periodo']] . ' - '
+            . MovimientoService::TIPOS[$filtros['tipo'] ?? ''] . ' - ' . date('Y-m-d');
 
-        return Response::csv(
-            'entradas-y-salidas-' . $filtros['periodo'] . '-' . date('Y-m-d') . '.csv',
-            ['Fecha', 'Tipo', 'Código', 'Producto', 'Cantidad', 'Quedaron', 'Quién', 'Sector', 'Motivo'],
-            $this->movimientos->filasCsv($filtros)
+        return Response::descarga(
+            iconv('UTF-8', 'ASCII//TRANSLIT', $nombre) . '.xlsx',
+            $this->movimientos->libroExcel($filtros, (string) (Auth::user()['nombre'] ?? '')),
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         );
     }
 

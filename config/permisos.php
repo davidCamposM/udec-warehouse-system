@@ -18,14 +18,14 @@ return [
     // prestamos.administrar (entregar y recibir herramientas).
     'administrador' => ['*'],
 
-    // Ven todo, pero no registran ni modifican (por ahora).
+    // Consultan sin registrar ni modificar: los productos, el catálogo de herramientas, las entradas y salidas y, en el
+    // inicio, los avisos y los gráficos de la bodega. No ven los préstamos de herramientas: eso es del encargado.
     'administrativa' => [
         'panel.ver',
-        'panel.bodega',     // resumen de toda la bodega; sin él, el inicio muestra solo lo propio
+        'panel.bodega',     // avisos y gráficos de toda la bodega; sin él, el inicio muestra solo lo propio
         'insumos.ver',
         'herramientas.ver',
-        'historial.ver',
-        'prestamos.ver',    // los préstamos de herramientas, sin entregar ni recibir
+        'historial.ver',    // «Entradas y salidas», con su descarga para Excel
         'reportes.ver',
         'avisos.ver',
     ],

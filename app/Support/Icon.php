@@ -44,6 +44,7 @@ final class Icon
         'minus' => '<path d="M5 12h14"/>',
         'ok' => '<path d="M4.5 12.5l5 5 10-11"/>',
         'plus' => '<path d="M12 5v14M5 12h14"/>',
+        'printer' => '<path d="M6 9V3h12v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M6 14h12v7H6z"/>',
         'refresh' => '<path d="M3 12a9 9 0 0 1 15.4-6.4L21 8"/><path d="M21 3v5h-5"/>'
             . '<path d="M21 12a9 9 0 0 1-15.4 6.4L3 16"/><path d="M8 16H3v5"/>',
         'scan' => '<path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/>'

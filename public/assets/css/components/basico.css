@@ -495,6 +495,60 @@ a.nav-link.active:hover {
   color: #fff;
 }
 
+/* ---------- Filtros por estado, con los colores de los gráficos del inicio: bien (verde: con stock, en bodega), atención
+   (ámbar: por reponer), fuera (azul: prestadas) y grave (rojo: sin stock, atrasadas). Sin elegir: borde y número del
+   color; elegido: relleno del color con letra blanca. <a class="nav-link nav-link--bien"> ---------- */
+.nav-link--bien { --estado: var(--estado-bien); --estado-relleno: var(--estado-bien); }
+.nav-link--atencion { --estado: var(--estado-atencion); --estado-relleno: var(--estado-atencion); }
+.nav-link--grave { --estado: var(--estado-grave); --estado-relleno: var(--estado-grave); }
+.nav-link--fuera { --estado: var(--estado-fuera); --estado-relleno: var(--estado-fuera); }
+
+.nav-link--bien,
+.nav-link--atencion,
+.nav-link--grave,
+.nav-link--fuera {
+  border-color: color-mix(in srgb, var(--estado) 55%, var(--bs-border));
+}
+
+.nav-link--bien .nav-count,
+.nav-link--atencion .nav-count,
+.nav-link--grave .nav-count,
+.nav-link--fuera .nav-count {
+  background: color-mix(in srgb, var(--estado) 18%, #fff);
+  color: color-mix(in srgb, var(--estado-relleno) 85%, #000);
+}
+
+a.nav-link--bien:hover,
+a.nav-link--atencion:hover,
+a.nav-link--grave:hover,
+a.nav-link--fuera:hover {
+  border-color: var(--estado);
+  background: color-mix(in srgb, var(--estado) 10%, #fff);
+  color: var(--bs-body);
+}
+
+.nav-link--bien.active,
+.nav-link--atencion.active,
+.nav-link--grave.active,
+a.nav-link--bien.active:hover,
+a.nav-link--atencion.active:hover,
+a.nav-link--grave.active:hover,
+.nav-link--fuera.active,
+a.nav-link--fuera.active:hover {
+  border-color: var(--estado-relleno);
+  background: var(--estado-relleno);
+  box-shadow: 0 2px 6px color-mix(in srgb, var(--estado-relleno) 35%, transparent);
+  color: #fff;
+}
+
+.nav-link--bien.active .nav-count,
+.nav-link--atencion.active .nav-count,
+.nav-link--grave.active .nav-count,
+.nav-link--fuera.active .nav-count {
+  background: rgba(255, 255, 255, 0.25);
+  color: #fff;
+}
+
 /* ---------- Estado de un producto (parcial Insumos::partials/estado): etiqueta redonda con fondo suave ---------- */
 .status {
   border-radius: 999px;

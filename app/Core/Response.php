@@ -7,7 +7,7 @@ namespace App\Core;
 defined('APP_ROOT') || exit;
 
 /**
- * Respuesta HTTP. Los controladores siempre retornan una: HTML, JSON, redirección o CSV.
+ * Respuesta HTTP. Los controladores siempre retornan una: HTML, JSON, redirección o un archivo para descargar.
  */
 final class Response
 {
@@ -42,44 +42,16 @@ final class Response
         return new self('', $estado, ['Location' => $url]);
     }
 
-    /**
-     * Descarga CSV que abre directo en Excel: separador ";" y BOM UTF-8 para tildes y ñ.
-     *
-     * @param list<string>                         $encabezados
-     * @param iterable<array<int|string, mixed>>   $filas
-     */
-    public static function csv(string $nombreArchivo, array $encabezados, iterable $filas): self
+    /** Un archivo para descargar (por ejemplo, un .docx), con su tipo y su nombre. */
+    public static function descarga(string $nombreArchivo, string $contenido, string $tipo): self
     {
-        $flujo = fopen('php://temp', 'r+');
-        fwrite($flujo, "\xEF\xBB\xBF");
-        fputcsv($flujo, $encabezados, ';', '"', '');
-
-        foreach ($filas as $fila) {
-            fputcsv($flujo, array_map(self::celdaSegura(...), array_values($fila)), ';', '"', '');
-        }
-
-        rewind($flujo);
-        $contenido = (string) stream_get_contents($flujo);
-        fclose($flujo);
-
         $nombre = preg_replace('/[^A-Za-z0-9._-]/', '_', $nombreArchivo);
 
         return new self($contenido, 200, [
-            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Type' => $tipo,
             'Content-Disposition' => 'attachment; filename="' . $nombre . '"',
+            'Content-Length' => (string) strlen($contenido),
         ]);
-    }
-
-    /** Evita que Excel ejecute como fórmula un texto ingresado por un usuario ("=...", "+...", "@..."). */
-    private static function celdaSegura(mixed $valor): string
-    {
-        $texto = (string) $valor;
-
-        if ($texto !== '' && !is_numeric($texto) && str_contains("=+-@\t\r", $texto[0])) {
-            return "'" . $texto;
-        }
-
-        return $texto;
     }
 
     public function send(): void

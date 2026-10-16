@@ -8,7 +8,9 @@ defined('APP_ROOT') || exit;
 // productos que coinciden (insumos.js) y tocar uno abre su ficha. «Buscar» (o Enter) deja en la lista de abajo todos
 // los que coinciden; un código leído con la pistola abre directo la ficha. Debajo, los filtros y una tarjeta por
 // producto: nombre y datos, la cantidad con su estado y la foto.
-$filtros = ['todos' => 'Todos', 'reponer' => 'Por reponer', 'no-queda' => 'No queda'];
+$filtros = ['todos' => 'Todos', 'con-stock' => 'Con stock', 'reponer' => 'Por reponer', 'no-queda' => 'Sin stock'];
+// Cada estado con su color, el mismo del gráfico del inicio (verde, ámbar, rojo).
+$colores = ['con-stock' => 'bien', 'reponer' => 'atencion', 'no-queda' => 'grave'];
 
 $urlFiltro = static fn (string $ver): string => url('insumos', array_filter([
     'q' => $texto,
@@ -45,7 +47,7 @@ $urlAgregar = url('insumos/nuevo', InsumoService::paraAgregar($texto));
 <div class="buscar__barra">
     <nav class="nav-pills" aria-label="Mostrar">
         <?php foreach ($filtros as $clave => $nombre) : ?>
-            <a class="nav-link<?= $clave === $filtro ? ' active' : '' ?>" href="<?= e($urlFiltro($clave)) ?>"
+            <a class="nav-link<?= isset($colores[$clave]) ? ' nav-link--' . e($colores[$clave]) : '' ?><?= $clave === $filtro ? ' active' : '' ?>" href="<?= e($urlFiltro($clave)) ?>"
                 <?= $clave === $filtro ? 'aria-current="true"' : '' ?>>
                 <?= e($nombre) ?>
                 <span class="nav-count"><?= e($conteo[$clave]) ?></span>

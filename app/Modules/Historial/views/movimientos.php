@@ -13,7 +13,8 @@ $enlace = static fn (array $cambios): string => url('movimientos', array_filter(
     'tipo' => array_key_exists('tipo', $cambios) ? $cambios['tipo'] : $filtros['tipo'],
     'pagina' => ($cambios['pagina'] ?? 1) > 1 ? $cambios['pagina'] : null,
 ]));
-$csv = url('movimientos/csv', array_filter(['periodo' => $filtros['periodo'], 'tipo' => $filtros['tipo']]));
+// «Descargar para Excel» baja lo mismo que muestran los filtros elegidos (período y tipo).
+$excel = url('movimientos/excel', array_filter(['periodo' => $filtros['periodo'], 'tipo' => $filtros['tipo']]));
 $tipoActual = $filtros['tipo'] ?? '';
 ?>
 <?= partial('encabezado', [
@@ -21,7 +22,7 @@ $tipoActual = $filtros['tipo'] ?? '';
     'tarea' => 'historial',
     'titulo' => 'Entradas y salidas',
     'texto' => 'Lo que llegó, lo que se retiró y los ajustes de cantidad, con quién y cuándo.',
-    'acciones' => '<a class="btn btn-outline-secondary btn-sm" href="' . e($csv) . '">' . icon('arrow-in') . 'Descargar para Excel</a>',
+    'acciones' => '<a class="btn btn-outline-secondary btn-sm" href="' . e($excel) . '" download>' . icon('arrow-in') . 'Descargar para Excel</a>',
 ]) ?>
 
 <div class="card card-body filtros">

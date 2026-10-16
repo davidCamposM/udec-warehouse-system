@@ -12,12 +12,16 @@ defined('APP_ROOT') || exit;
 final class HerramientaRepository
 {
     /**
-     * Columnas de cada herramienta: su categoría y cuántas unidades están prestadas ahora (en solicitudes prestadas).
+     * Columnas de cada herramienta: su categoría, cuántas unidades están prestadas ahora (en solicitudes prestadas) y
+     * cuántas de ellas debieron volver ya (atrasadas).
      */
     private const COLUMNAS = "h.id, h.nombre, h.descripcion, h.activo, h.categoria_id, c.nombre AS categoria,
         (SELECT COALESCE(SUM(si.cantidad), 0)
            FROM solicitud_items si JOIN solicitudes s ON s.id = si.solicitud_id
-          WHERE si.herramienta_id = h.id AND s.estado = 'prestada') AS prestadas";
+          WHERE si.herramienta_id = h.id AND s.estado = 'prestada') AS prestadas,
+        (SELECT COALESCE(SUM(si.cantidad), 0)
+           FROM solicitud_items si JOIN solicitudes s ON s.id = si.solicitud_id
+          WHERE si.herramienta_id = h.id AND s.estado = 'prestada' AND s.fecha_devolucion < CURDATE()) AS atrasadas";
 
     /** @return list<array<string, mixed>> las activas, por categoría y nombre (las sin categoría al final) */
     public function activas(): array

@@ -147,7 +147,17 @@
 }
 
 .tablero__tareas { grid-area: tareas; }
-.tablero__avisos { grid-area: avisos; }
+.tablero__avisos {
+  display: grid;
+  grid-area: avisos;
+  gap: var(--space-3);
+  align-content: start;
+}
+
+/* «Imprimir estado de bodega», sobre los avisos y a lo ancho de su columna */
+.tablero__imprimir {
+  justify-content: center;
+}
 .tablero__admin { grid-area: admin; }
 
 @media (min-width: 64em) {
@@ -164,6 +174,227 @@
     grid-template-areas: "avisos admin";
     grid-template-columns: repeat(2, minmax(0, 1fr));
     grid-template-rows: auto;
+  }
+}
+
+/* La columna de las tareas lleva debajo los gráficos de la bodega */
+.tablero__tareas {
+  display: grid;
+  gap: var(--space-6);
+  min-width: 0;
+}
+
+/* ---------- ¿Cómo está la bodega?: un gráfico de torta (anillo) para los insumos y otro para las herramientas ----------
+   <section class="card grafico"> card-header · <div class="grafico__cuerpo"> <figure class="grafico__anillo"> svg +
+   centro · <ul class="grafico__leyenda"> · <dl class="grafico__datos">. Colores de estado (validados para daltonismo):
+   verde = en bodega / bien, ámbar = atención, azul = fuera a tiempo, rojo = grave. El color nunca va solo: cada parte
+   lleva su ícono, su nombre y su número en la leyenda. */
+.graficos {
+  --grafico-bien: var(--estado-bien);
+  --grafico-atencion: var(--estado-atencion);
+  --grafico-grave: var(--estado-grave);
+  --grafico-fuera: var(--estado-fuera);
+}
+
+.graficos__lista {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+  gap: var(--space-4);
+}
+
+.grafico {
+  display: flex;
+  flex-direction: column;
+}
+
+.grafico__texto {
+  color: var(--bs-muted);
+  font-size: var(--text-sm);
+}
+
+.grafico__cuerpo {
+  display: grid;
+  grid-template-columns: 9.5rem minmax(0, 1fr);
+  gap: var(--space-4);
+  align-items: center;
+  padding: var(--space-4);
+}
+
+.grafico__anillo {
+  position: relative;
+  margin: 0;
+}
+
+.grafico__anillo svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.grafico__fondo,
+.grafico__parte {
+  fill: none;
+  stroke-width: 5.5;
+}
+
+.grafico__fondo {
+  stroke: var(--bs-gray-200);
+}
+
+.grafico__parte {
+  stroke-linecap: butt;
+  transition: opacity var(--bs-transition), stroke-width var(--bs-transition);
+}
+
+/* Al pasar sobre una parte, las demás se apagan un poco (el número exacto sale en el globo del navegador) */
+.grafico__anillo svg:hover .grafico__parte {
+  opacity: 0.45;
+}
+
+.grafico__anillo svg .grafico__parte:hover {
+  opacity: 1;
+  stroke-width: 6.5;
+}
+
+.grafico__parte--bien { stroke: var(--grafico-bien); }
+.grafico__parte--atencion { stroke: var(--grafico-atencion); }
+.grafico__parte--fuera { stroke: var(--grafico-fuera); }
+.grafico__parte--grave { stroke: var(--grafico-grave); }
+
+.grafico__centro {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  pointer-events: none;
+}
+
+.grafico__centro strong {
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--bs-body);
+}
+
+.grafico__centro span {
+  color: var(--bs-muted);
+  font-size: var(--text-xs);
+}
+
+.grafico__leyenda {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.grafico__item {
+  --c: var(--grafico-bien);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2);
+  border-radius: var(--bs-radius);
+  color: var(--bs-body);
+  text-decoration: none;
+}
+
+a.grafico__item:hover {
+  background: color-mix(in srgb, var(--c) 8%, #fff);
+}
+
+.grafico__item--atencion { --c: var(--grafico-atencion); }
+.grafico__item--fuera { --c: var(--grafico-fuera); }
+.grafico__item--grave { --c: var(--grafico-grave); }
+
+.grafico__marca {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: var(--c);
+  color: #fff;
+}
+
+.grafico__marca .icon {
+  width: 1rem;
+  height: 1rem;
+}
+
+.grafico__nombre {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  line-height: 1.3;
+}
+
+.grafico__nombre span,
+.grafico__cantidad span {
+  color: var(--bs-muted);
+  font-size: var(--text-xs);
+}
+
+.grafico__cantidad {
+  display: grid;
+  flex: none;
+  justify-items: end;
+  line-height: 1.2;
+}
+
+.grafico__cantidad strong {
+  font-size: var(--text-lg);
+  font-variant-numeric: tabular-nums;
+}
+
+.grafico__datos {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: auto 0 0;
+  border-top: 1px solid var(--bs-border);
+}
+
+.grafico__datos > div {
+  padding: var(--space-3) var(--space-4);
+}
+
+.grafico__datos > div + div {
+  border-left: 1px solid var(--bs-border);
+}
+
+.grafico__datos dt {
+  color: var(--bs-muted);
+  font-size: var(--text-xs);
+  line-height: 1.3;
+}
+
+.grafico__datos dd {
+  margin: 0;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Angosto (teléfono): el anillo arriba, centrado, y la leyenda debajo */
+@media (max-width: 30em) {
+  .grafico__cuerpo {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .grafico__anillo {
+    width: 9.5rem;
+    margin-inline: auto;
+  }
+
+  .grafico__datos {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .grafico__datos > div + div {
+    border-top: 1px solid var(--bs-border);
+    border-left: 0;
   }
 }
 

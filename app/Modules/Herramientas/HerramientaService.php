@@ -19,6 +19,17 @@ final class HerramientaService
     /** Nombre del grupo para las herramientas que no tienen categoría. */
     public const SIN_CATEGORIA = 'Otras';
 
+    /**
+     * Los filtros del catálogo por dónde está cada herramienta (los mismos grupos del gráfico del inicio; cada una en
+     * uno solo): filtro => nombre.
+     */
+    public const ESTADOS = [
+        'todas' => 'Todas',
+        'en-bodega' => 'En bodega',
+        'prestadas' => 'Prestadas',
+        'atrasadas' => 'Atrasadas',
+    ];
+
     public function __construct(
         private readonly HerramientaRepository $herramientas = new HerramientaRepository(),
         private readonly AuditoriaService $auditoria = new AuditoriaService(),
@@ -26,18 +37,54 @@ final class HerramientaService
     }
 
     /**
-     * Las activas agrupadas por categoría: categoría => herramientas (las sin categoría al final, en «Otras»).
+     * Las activas agrupadas por categoría: categoría => herramientas (las sin categoría al final, en «Otras»). Con un
+     * estado (en-bodega, prestadas, atrasadas), solo las que están así.
      *
      * @return array<string, list<array<string, mixed>>>
      */
-    public function porCategoria(): array
+    public function porCategoria(string $estado = 'todas'): array
     {
         $grupos = [];
         foreach ($this->herramientas->activas() as $herramienta) {
-            $grupos[$herramienta['categoria'] ?? self::SIN_CATEGORIA][] = $herramienta;
+            if ($estado === 'todas' || self::estado($herramienta) === $estado) {
+                $grupos[$herramienta['categoria'] ?? self::SIN_CATEGORIA][] = $herramienta;
+            }
         }
 
         return $grupos;
+    }
+
+    /** @return array<string, int> estado => cuántas herramientas activas hay así (y «todas») */
+    public function contarPorEstado(): array
+    {
+        $conteo = array_fill_keys(array_keys(self::ESTADOS), 0);
+        foreach ($this->herramientas->activas() as $herramienta) {
+            $conteo['todas']++;
+            $conteo[self::estado($herramienta)]++;
+        }
+
+        return $conteo;
+    }
+
+    /** El filtro pedido, si es uno de ESTADOS; si no, «todas». */
+    public static function filtro(mixed $valor): string
+    {
+        return is_string($valor) && isset(self::ESTADOS[$valor]) ? $valor : 'todas';
+    }
+
+    /**
+     * Dónde está: «atrasadas» si alguna unidad debió volver, «prestadas» si alguna está fuera a tiempo, «en-bodega» si
+     * ninguna está prestada.
+     *
+     * @param array<string, mixed> $herramienta
+     */
+    public static function estado(array $herramienta): string
+    {
+        return match (true) {
+            (int) $herramienta['atrasadas'] > 0 => 'atrasadas',
+            (int) $herramienta['prestadas'] > 0 => 'prestadas',
+            default => 'en-bodega',
+        };
     }
 
     /** @return list<array{id: int, nombre: string}> */

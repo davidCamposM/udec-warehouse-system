@@ -13,4 +13,4 @@ use App\Modules\Historial\MovimientoController;
 defined('APP_ROOT') || exit;
 
 $router->get('/movimientos', [MovimientoController::class, 'index'], 'historial.ver');
-$router->get('/movimientos/csv', [MovimientoController::class, 'csv'], 'historial.ver');
+$router->get('/movimientos/excel', [MovimientoController::class, 'excel'], 'historial.ver');

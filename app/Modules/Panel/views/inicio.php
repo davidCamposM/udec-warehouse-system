@@ -8,7 +8,9 @@ defined('APP_ROOT') || exit;
 // Inicio con los componentes básicos (basico.css, al estilo de Bootstrap), en el orden en que se lee: el saludo (quién
 // y qué día), la barra para buscar productos (mientras se escribe, debajo aparecen los que coinciden, insumos.js; la
 // lupa lleva a «Buscar producto»), el tablero (las tareas y, al lado, los avisos y la administración) y el
-// inventario (el detalle). $deFondo: va detrás de una ventana (como «Registrar producto»), así que la barra no toma el foco.
+// inventario (el detalle). Bajo las tareas, para las administrativas, los gráficos de la bodega; sobre los avisos,
+// «Imprimir estado de bodega».
+// $deFondo: va detrás de una ventana (como «Registrar producto»), así que la barra no toma el foco.
 
 $usuario = Auth::user();
 $hora = (int) date('G');
@@ -60,9 +62,11 @@ foreach ($tareas as $tarea) {
     <?php endif; ?>
 
     <?php // Tablero: a la izquierda lo que se hace (tareas); a la derecha lo que pasa (avisos) y lo que se configura (administración). ?>
-    <div class="tablero<?= $grupos['Tareas'] === [] ? ' tablero--una-columna' : '' ?>">
-        <?php if ($grupos['Tareas'] !== []) : ?>
-            <nav class="tablero__tareas" aria-labelledby="titulo-tareas">
+    <div class="tablero<?= $grupos['Tareas'] === [] && $bodega === null ? ' tablero--una-columna' : '' ?>">
+        <?php if ($grupos['Tareas'] !== [] || $bodega !== null) : ?>
+            <div class="tablero__tareas">
+            <?php if ($grupos['Tareas'] !== []) : ?>
+            <nav aria-labelledby="titulo-tareas">
                 <h2 class="titulo-seccion" id="titulo-tareas">¿Qué quieres hacer?</h2>
                 <ul class="lista-acciones">
                     <?php foreach ($grupos['Tareas'] as $tarea) : ?>
@@ -79,17 +83,39 @@ foreach ($tareas as $tarea) {
                     <?php endforeach; ?>
                 </ul>
             </nav>
+            <?php endif; ?>
+
+            <?php // Debajo de las tareas, cómo está la bodega: para responder «¿cuál es el estado de la bodega ahora mismo?». ?>
+            <?php if ($bodega !== null) : ?>
+                <section class="graficos" aria-labelledby="titulo-graficos">
+                    <h2 class="titulo-seccion" id="titulo-graficos">¿Cómo está la bodega?</h2>
+                    <div class="graficos__lista">
+                        <?php foreach ($bodega['graficos'] as $i => $grafico) : ?>
+                            <?= partial('Panel::grafico', $grafico + ['id' => 'grafico-' . $i]) ?>
+                        <?php endforeach; ?>
+                    </div>
+                </section>
+            <?php endif; ?>
+            </div>
         <?php endif; ?>
 
-        <section class="card tablero__avisos" aria-labelledby="titulo-avisos">
-            <div class="card-header">
-                <h2 class="card-title" id="titulo-avisos">Avisos</h2>
-                <p class="inicio__estado" data-panel-status>Actualizado a las <?= e(date('H:i')) ?></p>
-            </div>
-            <div data-panel-content>
-                <?= $avisos ?>
-            </div>
-        </section>
+        <div class="tablero__avisos">
+            <?php // Sobre los avisos, el documento Word con el estado completo de la bodega (encargado y administrativas). ?>
+            <?php if ($imprimir) : ?>
+                <a class="btn btn-outline-secondary tablero__imprimir" href="<?= e(url('panel/estado-bodega')) ?>" download>
+                    <?= icon('printer') ?>Imprimir estado de bodega
+                </a>
+            <?php endif; ?>
+            <section class="card" aria-labelledby="titulo-avisos">
+                <div class="card-header">
+                    <h2 class="card-title" id="titulo-avisos">Avisos</h2>
+                    <p class="inicio__estado" data-panel-status>Actualizado a las <?= e(date('H:i')) ?></p>
+                </div>
+                <div data-panel-content>
+                    <?= $avisos ?>
+                </div>
+            </section>
+        </div>
 
         <?php if ($grupos['Administración'] !== []) : ?>
             <nav class="card tablero__admin" aria-labelledby="titulo-administracion">

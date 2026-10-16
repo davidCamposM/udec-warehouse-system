@@ -34,6 +34,11 @@ final class Inicio
             'buscar' => Tareas::puede('buscar-producto'),
             'tareas' => Tareas::botones(),
             'avisos' => self::avisos(),
+            // Cómo está la bodega (los gráficos de insumos y herramientas): solo para las administrativas, que responden
+            // por el estado de la bodega; el inicio del encargado queda limpio, con sus tareas.
+            'bodega' => Auth::perfil() === 'administrativa' ? ['graficos' => (new PanelService())->graficos()] : null,
+            // «Imprimir estado de bodega» (sobre los avisos), para el encargado y las administrativas.
+            'imprimir' => Permission::can('panel.bodega'),
             // Las categorías a la izquierda y la lista de inventario a la derecha, para quien puede ver los insumos.
             'inventario' => Permission::can('insumos.ver') ? (new InsumoService())->inventario($categoria, $pagina) : null,
             'intervalo' => max(10, (int) Config::get('panel.poll_seconds', 30)),
