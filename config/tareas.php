@@ -146,8 +146,8 @@ return [
     [
         'clave' => 'usuarios',
         'texto' => 'Usuarios',
-        'descripcion' => 'Cuentas para entrar al sistema',
-        'ruta' => null,
+        'descripcion' => 'Docentes y administrativas que pueden entrar',
+        'ruta' => '/usuarios',
         'icono' => 'users',
         'color' => 'turquesa',
         'permiso' => 'usuarios.administrar',

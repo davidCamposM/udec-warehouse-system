@@ -1,0 +1,63 @@
+/* ==========================================================
+   Usuarios: la lista de cuentas de docentes y administrativas.
+   Lo común (tarjeta, tabla, pastillas, estado) sale de components/basico.css.
+   ========================================================== */
+.usuarios__filtros {
+  margin-bottom: var(--space-4);
+}
+
+.usuarios__nombre {
+  display: block;
+}
+
+.usuarios__email {
+  color: var(--bs-muted);
+  font-size: var(--text-sm);
+}
+
+.usuarios__tabla td {
+  vertical-align: middle;
+}
+
+.usuarios__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+/* ---------- El enlace para compartir: el enlace y, debajo, «Copiar enlace» ---------- */
+.enlace {
+  display: grid;
+  gap: var(--space-3);
+  max-width: 44rem;
+}
+
+.enlace__etiqueta {
+  font-weight: 700;
+}
+
+.enlace__campo {
+  width: 100%;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  background: var(--bs-gray-50, #f8f9fa);
+}
+
+.enlace__copiar {
+  justify-self: start;
+}
+
+.enlace__nota {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--bs-muted);
+  font-size: var(--text-sm);
+}
+
+.enlace__nota .icon {
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+}

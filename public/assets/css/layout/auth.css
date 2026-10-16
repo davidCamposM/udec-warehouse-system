@@ -88,30 +88,29 @@
   text-align: center;
 }
 
-.auth__forgot summary {
-  display: inline-block;
-  list-style: none;
+.auth__forgot a,
+.auth__volver a {
   color: var(--color-brand-700);
   font-weight: 600;
   text-decoration: underline;
   text-underline-offset: 4px;
-  cursor: pointer;
 }
 
-.auth__forgot summary::-webkit-details-marker {
-  display: none;
-}
-
-.auth__forgot summary:hover {
+.auth__forgot a:hover,
+.auth__volver a:hover {
   color: var(--color-brand-900);
 }
 
-.auth__forgot p {
-  margin-top: var(--space-3);
-  padding: var(--space-3) var(--space-4);
-  border-radius: var(--radius-md);
-  background: var(--color-bg);
+/* «Crea tu contraseña»: el texto de ayuda y la vuelta al login */
+.auth__ayuda {
+  margin-bottom: var(--space-4);
   color: var(--color-text-muted);
+  text-align: center;
+}
+
+.auth__volver {
+  margin-top: var(--space-4);
+  text-align: center;
 }
 
 .auth__account {

@@ -147,6 +147,10 @@ final class UsuarioService
      */
     public function verificarPassword(array $usuario, string $password): bool
     {
+        // Sin contraseña todavía (la persona no ha usado su enlace): no hay con qué comparar.
+        if ($usuario['password_hash'] === null) {
+            return false;
+        }
         $hash = (string) $usuario['password_hash'];
 
         if (!password_verify($password, $hash)) {

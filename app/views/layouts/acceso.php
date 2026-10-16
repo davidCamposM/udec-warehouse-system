@@ -12,7 +12,7 @@
                 <span class="auth__logo"><?= icon('tree') ?></span>
                 <h1 class="auth__name">Bodega FCF</h1>
             </header>
-            <p class="auth__tagline">Ingresa a tu cuenta</p>
+            <p class="auth__tagline"><?= e($lema ?? 'Ingresa a tu cuenta') ?></p>
 
             <?= $contenido ?>
         </div>

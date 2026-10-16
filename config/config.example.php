@@ -45,6 +45,25 @@ return [
         'max_intentos_ip' => 30,                // fallos desde una misma IP antes del bloqueo
         'bloqueo_minutos' => 15,                // ventana en que se cuentan los fallos
         'retencion_intentos_dias' => 90,        // el registro de accesos se borra pasado este plazo
+        'dominios' => ['udec.cl', 'gmail.com'], // solo se agregan cuentas con correo de estos dominios ([]: cualquiera)
+        'enlace_activar_dias' => 7,             // el enlace para crear la contraseña la primera vez
+        'enlace_recuperar_minutos' => 60,       // el enlace para recuperar una contraseña olvidada
+        'enlaces_por_hora' => 3,                // enlaces que se pueden pedir por correo en una hora
+    ],
+
+    // Envío de correos (enlaces para crear o recuperar la contraseña).
+    //   'archivo': no envía; los guarda en storage/logs/correos-aaaa-mm-dd.log (desarrollo).
+    //   'smtp': los envía con la casilla indicada. Gmail: smtp.gmail.com, 587, tls, con una «contraseña de
+    //   aplicación». Microsoft 365: smtp.office365.com, 587, tls (la casilla debe tener permitido «SMTP AUTH»).
+    'correo' => [
+        'modo' => 'archivo',                    // archivo | smtp
+        'host' => '',
+        'puerto' => 587,
+        'seguridad' => 'tls',                   // tls (STARTTLS, puerto 587) | ssl (puerto 465) | '' (sin cifrar)
+        'usuario' => '',
+        'clave' => '',
+        'remitente' => '',                      // la dirección que envía: bodega.fcf@udec.cl
+        'nombre_remitente' => 'Bodega FCF UdeC',
     ],
 
     'panel' => [

@@ -68,9 +68,8 @@ $enfocarPassword = old('email') !== '' && $errorEmail === null;
     <button class="btn btn--primary auth__submit" type="submit" data-loading-text="Ingresando…">Ingresar</button>
 </form>
 
-<details class="auth__forgot">
-    <summary>¿Olvidaste tu contraseña?</summary>
-    <p>Pide al encargado de bodega que la restablezca.</p>
-</details>
+<p class="auth__forgot">
+    <a href="<?= e(url('clave')) ?>">¿Primera vez, o olvidaste tu contraseña?</a>
+</p>
 
 <p class="auth__account">¿No tienes cuenta? <strong>Pídela al encargado de bodega.</strong></p>
