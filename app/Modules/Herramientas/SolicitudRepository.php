@@ -18,6 +18,12 @@ final class SolicitudRepository
     public const PROBLEMA = "si.resolucion IS NULL
         AND (si.estado_recepcion = 'danada' OR si.cantidad_devuelta < si.cantidad)";
 
+    /**
+     * Cuántas unidades de una línea con problema están afectadas: todas, si volvieron con daños (las que no volvieron
+     * tampoco están); si no, las que no volvieron. No están en bodega hasta que se resuelva. (Sobre el alias si.)
+     */
+    public const AFECTADAS = "IF(si.estado_recepcion = 'danada', si.cantidad, si.cantidad - si.cantidad_devuelta)";
+
     /** Filtro de la lista => condición SQL (fija, sin datos del usuario). */
     public const FILTROS = [
         'pendientes' => "s.estado = 'pendiente'",
@@ -93,7 +99,8 @@ final class SolicitudRepository
     public function bloquearItem(int $solicitudId, int $itemId): ?array
     {
         return Database::fetch(
-            'SELECT si.*, (' . self::PROBLEMA . ') AS problema FROM solicitud_items si WHERE si.id = ? AND si.solicitud_id = ? FOR UPDATE',
+            'SELECT si.*, (' . self::PROBLEMA . ') AS problema, ' . self::AFECTADAS . ' AS afectadas
+               FROM solicitud_items si WHERE si.id = ? AND si.solicitud_id = ? FOR UPDATE',
             [$itemId, $solicitudId]
         );
     }

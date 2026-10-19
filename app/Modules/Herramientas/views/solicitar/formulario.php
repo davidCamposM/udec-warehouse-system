@@ -11,7 +11,8 @@ defined('APP_ROOT') || exit;
 // - Los datos: departamento (dos opciones) y funcionario (el de la cuenta: no se escribe ni se firma); tipo de
 //   actividad y quién retira; las dos fechas.
 // - Los detalles: el buscador, las categorías y una línea por herramienta con sus unidades (− y +), varias por fila.
-//   La elegida se marca y abajo se ve el total que se lleva (herramientas.js). Las que quedan en 0 no se piden.
+//   La elegida se marca y abajo se ve el total que se lleva (herramientas.js). Las que quedan en 0 no se piden. Junto
+//   al nombre, cuántas hay en bodega hoy; el + llega hasta las que tiene la bodega (pueden volver antes del retiro).
 //   «Estado en la recepción» lo anota la bodega al recibir.
 $hoy = Fecha::hoy();
 $departamento = old('departamento');
@@ -97,17 +98,16 @@ $invalido = static fn (string $campo): string => error_de($campo) !== null ? ' i
                                 <?php
                                 $campo = 'unidades_' . $herramienta['id'];
                                 $unidades = old($campo, '0');
-                                $prestadas = (int) $herramienta['prestadas'];
+                                $hay = (int) $herramienta['en_bodega'];
+                                $maximo = min(SolicitudService::MAXIMO_UNIDADES, (int) $herramienta['unidades']);
                                 ?>
                                 <li class="pedir__herramienta<?= (int) $unidades > 0 ? ' is-elegida' : '' ?>" data-herramienta
                                     data-nombre="<?= e($herramienta['nombre']) ?>">
                                     <label class="pedir__nombre" for="<?= e($campo) ?>">
                                         <?= e($herramienta['nombre']) ?>
-                                        <?php if ($prestadas > 0) : ?>
-                                            <span class="pedir__prestadas"><?= e($prestadas === 1 ? '1 prestada' : "{$prestadas} prestadas") ?></span>
-                                        <?php endif; ?>
+                                        <span class="pedir__hay"><?= e($hay === 0 ? 'Ninguna en bodega hoy' : "{$hay} en bodega") ?></span>
                                     </label>
-                                    <div class="stepper stepper--chico" data-stepper data-min="0" data-max="<?= e(SolicitudService::MAXIMO_UNIDADES) ?>">
+                                    <div class="stepper stepper--chico" data-stepper data-min="0" data-max="<?= e($maximo) ?>">
                                         <button class="stepper__button" type="button" data-step="-1"><?= icon('minus') ?><span class="visually-hidden">Una menos de <?= e($herramienta['nombre']) ?></span></button>
                                         <input class="stepper__input" id="<?= e($campo) ?>" name="<?= e($campo) ?>" type="text" inputmode="numeric"
                                             value="<?= e($unidades) ?>">

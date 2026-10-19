@@ -13,7 +13,6 @@ use App\Modules\Insumos\AjusteController;
 use App\Modules\Insumos\GuardarController;
 use App\Modules\Insumos\InsumoController;
 use App\Modules\Insumos\NuevoProductoController;
-use App\Modules\Insumos\PracticaInviernoController;
 use App\Modules\Insumos\RetirarController;
 
 defined('APP_ROOT') || exit;
@@ -22,9 +21,6 @@ $router->get('/insumos', [InsumoController::class, 'index'], 'insumos.ver');
 
 // La lista que aparece bajo una barra de búsqueda mientras se escribe.
 $router->get('/insumos/sugerencias', [InsumoController::class, 'sugerencias'], 'insumos.ver');
-
-// Insumos Práctica de Invierno (administrativas): el equipo de montaña y cuántos hay.
-$router->get('/practica-invierno', [PracticaInviernoController::class, 'index'], 'insumos.ver');
 
 // Ingresar abastecimiento (administrativas): 1) la reserva, 2) lo que llegó (la lista, con la cantidad de cada uno).
 $router->get('/abastecimiento', [AbastecimientoController::class, 'reserva'], 'insumos.abastecimiento');

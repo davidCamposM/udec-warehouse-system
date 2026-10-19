@@ -24,12 +24,6 @@ final class InsumoRepository
         'no-queda' => 'i.activo = 1 AND i.stock_actual <= 0',
     ];
 
-    /**
-     * Solo los insumos de consumo: deja fuera el equipo de montaña de la Práctica de Invierno (su categoría principal),
-     * que tiene su propia pantalla. Lo usan los avisos y el gráfico del inicio, y «Buscar producto» con ?de=consumo.
-     */
-    public const SOLO_CONSUMO = "COALESCE(cp.nombre, c.nombre, '') <> '" . InsumoService::PRACTICA_INVIERNO . "'";
-
     private const COLUMNAS = 'i.id, i.codigo, i.codigo_udec, i.nombre, i.stock_actual, i.stock_minimo, i.activo,
         i.categoria_id, c.nombre AS categoria, cp.nombre AS categoria_padre,
         i.sector_id, s.nombre AS sector, s.codigo AS sector_codigo';
@@ -44,10 +38,9 @@ final class InsumoRepository
      *
      * @return list<array<string, mixed>>
      */
-    public function buscar(string $texto, string $filtro, bool $soloConsumo = false): array
+    public function buscar(string $texto, string $filtro): array
     {
         [$condicion, $parametros] = self::condicionTexto($texto);
-        $condicion .= $soloConsumo ? ' AND ' . self::SOLO_CONSUMO : '';
 
         return Database::fetchAll(
             'SELECT ' . self::COLUMNAS . ' FROM ' . self::DESDE
@@ -81,10 +74,9 @@ final class InsumoRepository
      *
      * @return array<string, int> filtro => cantidad
      */
-    public function contar(string $texto, bool $soloConsumo = false): array
+    public function contar(string $texto): array
     {
         [$condicion, $parametros] = self::condicionTexto($texto);
-        $condicion .= $soloConsumo ? ' AND ' . self::SOLO_CONSUMO : '';
         $columnas = [];
 
         foreach (self::FILTROS as $filtro => $sql) {
@@ -99,7 +91,12 @@ final class InsumoRepository
         return array_map('intval', $fila);
     }
 
-    /** @return array<string, mixed>|null */
+    /** Bloquea el producto hasta que termine la transacción. */
+    public function bloquear(int $id): void
+    {
+        Database::fetch('SELECT id FROM insumos WHERE id = ? FOR UPDATE', [$id]);
+    }
+
     /**
      * El producto, si no fue eliminado. Para las personas, un producto eliminado ya no existe (por dentro solo queda
      * desactivado, con su historial).

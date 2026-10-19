@@ -6,8 +6,9 @@
  * Relacopio → Relascopio, Huincha Carpinteri → Huincha Carpintero).
  *
  * Las categorías no venían en la lista: se agruparon por uso, para encontrarlas rápido al solicitar.
- * Solo agrega lo que falta. Las herramientas activas que no están en esta lista (el catálogo provisorio anterior) se
- * desactivan: las solicitudes que ya las usaron las siguen mostrando.
+ * Solo agrega lo que falta, con 1 unidad cada una. Las herramientas activas que no están en esta lista (el catálogo
+ * provisorio anterior) se desactivan, salvo las prestadas, pedidas o por resolver: las solicitudes que ya las usaron las
+ * siguen mostrando.
  */
 
 declare(strict_types=1);
@@ -100,7 +101,8 @@ foreach ($catalogo as $categoria => $herramientas) {
         $existente = Database::fetch('SELECT id, categoria_id, activo FROM herramientas WHERE nombre = ?', [$nombre]);
 
         if ($existente === null) {
-            Database::insert('INSERT INTO herramientas (nombre, categoria_id) VALUES (?, ?)', [$nombre, $categoriaId]);
+            // Al menos una: el encargado anota cuántas hay en «Editar herramienta».
+            Database::insert('INSERT INTO herramientas (nombre, categoria_id, unidades) VALUES (?, ?, 1)', [$nombre, $categoriaId]);
             $nuevas++;
         } elseif ($existente['categoria_id'] === null) {
             // Ya estaba (del catálogo provisorio, como GPS): toma su categoría y queda activa.
@@ -111,6 +113,19 @@ foreach ($catalogo as $categoria => $herramientas) {
 }
 
 $marcas = implode(', ', array_fill(0, count($nombres), '?'));
-$desactivadas = Database::execute("UPDATE herramientas SET activo = 0 WHERE activo = 1 AND nombre NOT IN ({$marcas})", $nombres);
+// Las de la Práctica de Invierno (seed 050) y las que están prestadas, pedidas o por resolver no se tocan.
+$desactivadas = Database::execute(
+    "UPDATE herramientas h
+        LEFT JOIN categorias c ON c.id = h.categoria_id
+        LEFT JOIN categorias cp ON cp.id = c.padre_id
+        SET h.activo = 0
+      WHERE h.activo = 1 AND h.nombre NOT IN ({$marcas})
+        AND COALESCE(cp.clave, c.clave, '') <> 'practica-invierno'
+        AND NOT EXISTS (SELECT 1 FROM solicitud_items si JOIN solicitudes s ON s.id = si.solicitud_id
+                         WHERE si.herramienta_id = h.id
+                           AND (s.estado IN ('pendiente', 'prestada')
+                                OR (si.resolucion IS NULL AND (si.estado_recepcion = 'danada' OR si.cantidad_devuelta < si.cantidad))))",
+    $nombres
+);
 
 Consola::exito("Herramientas: {$nuevas} nuevas, {$movidas} ordenadas en su categoría, {$desactivadas} del catálogo provisorio desactivadas.");

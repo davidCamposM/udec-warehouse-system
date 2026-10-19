@@ -81,11 +81,11 @@ return [
     [
         'clave' => 'practica-invierno',
         'texto' => 'Insumos Práctica de Invierno',
-        'descripcion' => 'El equipo de montaña y cuánto queda',
+        'descripcion' => 'El equipo de montaña: cuánto hay y qué está prestado',
         'ruta' => '/practica-invierno',
         'icono' => 'tree',
         'color' => 'turquesa',
-        'permiso' => 'insumos.ver',
+        'permiso' => 'herramientas.ver',
         'perfiles' => ['administrativa'],
     ],
     [

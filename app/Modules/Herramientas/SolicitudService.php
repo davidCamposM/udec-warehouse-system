@@ -16,7 +16,8 @@ defined('APP_ROOT') || exit;
 /**
  * Préstamos de herramientas, como el formulario en papel «Solicitud de instrumentos y herramientas»: el docente envía la
  * solicitud, el encargado entrega las herramientas (o la rechaza) y, cuando vuelven, anota cuántas volvieron y en qué
- * estado. Mientras las unidades no tengan etiqueta, se presta por tipo de herramienta y cantidad.
+ * estado. Mientras las unidades no tengan etiqueta, se presta por tipo de herramienta y cantidad: no se piden más de las
+ * que tiene la bodega ni se entregan más de las que están en ella. Lo que se da de baja sale de sus unidades.
  */
 final class SolicitudService
 {
@@ -165,11 +166,32 @@ final class SolicitudService
 
     // ---------- El encargado ----------
 
-    /** Entrega las herramientas: la solicitud pasa a «Prestada». @throws ValidationException */
+    /**
+     * Entrega las herramientas: la solicitud pasa a «Prestada». Solo si hay en bodega todas las que se piden.
+     *
+     * @throws ValidationException
+     */
     public function entregar(int $id): void
     {
         Database::transaction(function () use ($id): void {
             $this->pendiente($id);
+
+            $items = $this->solicitudes->items($id);
+            $herramientas = $this->herramientas->bloquear(array_map(static fn (array $item): int => (int) $item['herramienta_id'], $items));
+            $faltan = [];
+            foreach ($items as $item) {
+                $hay = isset($herramientas[(int) $item['herramienta_id']])
+                    ? HerramientaService::enBodega($herramientas[(int) $item['herramienta_id']])
+                    : 0;
+                if ((int) $item['cantidad'] > $hay) {
+                    $faltan[] = "de «{$item['nombre']}» se piden {$item['cantidad']} y " . ($hay === 0 ? 'no hay ninguna' : "hay {$hay}");
+                }
+            }
+            if ($faltan !== []) {
+                throw new ValidationException(['solicitud' => 'No alcanzan las que hay en bodega: ' . implode('; ', $faltan)
+                    . '. Espera a que vuelvan o rechaza la solicitud con un motivo.']);
+            }
+
             $this->solicitudes->marcarPrestada($id, (int) Auth::id());
             $this->auditoria->registrar('entregar', 'solicitud', $id);
         });
@@ -286,7 +308,8 @@ final class SolicitudService
     }
 
     /**
-     * Resuelve una herramienta que volvió con daños o no volvió: se reparó, se repuso o se dio de baja.
+     * Resuelve una herramienta que volvió con daños o no volvió: se reparó, se repuso o se dio de baja (sale de las
+     * unidades de la bodega).
      *
      * @throws ValidationException
      */
@@ -303,7 +326,15 @@ final class SolicitudService
             }
 
             $this->solicitudes->resolverItem($itemId, $resolucion, (int) Auth::id());
-            $this->auditoria->registrar('resolver', 'solicitud', $id, ['item' => $itemId, 'resolucion' => $resolucion]);
+            // Dadas de baja: ya no son de la bodega. (Reparadas o repuestas, vuelven a estar en ella.)
+            if ($resolucion === 'baja') {
+                $this->herramientas->descontarUnidades((int) $item['herramienta_id'], (int) $item['afectadas']);
+            }
+            $this->auditoria->registrar('resolver', 'solicitud', $id, [
+                'item' => $itemId,
+                'resolucion' => $resolucion,
+                'unidades' => (int) $item['afectadas'],
+            ]);
         });
     }
 
@@ -324,7 +355,7 @@ final class SolicitudService
 
     /**
      * @param array<string, mixed>                               $datos
-     * @param list<array{id: int, nombre: string, descripcion: ?string}> $herramientas
+     * @param list<array<string, mixed>>                         $herramientas las activas, con sus unidades
      * @return array{0: array{departamento: string, tipo_actividad: string, autoriza_retiro: ?string, fecha_retiro: string,
      *     fecha_devolucion: string}, 1: array<int, int>} los datos limpios y herramienta => unidades
      * @throws ValidationException
@@ -370,9 +401,11 @@ final class SolicitudService
             if ($valor === '' || $valor === '0') {
                 continue;
             }
-            if (!ctype_digit($valor) || (int) $valor > self::MAXIMO_UNIDADES) {
-                $errores['detalle'] = "Revisa las unidades de «{$herramienta['nombre']}»: un número entero de 0 a "
-                    . self::MAXIMO_UNIDADES . '.';
+            $maximo = min(self::MAXIMO_UNIDADES, (int) $herramienta['unidades']);
+            if (!ctype_digit($valor) || (int) $valor > $maximo) {
+                $errores['detalle'] = $maximo === 0
+                    ? "La bodega no tiene «{$herramienta['nombre']}». Déjala en 0."
+                    : "Revisa las unidades de «{$herramienta['nombre']}»: la bodega tiene {$maximo}, así que de 0 a {$maximo}.";
                 continue;
             }
             $detalle[(int) $herramienta['id']] = (int) $valor;

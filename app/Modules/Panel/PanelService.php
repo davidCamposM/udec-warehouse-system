@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Panel;
 
 use App\Core\Permission;
+use App\Modules\Herramientas\HerramientaService;
 use App\Modules\Insumos\InsumoService;
 
 defined('APP_ROOT') || exit;
@@ -18,6 +19,7 @@ final class PanelService
     public function __construct(
         private readonly PanelRepository $panel = new PanelRepository(),
         private readonly InsumoService $insumos = new InsumoService(),
+        private readonly HerramientaService $herramientas = new HerramientaService(),
     ) {
     }
 
@@ -28,8 +30,8 @@ final class PanelService
      */
     public function avisosBodega(): array
     {
-        // Los mismos números que los filtros de la lista de insumos, solo de los de consumo (sin la Práctica de Invierno).
-        $insumos = $this->insumos->contar('', true);
+        // Los mismos números que los filtros de la lista de insumos.
+        $insumos = $this->insumos->contar('');
 
         return [
             'sin_unidades' => $insumos['no-queda'],
@@ -52,9 +54,9 @@ final class PanelService
     public function graficos(): array
     {
         $insumos = $this->panel->resumenInsumos();
-        $herramientas = $this->panel->resumenHerramientas();
+        $herramientas = $this->herramientas->resumen();
         $verInsumos = Permission::can('insumos.ver');
-        $enlace = static fn (string $ver): ?string => $verInsumos ? url('insumos', ['ver' => $ver, 'de' => 'consumo']) : null;
+        $enlace = static fn (string $ver): ?string => $verInsumos ? url('insumos', ['ver' => $ver]) : null;
         $verHerramientas = Permission::can('herramientas.ver');
         $catalogo = static fn (string $ver): ?string => $verHerramientas ? url('herramientas', ['ver' => $ver]) : null;
         $unidades = static fn (int $n): string => unidades($n);
@@ -78,15 +80,17 @@ final class PanelService
             ],
             [
                 'titulo' => 'Herramientas',
-                'texto' => 'Las herramientas del catálogo según dónde están',
+                'texto' => 'Las herramientas del catálogo (también el equipo de la Práctica de Invierno) según dónde están',
                 'unidad' => ['herramienta', 'herramientas'],
                 'centro' => 'en bodega',
                 'partes' => [
-                    ['bien', 'En bodega', 'Ninguna unidad prestada', 'check', $herramientas['en_bodega'], $catalogo('en-bodega')],
-                    ['fuera', 'Prestadas', 'Fuera de la bodega, a tiempo', 'swap', $herramientas['prestadas'], $catalogo('prestadas')],
-                    ['grave', 'Atrasadas', 'Debieron volver a la bodega', 'clock', $herramientas['atrasadas'], $catalogo('atrasadas')],
+                    ['bien', 'En bodega', 'Ninguna prestada y hay para prestar', 'check', $herramientas['en_bodega'], $catalogo('en-bodega')],
+                    ['fuera', 'Prestadas', 'Alguna unidad fuera de la bodega, a tiempo', 'swap', $herramientas['prestadas'], $catalogo('prestadas')],
+                    ['grave', 'Atrasadas', 'Alguna unidad debió volver a la bodega', 'clock', $herramientas['atrasadas'], $catalogo('atrasadas')],
+                    ['atencion', 'Sin unidades', 'No hay ninguna para prestar', 'alert', $herramientas['sin_unidades'], $catalogo('sin-unidades')],
                 ],
                 'datos' => [
+                    ['Unidades en bodega', $unidades($herramientas['unidades_en_bodega']) . ' de ' . $unidades($herramientas['unidades'])],
                     ['Unidades prestadas ahora', $unidades($herramientas['unidades_prestadas'])],
                     ['Solicitudes por entregar', (string) $this->panel->contarSolicitudesPendientes()],
                     ['Dañadas o perdidas sin resolver', (string) $this->panel->contarHerramientasPorResolver()],
@@ -119,7 +123,7 @@ final class PanelService
     {
         return [
             'insumos' => $this->panel->resumenInsumos(),
-            'herramientas' => $this->panel->resumenHerramientas(),
+            'herramientas' => $this->herramientas->resumen(),
             'categorias' => $this->categorias(),
             'por_reponer' => $this->panel->productos('por_reponer'),
             'sin_stock' => $this->panel->productos('sin_stock'),

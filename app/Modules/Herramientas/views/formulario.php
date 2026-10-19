@@ -1,9 +1,12 @@
 <?php
 
+use App\Modules\Herramientas\HerramientaService;
+
 defined('APP_ROOT') || exit;
 
-// Agregar o editar una herramienta del catálogo: su nombre y su categoría (opciones grandes, sin lista desplegable).
-// Al editar, abajo está «Eliminar».
+// Agregar o editar una herramienta del catálogo: su nombre, su categoría (opciones grandes, sin lista desplegable; las
+// subcategorías con su principal: «Práctica de Invierno › Bastones») y cuántas hay (con − y +). Al editar, abajo está
+// «Eliminar».
 $editando = $herramienta !== null;
 $elegida = old('categoria_id', $editando && $herramienta['categoria_id'] !== null ? (string) $herramienta['categoria_id'] : '');
 ?>
@@ -43,7 +46,7 @@ $elegida = old('categoria_id', $editando && $herramienta['categoria_id'] !== nul
                 <label class="option">
                     <input class="option__input" type="radio" name="categoria_id" value="<?= e($categoria['id']) ?>"
                         <?= (string) $categoria['id'] === $elegida ? 'checked' : '' ?>>
-                    <span class="option__box"><?= e($categoria['nombre']) ?></span>
+                    <span class="option__box"><?= e($categoria['padre'] !== null ? "{$categoria['padre']} › {$categoria['nombre']}" : $categoria['nombre']) ?></span>
                 </label>
             <?php endforeach; ?>
             <label class="option">
@@ -53,6 +56,26 @@ $elegida = old('categoria_id', $editando && $herramienta['categoria_id'] !== nul
         </div>
         <?= mensaje_error('categoria_id') ?>
     </fieldset>
+
+    <?php
+    $fuera = $editando ? (int) $herramienta['prestadas'] + (int) $herramienta['por_resolver'] : 0;
+    ?>
+    <div class="question<?= error_de('unidades') !== null ? ' has-error' : '' ?>">
+        <label class="question__label" for="unidades">
+            <span class="question__number">3</span>¿Cuántas hay?
+        </label>
+        <p class="question__hint" id="unidades-ayuda">Todas las que tiene la bodega, también las prestadas.<?= $fuera > 0
+            ? ' Ahora hay ' . e($fuera) . ' fuera de la bodega (prestadas o por resolver).'
+            : '' ?></p>
+        <div class="stepper" data-stepper data-min="0" data-max="<?= e(HerramientaService::MAXIMO_UNIDADES) ?>">
+            <button class="stepper__button" type="button" data-step="-1"><?= icon('minus') ?><span class="visually-hidden">Una menos</span></button>
+            <input class="stepper__input" id="unidades" name="unidades" type="text" inputmode="numeric" required
+                value="<?= e(old('unidades', $editando ? (string) $herramienta['unidades'] : '1')) ?>"
+                <?= error_de('unidades') !== null ? aria_error('unidades') : 'aria-describedby="unidades-ayuda"' ?>>
+            <button class="stepper__button" type="button" data-step="1"><?= icon('plus') ?><span class="visually-hidden">Una más</span></button>
+        </div>
+        <?= mensaje_error('unidades') ?>
+    </div>
 
     <div class="acciones">
         <a class="btn btn--lg btn--no" href="<?= e(url('herramientas')) ?>"><?= icon('close') ?>Cancelar</a>

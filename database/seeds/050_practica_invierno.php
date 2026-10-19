@@ -1,8 +1,9 @@
 <?php
 
 /**
- * Insumos de la Práctica de Invierno (equipo de montaña, lista entregada el 16/10/2026): una categoría principal propia,
- * agrupada por tipo, con stock 0 porque aún no se sabe el real (se carga con «Actualizar cantidad»). Se corrigieron
+ * Equipo de la Práctica de Invierno (equipo de montaña, lista entregada el 16/10/2026). Se presta y se devuelve, como
+ * las herramientas: una categoría principal propia (clave practica-invierno), agrupada por tipo, con 0 unidades porque
+ * aún no se sabe cuántas hay (el encargado las anota en «Editar herramienta»). Se corrigieron
  * erratas evidentes (Marmmot → Marmot, Petzi → Petzl, Frontral → Frontal…), los plurales pasaron a singular y los
  * repetidos de la lista quedaron una sola vez. Lo que la lista agrupaba («Sky Rondoné: 1 Modelo 777…», «Bastones: 5 de
  * 110 cm…») queda como un producto por modelo o medida.
@@ -96,7 +97,7 @@ $productos = [
     $nuevas = 0;
     $categoria = static function (string $nombre, ?int $padreId) use (&$nuevas): int {
         $id = Database::fetchValue(
-            "SELECT id FROM categorias WHERE ambito = 'insumo' AND nombre = ? AND padre_id <=> ?",
+            "SELECT id FROM categorias WHERE ambito = 'herramienta' AND nombre = ? AND padre_id <=> ?",
             [$nombre, $padreId]
         );
         if ($id !== null) {
@@ -104,26 +105,26 @@ $productos = [
         }
         $nuevas++;
 
-        return Database::insert("INSERT INTO categorias (nombre, padre_id, ambito) VALUES (?, ?, 'insumo')", [$nombre, $padreId]);
+        return Database::insert("INSERT INTO categorias (nombre, padre_id, ambito) VALUES (?, ?, 'herramienta')", [$nombre, $padreId]);
     };
 
-    $principal = $categoria($practica, null);
-    $numero = (int) Database::fetchValue(
-        "SELECT COALESCE(MAX(CAST(SUBSTRING(codigo, 4) AS UNSIGNED)), 0) FROM insumos WHERE codigo LIKE 'INS%'"
-    );
+    // La principal se reconoce por su clave (aunque le cambien el nombre).
+    $principal = Database::fetchValue("SELECT id FROM categorias WHERE clave = 'practica-invierno'");
+    if ($principal === null) {
+        $principal = $categoria($practica, null);
+        Database::execute("UPDATE categorias SET clave = 'practica-invierno' WHERE id = ?", [$principal]);
+    }
+    $principal = (int) $principal;
     $nuevos = 0;
 
     foreach ($productos as $subcategoria => $nombres) {
         $categoriaId = $categoria($subcategoria, $principal);
         foreach ($nombres as $nombre) {
             // Ya cargado (aunque se haya eliminado después): no se repite.
-            if (Database::fetchValue('SELECT id FROM insumos WHERE nombre = ? AND categoria_id = ?', [$nombre, $categoriaId]) !== null) {
+            if (Database::fetchValue('SELECT id FROM herramientas WHERE nombre = ? AND categoria_id = ?', [$nombre, $categoriaId]) !== null) {
                 continue;
             }
-            Database::insert(
-                'INSERT INTO insumos (codigo, nombre, categoria_id) VALUES (?, ?, ?)',
-                [sprintf('INS%05d', ++$numero), $nombre, $categoriaId]
-            );
+            Database::insert('INSERT INTO herramientas (nombre, categoria_id) VALUES (?, ?)', [$nombre, $categoriaId]);
             $nuevos++;
         }
     }
@@ -131,5 +132,5 @@ $productos = [
     return [$nuevas, $nuevos];
 });
 
-Consola::exito('Práctica de Invierno: ' . $nuevas . ' categorías nuevas, ' . $nuevos . ' productos nuevos de '
+Consola::exito('Práctica de Invierno: ' . $nuevas . ' categorías nuevas, ' . $nuevos . ' herramientas nuevas de '
     . array_sum(array_map('count', $productos)) . '.');

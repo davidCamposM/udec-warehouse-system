@@ -40,7 +40,7 @@ if ($puedeAdministrar) {
 }
 ?>
 <?= partial('encabezado', [
-    'volver' => $volver,
+    'volver' => [url('insumos'), 'Volver a Buscar producto'],
     'tarea' => 'buscar-producto',
     'icono' => 'box',
     'titulo' => $insumo['nombre'],

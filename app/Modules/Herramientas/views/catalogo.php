@@ -4,11 +4,10 @@ use App\Modules\Herramientas\HerramientaService;
 
 defined('APP_ROOT') || exit;
 
-// «Catálogo de herramientas»: lo que tiene la bodega para prestar, en una tarjeta por categoría, con cuántas están
-// prestadas ahora. Arriba, los filtros por dónde están (todas, en bodega, prestadas, atrasadas; ?ver=) y debajo el
-// buscador y las categorías (herramientas.js). El encargado además agrega, edita y elimina (desde Editar).
-// Cada estado con su color, el mismo del gráfico del inicio (verde, azul, rojo).
-$colores = ['en-bodega' => 'bien', 'prestadas' => 'fuera', 'atrasadas' => 'grave'];
+// «Catálogo de herramientas»: lo que tiene la bodega para prestar, en una tarjeta por categoría, con cuántas hay en
+// bodega y cuántas están prestadas ahora. Arriba, los filtros por dónde están (todas, en bodega, prestadas, atrasadas,
+// sin unidades; ?ver=) y debajo el buscador y las categorías (herramientas.js). El encargado además agrega, edita (y
+// anota cuántas hay) y elimina (desde Editar). Cada estado con su color, el mismo del gráfico del inicio.
 $acciones = match (true) {
     $puedeAdministrar => '<a class="btn btn-success" href="' . e(url('herramientas/nueva')) . '">' . icon('plus') . 'Agregar herramienta</a>',
     $puedeSolicitar => '<a class="btn btn-success" href="' . e(url('herramientas/solicitar')) . '">' . icon('tool') . 'Solicitar herramientas</a>',
@@ -23,10 +22,10 @@ $acciones = match (true) {
     'acciones' => $acciones,
 ]) ?>
 
-<?php // Arriba, dónde están: todas, en bodega, prestadas o atrasadas, con los colores del gráfico del inicio. ?>
+<?php // Arriba, dónde están: todas, en bodega, prestadas, atrasadas o sin unidades, con los colores del gráfico del inicio. ?>
 <nav class="nav-pills catalogo__estados" aria-label="Mostrar">
     <?php foreach (HerramientaService::ESTADOS as $clave => $nombre) : ?>
-        <a class="nav-link<?= isset($colores[$clave]) ? ' nav-link--' . e($colores[$clave]) : '' ?><?= $clave === $estado ? ' active' : '' ?>"
+        <a class="nav-link<?= isset(HerramientaService::COLORES[$clave]) ? ' nav-link--' . e(HerramientaService::COLORES[$clave]) : '' ?><?= $clave === $estado ? ' active' : '' ?>"
             href="<?= e(url('herramientas', $clave === 'todas' ? [] : ['ver' => $clave])) ?>"
             <?= $clave === $estado ? 'aria-current="true"' : '' ?>>
             <?= e($nombre) ?> <span class="nav-count"><?= e($conteo[$clave]) ?></span>
@@ -63,6 +62,12 @@ $acciones = match (true) {
                                 <?php $aTiempo = $prestadas - (int) $herramienta['atrasadas']; ?>
                                 <span class="status status--low"><?= e($aTiempo === 1 ? '1 prestada' : "{$aTiempo} prestadas") ?></span>
                             <?php endif; ?>
+                            <?php $hay = (int) $herramienta['en_bodega']; ?>
+                            <span class="catalogo__hay<?= $hay > 0 ? '' : ' catalogo__hay--sin' ?>"><?= e(match (true) {
+                                $hay > 0 => "{$hay} en bodega",
+                                (int) $herramienta['unidades'] > 0 => 'Ninguna en bodega',
+                                default => 'Sin unidades',
+                            }) ?></span>
                             <?php if ($puedeAdministrar) : ?>
                                 <a class="catalogo__editar" href="<?= e(url('herramientas/' . $herramienta['id'] . '/editar')) ?>"
                                     title="Editar <?= e($herramienta['nombre']) ?>"><?= icon('edit') ?><span class="visually-hidden">Editar <?= e($herramienta['nombre']) ?></span></a>

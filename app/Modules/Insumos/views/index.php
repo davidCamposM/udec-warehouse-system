@@ -15,7 +15,6 @@ $colores = ['con-stock' => 'bien', 'reponer' => 'atencion', 'no-queda' => 'grave
 $urlFiltro = static fn (string $ver): string => url('insumos', array_filter([
     'q' => $texto,
     'ver' => $ver === 'todos' ? null : $ver,
-    'de' => $soloConsumo ? 'consumo' : null,
 ]));
 
 // Se ofrece agregar lo buscado como producto nuevo (si parece un código, con ese código ya escrito).
@@ -33,9 +32,6 @@ $urlAgregar = url('insumos/nuevo', InsumoService::paraAgregar($texto));
     <?php if ($filtro !== 'todos') : ?>
         <input type="hidden" name="ver" value="<?= e($filtro) ?>">
     <?php endif; ?>
-    <?php if ($soloConsumo) : ?>
-        <input type="hidden" name="de" value="consumo">
-    <?php endif; ?>
     <label class="buscar__etiqueta" for="buscar">
         <span class="buscar__icono"><?= icon('barcode') ?></span>
         Escanea el código o escribe el nombre
@@ -47,13 +43,6 @@ $urlAgregar = url('insumos/nuevo', InsumoService::paraAgregar($texto));
         <button class="btn btn-primary" type="submit"><?= icon('search') ?>Buscar</button>
     </div>
 </form>
-
-<?php if ($soloConsumo) : ?>
-    <p class="buscar__alcance">
-        <?= icon('info') ?>Solo insumos de consumo (sin el equipo de la Práctica de Invierno) ·
-        <a href="<?= e(url('insumos', array_filter(['q' => $texto, 'ver' => $filtro === 'todos' ? null : $filtro]))) ?>">Ver todos los productos</a>
-    </p>
-<?php endif; ?>
 
 <div class="buscar__barra">
     <nav class="nav-pills" aria-label="Mostrar">

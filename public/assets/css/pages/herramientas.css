@@ -391,7 +391,7 @@
   font-weight: 600;
 }
 
-.pedir__prestadas {
+.pedir__hay {
   color: var(--bs-muted);
   font-size: var(--text-xs);
   font-weight: 400;
@@ -887,7 +887,97 @@
   }
 }
 
+/* Cuántas hay en bodega para prestar, a la derecha del nombre; ninguna: en mostaza oscura */
+.catalogo__hay {
+  flex: none;
+  color: var(--bs-muted);
+  font-size: var(--text-xs);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.catalogo__hay--sin {
+  color: color-mix(in srgb, var(--estado-atencion) 70%, #000);
+  font-weight: 600;
+}
+
 /* Los filtros por dónde están las herramientas, sobre el buscador */
 .catalogo__estados {
   margin-bottom: var(--space-4);
+}
+
+/* ---------- Insumos Práctica de Invierno: una tarjeta por tipo de equipo; cada fila, el equipo y cuántos hay en bodega ---------- */
+.invierno__filtros {
+  margin-bottom: var(--space-4);
+}
+
+.invierno {
+  columns: 2 24rem;
+  column-gap: var(--space-4);
+}
+
+/* Cada tarjeta entera en su columna, una debajo de otra: sin huecos aunque tengan distinto largo */
+.invierno__grupo {
+  display: block;
+  width: 100%;
+  margin-bottom: var(--space-4);
+  break-inside: avoid;
+}
+
+.invierno__lista {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.invierno__lista li + li {
+  border-top: 1px solid var(--bs-border);
+}
+
+.invierno__fila {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+}
+
+.invierno__nombre {
+  flex: 1;
+  min-width: 0;
+  line-height: 1.35;
+}
+
+.invierno__nombre .status {
+  margin-left: var(--space-1);
+  font-size: var(--text-xs);
+  vertical-align: middle;
+}
+
+/* Cuántos hay: el número en grande, verde si hay; si no hay, el 0 en gris y «Sin unidades» en mostaza (como el filtro) */
+.invierno__hay {
+  display: grid;
+  flex: none;
+  justify-items: end;
+  line-height: 1.1;
+}
+
+.invierno__hay strong {
+  color: var(--estado-bien);
+  font-size: var(--text-xl, 1.25rem);
+  font-variant-numeric: tabular-nums;
+}
+
+.invierno__hay span {
+  color: var(--bs-muted);
+  font-size: var(--text-xs);
+}
+
+.invierno__fila--sin .invierno__hay strong {
+  color: var(--bs-muted);
+}
+
+/* La mostaza, más oscura en letra chica para que se lea */
+.invierno__fila--sin .invierno__hay span {
+  color: color-mix(in srgb, var(--estado-atencion) 70%, #000);
+  font-weight: 600;
 }

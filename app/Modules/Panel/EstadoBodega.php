@@ -13,7 +13,7 @@ defined('APP_ROOT') || exit;
 /**
  * El documento «Estado de la bodega» (Word, blanco y negro): lo que muestran los gráficos del inicio, con todos los
  * números, para entregarlo o imprimirlo. 1) Resumen, 2) insumos de consumo (estado, por categoría, por reponer y sin
- * stock) y 3) herramientas (estado y préstamos en curso).
+ * stock) y 3) herramientas, con el equipo de la Práctica de Invierno (estado y préstamos en curso).
  */
 final class EstadoBodega
 {
@@ -29,7 +29,7 @@ final class EstadoBodega
         $insumos = $datos['insumos'];
         $herramientas = $datos['herramientas'];
         $productos = $insumos['con_stock'] + $insumos['por_reponer'] + $insumos['sin_stock'];
-        $catalogo = $herramientas['en_bodega'] + $herramientas['prestadas'] + $herramientas['atrasadas'];
+        $catalogo = $herramientas['en_bodega'] + $herramientas['prestadas'] + $herramientas['atrasadas'] + $herramientas['sin_unidades'];
         $ahora = date('H:i');
         $usuario = Auth::user() ?? [];
         $cargo = self::CARGOS[$usuario['perfil'] ?? ''] ?? 'Bodega';
@@ -47,10 +47,12 @@ final class EstadoBodega
         $doc->seccion('1. Resumen')
             ->parrafo(sprintf(
                 'La bodega tiene %s productos de consumo: %s con stock, %s por reponer y %s sin stock, con un total de %s en '
-                . 'bodega. De las %s herramientas del catálogo, %s están en bodega, %s prestadas a tiempo y %s atrasadas.',
+                . 'bodega. De las %s herramientas del catálogo (con %s), %s están en bodega, %s prestadas a tiempo, %s '
+                . 'atrasadas y %s sin unidades.',
                 $numero($productos), $numero($insumos['con_stock']), $numero($insumos['por_reponer']),
                 $numero($insumos['sin_stock']), unidades($insumos['unidades']), $numero($catalogo),
-                $numero($herramientas['en_bodega']), $numero($herramientas['prestadas']), $numero($herramientas['atrasadas']),
+                unidades($herramientas['unidades']), $numero($herramientas['en_bodega']), $numero($herramientas['prestadas']),
+                $numero($herramientas['atrasadas']), $numero($herramientas['sin_unidades']),
             ))
             ->tabla(['Indicador', 'Valor'], [
                 ['Productos de consumo', $numero($productos)],
@@ -60,6 +62,8 @@ final class EstadoBodega
                 ['Unidades que entraron este mes', $numero($insumos['entraron_mes'])],
                 ['Unidades que salieron este mes', $numero($insumos['salieron_mes'])],
                 ['Herramientas en el catálogo', $numero($catalogo)],
+                ['Unidades de herramientas', $numero($herramientas['unidades'])],
+                ['Unidades de herramientas en bodega', $numero($herramientas['unidades_en_bodega'])],
                 ['Unidades de herramientas prestadas ahora', $numero($herramientas['unidades_prestadas'])],
                 ['Préstamos atrasados', $numero(count(array_filter($datos['prestamos'], static fn (array $p): bool => (bool) $p['atrasado'])))],
                 ['Solicitudes de herramientas por entregar', $numero($datos['solicitudes_pendientes'])],
@@ -106,9 +110,10 @@ final class EstadoBodega
         $doc->seccion('3. Herramientas')
             ->subseccion('3.1 Estado general')
             ->tabla(['Estado', 'Significado', 'Herramientas', '%'], [
-                ['En bodega', 'Ninguna unidad prestada', $numero($herramientas['en_bodega']), $porcentaje($herramientas['en_bodega'], $catalogo)],
+                ['En bodega', 'Ninguna prestada y hay para prestar', $numero($herramientas['en_bodega']), $porcentaje($herramientas['en_bodega'], $catalogo)],
                 ['Prestadas', 'Alguna unidad fuera de la bodega, a tiempo', $numero($herramientas['prestadas']), $porcentaje($herramientas['prestadas'], $catalogo)],
                 ['Atrasadas', 'Alguna unidad debió volver a la bodega', $numero($herramientas['atrasadas']), $porcentaje($herramientas['atrasadas'], $catalogo)],
+                ['Sin unidades', 'No hay ninguna para prestar', $numero($herramientas['sin_unidades']), $porcentaje($herramientas['sin_unidades'], $catalogo)],
                 ['Total', '', $numero($catalogo), $catalogo > 0 ? '100 %' : '0 %'],
             ], [3, 6, 2, 1], [2, 3], true);
 

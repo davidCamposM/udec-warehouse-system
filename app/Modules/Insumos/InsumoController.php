@@ -33,8 +33,6 @@ final class InsumoController
     {
         $texto = trim((string) $request->query('q', ''));
         $filtro = InsumoService::filtro($request->query('ver'));
-        // ?de=consumo (desde los avisos y el gráfico del inicio): sin el equipo de la Práctica de Invierno.
-        $soloConsumo = $request->query('de') === 'consumo';
 
         $id = $this->insumos->idPorCodigo($texto);
         if ($id !== null) {
@@ -45,9 +43,8 @@ final class InsumoController
             'titulo' => 'Buscar producto',
             'texto' => $texto,
             'filtro' => $filtro,
-            'insumos' => $this->insumos->buscar($texto, $filtro, $soloConsumo),
-            'conteo' => $this->insumos->contar($texto, $soloConsumo),
-            'soloConsumo' => $soloConsumo,
+            'insumos' => $this->insumos->buscar($texto, $filtro),
+            'conteo' => $this->insumos->contar($texto),
             'puedeAdministrar' => Permission::can('insumos.administrar'),
             'estilos' => ['css/pages/insumos.css'],
             'scripts' => ['js/modules/insumos.js'],
@@ -91,17 +88,8 @@ final class InsumoController
             throw new HttpException(404, 'Ese producto no existe.');
         }
 
-        // Desde «Insumos Práctica de Invierno» (?desde=invierno), «Volver» regresa ahí, con su filtro; si no, a «Buscar
-        // producto».
-        $ver = $request->query('ver');
-        $volver = $request->query('desde') === 'invierno'
-            ? [Url::to('practica-invierno', isset(PracticaInviernoController::FILTROS[$ver]) && $ver !== 'todos' ? ['ver' => $ver] : []),
-                'Volver a Insumos Práctica de Invierno']
-            : [Url::to('insumos'), 'Volver a Buscar producto'];
-
         return Response::view('Insumos::show', $ficha + [
             'titulo' => $ficha['insumo']['nombre'],
-            'volver' => $volver,
             'puedeAdministrar' => Permission::can('insumos.administrar'),
             'puedeGuardar' => Permission::can('insumos.entrada'),
             'puedeAjustar' => Permission::can('insumos.ajuste'),

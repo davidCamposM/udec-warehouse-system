@@ -15,8 +15,9 @@ use App\Core\Url;
 defined('APP_ROOT') || exit;
 
 /**
- * «Catálogo de herramientas»: lo que tiene la bodega para prestar, por categoría, con cuántas están prestadas ahora.
- * Todos los perfiles lo ven (el docente, para saber qué pedir); el encargado además agrega, edita y elimina.
+ * «Catálogo de herramientas»: lo que tiene la bodega para prestar, por categoría, con cuántas hay en bodega y cuántas
+ * están prestadas ahora. Todos los perfiles lo ven (el docente, para saber qué pedir); el encargado además agrega, edita
+ * (y anota cuántas hay) y elimina.
  */
 final class HerramientaController
 {
@@ -30,7 +31,7 @@ final class HerramientaController
     public function index(Request $request): Response
     {
         $administrar = Permission::can('herramientas.administrar');
-        // ?ver= en-bodega, prestadas o atrasadas (desde el gráfico del inicio o las pastillas de arriba)
+        // ?ver= en-bodega, prestadas, atrasadas o sin-unidades (desde el gráfico del inicio o las pastillas de arriba)
         $estado = HerramientaService::filtro($request->query('ver'));
 
         return Response::view('Herramientas::catalogo', [
@@ -53,7 +54,7 @@ final class HerramientaController
     public function store(Request $request): Response
     {
         $nombre = $this->herramientas->crear($request->post());
-        Session::flash('exito', "Listo. Se agregó «{$nombre}» al catálogo: ya se puede solicitar.");
+        Session::flash('exito', "Listo. Se agregó «{$nombre}» al catálogo.");
 
         return Response::redirect(Url::to('herramientas'));
     }

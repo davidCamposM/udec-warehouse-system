@@ -8,29 +8,47 @@ use App\Core\Database;
 
 defined('APP_ROOT') || exit;
 
-/** Catálogo de herramientas (los tipos, como «Hipsómetro»; las unidades físicas van aparte). */
+/** Catálogo de herramientas: cada tipo («Hipsómetro») con cuántas unidades tiene la bodega. */
 final class HerramientaRepository
 {
+    /** Clave de la categoría principal del equipo de la Práctica de Invierno (migración 017). */
+    public const PRACTICA_INVIERNO = 'practica-invierno';
+
     /**
-     * Columnas de cada herramienta: su categoría, cuántas unidades están prestadas ahora (en solicitudes prestadas) y
-     * cuántas de ellas debieron volver ya (atrasadas).
+     * Columnas de cada herramienta:
+     * - su categoría principal (la de arriba, si está en una subcategoría) y su subcategoría;
+     * - cuántas unidades tiene la bodega;
+     * - cuántas están prestadas ahora (en solicitudes prestadas) y cuántas de ellas debieron volver ya (atrasadas);
+     * - cuántas volvieron con daños o no volvieron y nadie lo ha resuelto (por resolver);
+     * - cuántas solicitudes por entregar la piden.
      */
-    private const COLUMNAS = "h.id, h.nombre, h.descripcion, h.activo, h.categoria_id, c.nombre AS categoria,
+    private const COLUMNAS = "h.id, h.nombre, h.activo, h.categoria_id, h.unidades,
+        COALESCE(cp.nombre, c.nombre) AS categoria, IF(cp.id IS NULL, NULL, c.nombre) AS subcategoria,
+        COALESCE(cp.clave, c.clave) AS clave,
         (SELECT COALESCE(SUM(si.cantidad), 0)
            FROM solicitud_items si JOIN solicitudes s ON s.id = si.solicitud_id
           WHERE si.herramienta_id = h.id AND s.estado = 'prestada') AS prestadas,
         (SELECT COALESCE(SUM(si.cantidad), 0)
            FROM solicitud_items si JOIN solicitudes s ON s.id = si.solicitud_id
-          WHERE si.herramienta_id = h.id AND s.estado = 'prestada' AND s.fecha_devolucion < CURDATE()) AS atrasadas";
+          WHERE si.herramienta_id = h.id AND s.estado = 'prestada' AND s.fecha_devolucion < CURDATE()) AS atrasadas,
+        (SELECT COALESCE(SUM(" . SolicitudRepository::AFECTADAS . "), 0)
+           FROM solicitud_items si
+          WHERE si.herramienta_id = h.id AND " . SolicitudRepository::PROBLEMA . ") AS por_resolver,
+        (SELECT COUNT(*)
+           FROM solicitud_items si JOIN solicitudes s ON s.id = si.solicitud_id
+          WHERE si.herramienta_id = h.id AND s.estado = 'pendiente') AS pedidas";
 
-    /** @return list<array<string, mixed>> las activas, por categoría y nombre (las sin categoría al final) */
+    private const DESDE = 'herramientas h
+        LEFT JOIN categorias c ON c.id = h.categoria_id
+        LEFT JOIN categorias cp ON cp.id = c.padre_id';
+
+    /** @return list<array<string, mixed>> las activas, por categoría, subcategoría y nombre (las sin categoría al final) */
     public function activas(): array
     {
         return Database::fetchAll(
-            'SELECT ' . self::COLUMNAS . '
-               FROM herramientas h LEFT JOIN categorias c ON c.id = h.categoria_id
+            'SELECT ' . self::COLUMNAS . ' FROM ' . self::DESDE . '
               WHERE h.activo = 1
-              ORDER BY c.nombre IS NULL, c.nombre, h.nombre'
+              ORDER BY categoria IS NULL, categoria, subcategoria, h.nombre'
         );
     }
 
@@ -40,12 +58,26 @@ final class HerramientaRepository
      */
     public function findById(int $id): ?array
     {
-        return Database::fetch(
-            'SELECT ' . self::COLUMNAS . '
-               FROM herramientas h LEFT JOIN categorias c ON c.id = h.categoria_id
-              WHERE h.id = ? AND h.activo = 1',
-            [$id]
-        );
+        return Database::fetch('SELECT ' . self::COLUMNAS . ' FROM ' . self::DESDE . ' WHERE h.id = ? AND h.activo = 1', [$id]);
+    }
+
+    /**
+     * Varias herramientas, bloqueadas hasta que termine la transacción: así nadie más presta las mismas unidades a la
+     * vez.
+     *
+     * @param list<int> $ids
+     * @return array<int, array<string, mixed>> id => herramienta
+     */
+    public function bloquear(array $ids): array
+    {
+        if ($ids === []) {
+            return [];
+        }
+        $marcas = implode(', ', array_fill(0, count($ids), '?'));
+        Database::fetchAll("SELECT id FROM herramientas WHERE id IN ({$marcas}) FOR UPDATE", $ids);
+        $filas = Database::fetchAll('SELECT ' . self::COLUMNAS . ' FROM ' . self::DESDE . " WHERE h.id IN ({$marcas})", $ids);
+
+        return array_column($filas, null, 'id');
     }
 
     /**
@@ -60,22 +92,43 @@ final class HerramientaRepository
         ) !== null;
     }
 
-    /** @return list<array{id: int, nombre: string}> las categorías de herramientas activas, por nombre */
+    /**
+     * Las categorías donde puede ir una herramienta: las principales sin subcategorías y las subcategorías (con el
+     * nombre de su principal), por principal y nombre.
+     *
+     * @return list<array{id: int, nombre: string, padre: ?string}>
+     */
     public function categorias(): array
     {
         return Database::fetchAll(
-            "SELECT id, nombre FROM categorias WHERE ambito = 'herramienta' AND activo = 1 ORDER BY nombre"
+            "SELECT c.id, c.nombre, p.nombre AS padre
+               FROM categorias c LEFT JOIN categorias p ON p.id = c.padre_id
+              WHERE c.ambito = 'herramienta' AND c.activo = 1
+                AND NOT EXISTS (SELECT 1 FROM categorias h WHERE h.padre_id = c.id AND h.activo = 1)
+              ORDER BY COALESCE(p.nombre, c.nombre), p.nombre IS NOT NULL, c.nombre"
         );
     }
 
-    public function create(string $nombre, ?int $categoriaId): int
+    public function create(string $nombre, ?int $categoriaId, int $unidades): int
     {
-        return Database::insert('INSERT INTO herramientas (nombre, categoria_id) VALUES (?, ?)', [$nombre, $categoriaId]);
+        return Database::insert(
+            'INSERT INTO herramientas (nombre, categoria_id, unidades) VALUES (?, ?, ?)',
+            [$nombre, $categoriaId, $unidades]
+        );
     }
 
-    public function update(int $id, string $nombre, ?int $categoriaId): void
+    public function update(int $id, string $nombre, ?int $categoriaId, int $unidades): void
     {
-        Database::execute('UPDATE herramientas SET nombre = ?, categoria_id = ? WHERE id = ?', [$nombre, $categoriaId, $id]);
+        Database::execute(
+            'UPDATE herramientas SET nombre = ?, categoria_id = ?, unidades = ? WHERE id = ?',
+            [$nombre, $categoriaId, $unidades, $id]
+        );
+    }
+
+    /** Unidades que se dieron de baja: salen de las que tiene la bodega. */
+    public function descontarUnidades(int $id, int $cuantas): void
+    {
+        Database::execute('UPDATE herramientas SET unidades = GREATEST(0, unidades - ?) WHERE id = ?', [$cuantas, $id]);
     }
 
     /** «Eliminar»: por dentro solo se desactiva, para conservar los préstamos en que aparece. */

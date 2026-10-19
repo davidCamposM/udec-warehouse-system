@@ -11,6 +11,7 @@
 declare(strict_types=1);
 
 use App\Modules\Herramientas\HerramientaController;
+use App\Modules\Herramientas\PracticaInviernoController;
 use App\Modules\Herramientas\PrestamoController;
 use App\Modules\Herramientas\SolicitudController;
 
@@ -32,6 +33,9 @@ $router->get('/prestamos/{id}/recibir', [PrestamoController::class, 'recepcion']
 $router->post('/prestamos/{id}/recibir', [PrestamoController::class, 'recibir'], 'prestamos.administrar');
 $router->post('/prestamos/{id}/extender', [PrestamoController::class, 'extender'], 'prestamos.administrar');
 $router->post('/prestamos/{id}/items/{item}/resolver', [PrestamoController::class, 'resolver'], 'prestamos.administrar');
+
+// El equipo de la Práctica de Invierno (las administrativas)
+$router->get('/practica-invierno', [PracticaInviernoController::class, 'index'], 'herramientas.ver');
 
 // El catálogo
 $router->get('/herramientas', [HerramientaController::class, 'index'], 'herramientas.ver');

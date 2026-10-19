@@ -37,7 +37,8 @@ final class SolicitudController
         }
 
         return $this->ventana('formulario', [
-            'grupos' => (new HerramientaService())->porCategoria(),
+            // Solo las que tiene la bodega: de las sin unidades no hay nada que pedir.
+            'grupos' => (new HerramientaService())->porCategoria(soloConUnidades: true),
             'nombre' => (string) (Auth::user()['nombre'] ?? ''),
         ]);
     }

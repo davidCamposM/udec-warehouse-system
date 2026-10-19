@@ -17,12 +17,12 @@ $definiciones = [
     'sin_unidades' => [
         'x-circle', 'danger', 'producto sin unidades', 'productos sin unidades',
         'No queda ninguna en bodega.',
-        $verInsumos ? url('insumos', ['ver' => 'no-queda', 'de' => 'consumo']) : null,
+        $verInsumos ? url('insumos', ['ver' => 'no-queda']) : null,
     ],
     'por_reponer' => [
         'alert', 'warning', 'producto por reponer', 'productos por reponer',
         'Llegaron a su stock mínimo: hay que pedir más.',
-        $verInsumos ? url('insumos', ['ver' => 'reponer', 'de' => 'consumo']) : null,
+        $verInsumos ? url('insumos', ['ver' => 'reponer']) : null,
     ],
     'prestamos_atrasados' => [
         'clock', 'danger', 'préstamo atrasado', 'préstamos atrasados',

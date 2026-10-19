@@ -6,7 +6,6 @@ namespace App\Modules\Panel;
 
 use App\Core\Database;
 use App\Modules\Herramientas\SolicitudRepository;
-use App\Modules\Insumos\InsumoRepository;
 
 defined('APP_ROOT') || exit;
 
@@ -45,8 +44,8 @@ final class PanelRepository
     }
 
     /**
-     * Los insumos de consumo activos (sin el equipo de la Práctica de Invierno) según lo que queda: sin unidades, por
-     * reponer (quedan, pero llegaron a su mínimo) y con stock; cada uno cuenta en un solo grupo. Más las unidades en bodega y las que entraron y salieron este mes.
+     * Los insumos activos según lo que queda: sin unidades, por reponer (quedan, pero llegaron a su mínimo) y con stock;
+     * cada uno cuenta en un solo grupo. Más las unidades en bodega y las que entraron y salieron este mes.
      *
      * @return array{con_stock: int, por_reponer: int, sin_stock: int, unidades: int, salieron_mes: int, entraron_mes: int}
      */
@@ -58,7 +57,7 @@ final class PanelRepository
                     COALESCE(SUM(i.stock_actual > 0 AND (i.stock_minimo = 0 OR i.stock_actual > i.stock_minimo)), 0) AS con_stock,
                     COALESCE(SUM(GREATEST(i.stock_actual, 0)), 0) AS unidades
                FROM ' . self::INSUMOS_CON_CATEGORIA . '
-              WHERE i.activo = 1 AND ' . InsumoRepository::SOLO_CONSUMO
+              WHERE i.activo = 1'
         ) ?? [];
         $mes = Database::fetch(
             "SELECT COALESCE(SUM(CASE WHEN m.tipo = 'salida' THEN ABS(mi.cantidad) END), 0) AS salieron_mes,
@@ -70,34 +69,6 @@ final class PanelRepository
         return array_map('intval', $productos + $mes) + [
             'con_stock' => 0, 'por_reponer' => 0, 'sin_stock' => 0, 'unidades' => 0, 'salieron_mes' => 0, 'entraron_mes' => 0,
         ];
-    }
-
-    /**
-     * Las herramientas activas del catálogo según dónde están: en bodega (ninguna unidad prestada), prestadas (alguna
-     * unidad fuera, a tiempo) y atrasadas (alguna unidad en un préstamo que debió volver). Cada una cuenta en un solo
-     * grupo. Más las unidades prestadas ahora.
-     *
-     * @return array{en_bodega: int, prestadas: int, atrasadas: int, unidades_prestadas: int}
-     */
-    public function resumenHerramientas(): array
-    {
-        $fila = Database::fetch(
-            "SELECT COALESCE(SUM(t.atrasada = 1), 0) AS atrasadas,
-                    COALESCE(SUM(t.atrasada = 0 AND t.prestadas > 0), 0) AS prestadas,
-                    COALESCE(SUM(t.prestadas = 0), 0) AS en_bodega,
-                    COALESCE(SUM(t.prestadas), 0) AS unidades_prestadas
-               FROM (SELECT h.id,
-                            COALESCE(SUM(si.cantidad), 0) AS prestadas,
-                            COALESCE(MAX(s.fecha_devolucion < CURDATE()), 0) AS atrasada
-                       FROM herramientas h
-                       LEFT JOIN solicitud_items si ON si.herramienta_id = h.id
-                            AND si.solicitud_id IN (SELECT id FROM solicitudes WHERE estado = 'prestada')
-                       LEFT JOIN solicitudes s ON s.id = si.solicitud_id
-                      WHERE h.activo = 1
-                      GROUP BY h.id) t"
-        ) ?? [];
-
-        return array_map('intval', $fila) + ['en_bodega' => 0, 'prestadas' => 0, 'atrasadas' => 0, 'unidades_prestadas' => 0];
     }
 
     /** La categoría principal de un producto (o la suya, si no tiene padre); sin categoría: «Sin categoría». */
@@ -122,7 +93,7 @@ final class PanelRepository
                     SUM(i.stock_actual > 0 AND i.stock_minimo > 0 AND i.stock_actual <= i.stock_minimo) AS por_reponer,
                     SUM(i.stock_actual <= 0) AS sin_stock
                FROM ' . self::INSUMOS_CON_CATEGORIA . '
-              WHERE i.activo = 1 AND ' . InsumoRepository::SOLO_CONSUMO . '
+              WHERE i.activo = 1
               GROUP BY categoria
               ORDER BY categoria = \'Sin categoría\', categoria'
         );
@@ -152,7 +123,7 @@ final class PanelRepository
             'SELECT i.codigo, i.nombre, i.stock_actual, i.stock_minimo, ' . self::CATEGORIA_PRINCIPAL . ' AS categoria,
                     s.codigo AS sector_codigo
                FROM ' . self::INSUMOS_CON_CATEGORIA . "
-              WHERE i.activo = 1 AND {$condicion} AND " . InsumoRepository::SOLO_CONSUMO . "
+              WHERE i.activo = 1 AND {$condicion}
               ORDER BY categoria, i.nombre"
         );
     }

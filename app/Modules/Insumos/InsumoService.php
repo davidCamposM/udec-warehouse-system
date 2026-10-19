@@ -27,9 +27,6 @@ final class InsumoService
         'out' => ['Sin stock', 'x-circle'],
     ];
 
-    /** La categoría principal del equipo de montaña de la Práctica de Invierno (seed 050_practica_invierno.php). */
-    public const PRACTICA_INVIERNO = 'Práctica de Invierno';
-
     public function __construct(
         private readonly InsumoRepository $insumos = new InsumoRepository(),
         private readonly AuditoriaService $auditoria = new AuditoriaService(),
@@ -73,15 +70,15 @@ final class InsumoService
     }
 
     /** @return list<array<string, mixed>> */
-    public function buscar(string $texto, string $filtro, bool $soloConsumo = false): array
+    public function buscar(string $texto, string $filtro): array
     {
-        return $this->insumos->buscar($texto, $filtro, $soloConsumo);
+        return $this->insumos->buscar($texto, $filtro);
     }
 
     /** @return array<string, int> */
-    public function contar(string $texto, bool $soloConsumo = false): array
+    public function contar(string $texto): array
     {
-        return $this->insumos->contar($texto, $soloConsumo);
+        return $this->insumos->contar($texto);
     }
 
     /**
@@ -147,36 +144,6 @@ final class InsumoService
             'total' => $total,
             'desde' => $desde,
         ];
-    }
-
-    /**
-     * «Insumos Práctica de Invierno»: los productos de esa categoría principal, agrupados por su subcategoría (Esquí y
-     * fijaciones, Bastones…), con cuántos hay con y sin stock. Con $filtro ('con-stock', 'sin-stock') solo esos.
-     *
-     * @return array{grupos: array<string, list<array<string, mixed>>>, conteo: array{todos: int, con-stock: int, sin-stock: int}}
-     */
-    public function practicaInvierno(string $filtro): array
-    {
-        $grupos = [];
-        $conteo = ['todos' => 0, 'con-stock' => 0, 'sin-stock' => 0];
-        foreach ($this->insumos->buscar('', 'todos') as $insumo) {
-            $esDeLaPractica = $insumo['categoria_padre'] === self::PRACTICA_INVIERNO
-                || ($insumo['categoria_padre'] === null && $insumo['categoria'] === self::PRACTICA_INVIERNO);
-            if (!$esDeLaPractica) {
-                continue;
-            }
-
-            $estado = (int) $insumo['stock_actual'] > 0 ? 'con-stock' : 'sin-stock';
-            $conteo['todos']++;
-            $conteo[$estado]++;
-            if ($filtro === 'todos' || $filtro === $estado) {
-                $grupos[$insumo['categoria_padre'] !== null ? $insumo['categoria'] : 'Otros'][] = $insumo;
-            }
-        }
-        // Por nombre, con «Otros» al final.
-        uksort($grupos, static fn (string $a, string $b): int => [$a === 'Otros', $a] <=> [$b === 'Otros', $b]);
-
-        return ['grupos' => $grupos, 'conteo' => $conteo];
     }
 
     /**
@@ -373,17 +340,39 @@ final class InsumoService
     }
 
     /**
+     * Por qué todavía no se puede eliminar (null: se puede). Con unidades en bodega, eliminarlo las haría desaparecer
+     * sin dejar rastro en las entradas y salidas: primero se deja en 0 con «Actualizar cantidad», que anota el motivo.
+     *
+     * @param array<string, mixed> $insumo
+     */
+    public static function porQueNoSeElimina(array $insumo): ?string
+    {
+        $hay = (int) $insumo['stock_actual'];
+
+        return $hay > 0
+            ? 'Según el sistema hay ' . unidades($hay) . ' en bodega. Si ya no están, primero déjalo en 0 con «Actualizar cantidad»: así queda anotado por qué.'
+            : null;
+    }
+
+    /**
      * «Eliminar»: el producto desaparece del sistema para las personas; por dentro solo se desactiva y queda su historial
-     * (InsumoRepository::eliminar).
+     * (InsumoRepository::eliminar). Solo sin unidades en bodega.
+     *
+     * @throws ValidationException si todavía tiene unidades
      */
     public function eliminar(int $id): void
     {
-        $insumo = $this->insumos->findById($id);
-        if ($insumo === null) {
-            return;
-        }
+        Database::transaction(function () use ($id): void {
+            // Bloqueado: nadie registra unidades mientras se elimina.
+            $this->insumos->bloquear($id);
+            $insumo = $this->insumos->findById($id);
+            if ($insumo === null) {
+                return;
+            }
+            if ((int) $insumo['stock_actual'] > 0) {
+                throw new ValidationException(['eliminar' => 'Todavía no se puede eliminar. ' . self::porQueNoSeElimina($insumo)]);
+            }
 
-        Database::transaction(function () use ($id, $insumo): void {
             $this->insumos->eliminar($id);
             $this->auditoria->registrar('eliminar', 'insumo', $id, [
                 'codigo' => $insumo['codigo'],
