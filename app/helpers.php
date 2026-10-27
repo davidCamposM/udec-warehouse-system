@@ -39,18 +39,22 @@ function asset(string $ruta): string
 }
 
 /**
- * Foto de un producto, por su código UdeC: public/assets/img/productos/{código}.jpg (sacadas de abasto.udec.cl).
- * Null si no tiene código UdeC o no hay foto.
+ * Foto de un producto: public/assets/img/productos/{código UdeC}.jpg (sacadas de abasto.udec.cl) o, si no tiene código
+ * UdeC, {código interno}.jpg (INS00065.jpg, fotos propias). Null si no hay foto.
  */
-function foto_producto(?string $codigoUdec): ?string
+function foto_producto(?string $codigoUdec, ?string $codigo = null): ?string
 {
-    if ($codigoUdec === null || !ctype_digit($codigoUdec)) {
-        return null;
+    foreach ([$codigoUdec, $codigo] as $nombre) {
+        if ($nombre === null || preg_match('/^[A-Z0-9]+$/', $nombre) !== 1) {
+            continue;
+        }
+        $ruta = "img/productos/{$nombre}.jpg";
+        if (is_file(APP_ROOT . '/public/assets/' . $ruta)) {
+            return asset($ruta);
+        }
     }
 
-    $ruta = "img/productos/{$codigoUdec}.jpg";
-
-    return is_file(APP_ROOT . '/public/assets/' . $ruta) ? asset($ruta) : null;
+    return null;
 }
 
 function config(string $clave, mixed $porDefecto = null): mixed

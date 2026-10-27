@@ -9,7 +9,7 @@ $claseError = static fn (string $campo): string => error_de($campo) !== null ? '
     'volver' => [url('insumos/' . $insumo['id']), 'Volver al producto'],
     'color' => 'turquesa',
     'icono' => 'barcode',
-    'titulo' => 'Agregar código de barras',
+    'titulo' => 'Agregar otro código de barras',
     'texto' => 'Para «' . $insumo['nombre'] . '». Así, al escanear este código, el sistema sabrá que es este producto.',
 ]) ?>
 

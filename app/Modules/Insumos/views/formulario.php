@@ -84,9 +84,20 @@ $claseError = static fn (string $campo): string => error_de($campo) !== null ? '
         <?= mensaje_error('codigo_udec') ?>
     </div>
 
+    <div class="question<?= $claseError('sku') ?>">
+        <label class="question__label" for="sku">
+            <span class="question__number"><?= ++$numero ?></span>Código de barras
+            <span class="question__optional">(opcional)</span>
+        </label>
+        <p class="question__hint">El código del envase: escanéalo o escríbelo. Ejemplo: 7806505012554. Con solo ceros, todavía no está anotado.</p>
+        <input class="input" id="sku" name="sku" type="text" maxlength="20" inputmode="numeric" autocomplete="off"
+            value="<?= e($valor('sku', $insumo['sku'] ?? '')) ?>" <?= aria_error('sku') ?>>
+        <?= mensaje_error('sku') ?>
+    </div>
+
     <p class="form-simple__note">
         <?= icon('info') ?>
-        Los códigos de barra se agregan o se quitan desde la ficha del producto.
+        Otros códigos de barras del mismo producto (otra marca, la caja) se agregan o se quitan desde su ficha.
     </p>
 
     <div class="acciones">

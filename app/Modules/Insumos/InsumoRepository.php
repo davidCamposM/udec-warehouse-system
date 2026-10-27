@@ -14,6 +14,12 @@ defined('APP_ROOT') || exit;
 final class InsumoRepository
 {
     /**
+     * Código de barras principal (columna sku, migración 018) de un producto que todavía no lo tiene anotado: no se
+     * busca ni se compara.
+     */
+    public const SIN_CODIGO_BARRAS = '0000000000000';
+
+    /**
      * Condición SQL de cada filtro de la lista. Con stock, por reponer y sin stock no se cruzan: cada producto está en
      * uno solo (los mismos grupos del gráfico del inicio).
      */
@@ -24,7 +30,7 @@ final class InsumoRepository
         'no-queda' => 'i.activo = 1 AND i.stock_actual <= 0',
     ];
 
-    private const COLUMNAS = 'i.id, i.codigo, i.codigo_udec, i.nombre, i.stock_actual, i.stock_minimo, i.activo,
+    private const COLUMNAS = 'i.id, i.codigo, i.codigo_udec, i.sku, i.nombre, i.stock_actual, i.stock_minimo, i.activo,
         i.categoria_id, c.nombre AS categoria, cp.nombre AS categoria_padre,
         i.sector_id, s.nombre AS sector, s.codigo AS sector_codigo';
 
@@ -110,7 +116,7 @@ final class InsumoRepository
 
     /**
      * Producto (no eliminado) al que corresponde un código leído o escrito: el código interno (INS00001), el código
-     * UdeC o un código de barras de fábrica activo.
+     * UdeC, el código de barras principal o uno de sus otros códigos de barras activos.
      */
     public function idPorCodigo(string $codigo): ?int
     {
@@ -118,9 +124,9 @@ final class InsumoRepository
             'SELECT ic.insumo_id FROM insumo_codigos ic JOIN insumos i ON i.id = ic.insumo_id
               WHERE ic.codigo = ? AND ic.activo = 1 AND i.activo = 1
              UNION ALL
-             SELECT id FROM insumos WHERE (codigo = ? OR codigo_udec = ?) AND activo = 1
+             SELECT id FROM insumos WHERE (codigo = ? OR codigo_udec = ? OR (sku = ? AND sku <> ?)) AND activo = 1
              LIMIT 1',
-            [$codigo, $codigo, $codigo]
+            [$codigo, $codigo, $codigo, $codigo, self::SIN_CODIGO_BARRAS]
         );
 
         return $id === null ? null : (int) $id;
@@ -177,21 +183,21 @@ final class InsumoRepository
         return sprintf('INS%05d', $ultimo + 1);
     }
 
-    /** @param array{codigo: string, codigo_udec: ?string, nombre: string, categoria_id: ?int, stock_minimo: int} $datos */
+    /** @param array{codigo: string, codigo_udec: ?string, sku?: string, nombre: string, categoria_id: ?int, stock_minimo: int} $datos */
     public function create(array $datos): int
     {
         return Database::insert(
-            'INSERT INTO insumos (codigo, codigo_udec, nombre, categoria_id, stock_minimo) VALUES (?, ?, ?, ?, ?)',
-            [$datos['codigo'], $datos['codigo_udec'], $datos['nombre'], $datos['categoria_id'], $datos['stock_minimo']]
+            'INSERT INTO insumos (codigo, codigo_udec, sku, nombre, categoria_id, stock_minimo) VALUES (?, ?, ?, ?, ?, ?)',
+            [$datos['codigo'], $datos['codigo_udec'], $datos['sku'] ?? self::SIN_CODIGO_BARRAS, $datos['nombre'], $datos['categoria_id'], $datos['stock_minimo']]
         );
     }
 
-    /** @param array{codigo_udec: ?string, nombre: string, categoria_id: ?int, stock_minimo: int} $datos */
+    /** @param array{codigo_udec: ?string, sku: string, nombre: string, categoria_id: ?int, stock_minimo: int} $datos */
     public function update(int $id, array $datos): void
     {
         Database::execute(
-            'UPDATE insumos SET codigo_udec = ?, nombre = ?, categoria_id = ?, stock_minimo = ? WHERE id = ?',
-            [$datos['codigo_udec'], $datos['nombre'], $datos['categoria_id'], $datos['stock_minimo'], $id]
+            'UPDATE insumos SET codigo_udec = ?, sku = ?, nombre = ?, categoria_id = ?, stock_minimo = ? WHERE id = ?',
+            [$datos['codigo_udec'], $datos['sku'], $datos['nombre'], $datos['categoria_id'], $datos['stock_minimo'], $id]
         );
     }
 
@@ -250,7 +256,8 @@ final class InsumoRepository
     /**
      * Dónde se usa un código en todo el sistema, para que un código lleve siempre a una sola cosa (RF17).
      * Retorna la descripción de su dueño ("el producto CLORO…", "el sector Estante A"…) o null.
-     * $exceptoInsumo deja fuera el código interno y el código UdeC de ese producto (al editarlo).
+     * $exceptoInsumo deja fuera el código interno, el código UdeC y el código de barras principal de ese producto (al
+     * editarlo).
      */
     public function codigoEnUso(string $codigo, ?int $exceptoInsumo = null): ?string
     {
@@ -259,11 +266,12 @@ final class InsumoRepository
                FROM insumo_codigos ic JOIN insumos i ON i.id = ic.insumo_id
               WHERE ic.codigo = ? AND ic.activo = 1 AND i.activo = 1
              UNION ALL
-             SELECT CONCAT('el producto ', nombre) FROM insumos WHERE (codigo = ? OR codigo_udec = ?) AND id <> ? AND activo = 1
+             SELECT CONCAT('el producto ', nombre) FROM insumos
+              WHERE (codigo = ? OR codigo_udec = ? OR (sku = ? AND sku <> ?)) AND id <> ? AND activo = 1
              UNION ALL
              SELECT CONCAT('el sector ', nombre) FROM sectores WHERE codigo = ? AND activo = 1
              LIMIT 1",
-            [$codigo, $codigo, $codigo, $exceptoInsumo ?? 0, $codigo]
+            [$codigo, $codigo, $codigo, $codigo, self::SIN_CODIGO_BARRAS, $exceptoInsumo ?? 0, $codigo]
         );
 
         return $fila['duenio'] ?? null;
@@ -288,6 +296,12 @@ final class InsumoRepository
      * Agrega un código de barras al producto. Si el código existió antes y se había quitado, se reutiliza esa fila
      * (la columna es única): así un envase que cambió de producto se puede volver a asignar.
      */
+    /** Deja ese código como el código de barras principal del producto (columna sku). */
+    public function fijarCodigoBarras(int $insumoId, string $codigo): void
+    {
+        Database::execute('UPDATE insumos SET sku = ? WHERE id = ?', [$codigo, $insumoId]);
+    }
+
     public function guardarCodigo(int $insumoId, string $codigo, ?string $descripcion): int
     {
         $anterior = $this->findCodigoDeBarras($codigo);
@@ -333,8 +347,8 @@ final class InsumoRepository
         foreach ($palabras as $palabra) {
             $like = '%' . addcslashes($palabra, '%_\\') . '%';
             $partes[] = '(i.nombre LIKE ? OR c.nombre LIKE ? OR cp.nombre LIKE ? OR s.nombre LIKE ?
-                OR i.codigo LIKE ? OR i.codigo_udec LIKE ?)';
-            array_push($parametros, $like, $like, $like, $like, $like, $like);
+                OR i.codigo LIKE ? OR i.codigo_udec LIKE ? OR (i.sku <> ? AND i.sku LIKE ?))';
+            array_push($parametros, $like, $like, $like, $like, $like, $like, self::SIN_CODIGO_BARRAS, $like);
         }
 
         $exacto = trim($texto);

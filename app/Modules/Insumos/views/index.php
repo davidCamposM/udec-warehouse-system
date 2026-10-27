@@ -82,7 +82,7 @@ $urlAgregar = url('insumos/nuevo', InsumoService::paraAgregar($texto));
         <?php foreach ($insumos as $insumo) : ?>
             <?php
             [$numero, $unidad] = explode(' ', unidades($insumo['stock_actual']), 2);
-            $foto = foto_producto($insumo['codigo_udec']);
+            $foto = foto_producto($insumo['codigo_udec'], $insumo['codigo']);
             ?>
             <li>
                 <a class="resultado" href="<?= e(url('insumos/' . $insumo['id'])) ?>">

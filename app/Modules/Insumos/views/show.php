@@ -1,5 +1,6 @@
 <?php
 
+use App\Modules\Insumos\InsumoRepository;
 use App\Support\Fecha;
 
 defined('APP_ROOT') || exit;
@@ -35,8 +36,10 @@ if ($puedeAjustar) {
     $tareas[] = ['Actualizar cantidad', 'Dejar lo que realmente hay, después de contar', 'refresh', 'naranja', url('ajustar', ['producto' => $insumo['id']])];
 }
 if ($puedeAdministrar) {
-    $tareas[] = ['Editar datos', 'Nombre, tipo, stock mínimo o código UdeC', 'edit', 'pizarra', url("{$base}/editar")];
-    $tareas[] = ['Agregar código de barras', 'Otro envase de este mismo producto', 'barcode', 'turquesa', url("{$base}/codigos/nuevo")];
+    $tareas[] = ['Editar datos', 'Nombre, tipo, stock mínimo, código UdeC o código de barras', 'edit', 'pizarra', url("{$base}/editar")];
+    $tareas[] = $insumo['sku'] === InsumoRepository::SIN_CODIGO_BARRAS
+        ? ['Agregar código de barras', 'Escanear el código del envase', 'barcode', 'turquesa', url("{$base}/codigos/nuevo")]
+        : ['Agregar otro código de barras', 'Otra marca o la caja de este mismo producto', 'barcode', 'turquesa', url("{$base}/codigos/nuevo")];
 }
 ?>
 <?= partial('encabezado', [
@@ -47,7 +50,7 @@ if ($puedeAdministrar) {
     'texto' => $insumo['codigo'] . ' · ' . $categoria,
 ]) ?>
 
-<?php $foto = foto_producto($insumo['codigo_udec']); ?>
+<?php $foto = foto_producto($insumo['codigo_udec'], $insumo['codigo']); ?>
 <section class="producto" aria-label="El producto">
     <div class="producto__info">
         <div class="producto__cantidad">
@@ -74,6 +77,10 @@ if ($puedeAdministrar) {
             <div>
                 <dt><?= icon('clipboard') ?>Código UdeC</dt>
                 <dd><?= e($insumo['codigo_udec'] ?? 'Sin código') ?></dd>
+            </div>
+            <div>
+                <dt><?= icon('barcode') ?>Código de barras</dt>
+                <dd><?= e($insumo['sku'] === InsumoRepository::SIN_CODIGO_BARRAS ? 'Sin anotar' : $insumo['sku']) ?></dd>
             </div>
         </dl>
     </div>
@@ -142,11 +149,11 @@ if ($puedeAdministrar) {
 
     <section class="card" aria-labelledby="titulo-codigos">
         <div class="card-header">
-            <h2 class="card-title" id="titulo-codigos">Códigos de barra</h2>
+            <h2 class="card-title" id="titulo-codigos">Otros códigos de barras</h2>
         </div>
         <?php if ($codigos === []) : ?>
             <p class="card-body text-muted">
-                Este producto no tiene códigos de barra de fábrica. Se puede escanear su código interno
+                Este producto no tiene otros códigos de barras. Se puede escanear su código interno
                 <strong><?= e($insumo['codigo']) ?></strong> desde su etiqueta.
             </p>
         <?php else : ?>

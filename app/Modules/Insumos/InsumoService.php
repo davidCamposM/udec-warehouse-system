@@ -295,6 +295,13 @@ final class InsumoService
             throw new ValidationException($errores);
         }
 
+        // El código que se escaneó al crearlo es su código de barras (el del envase). Solo si ya trae uno escrito, el
+        // escaneado queda como otro código de barras del mismo producto.
+        if ($barras !== null && ($insumo['sku'] ?? InsumoRepository::SIN_CODIGO_BARRAS) === InsumoRepository::SIN_CODIGO_BARRAS) {
+            $insumo['sku'] = $barras['codigo'];
+            $barras = null;
+        }
+
         return Database::transaction(function () use ($insumo, $barras): array {
             if (($insumo['codigo_udec'] ?? null) !== null) {
                 $this->insumos->liberarCodigoUdec($insumo['codigo_udec']);
@@ -309,7 +316,7 @@ final class InsumoService
             $this->auditoria->registrar('crear', 'insumo', $id, [
                 'codigo' => $insumo['codigo'],
                 'nombre' => $insumo['nombre'],
-                'codigo_barras' => $barras['codigo'] ?? null,
+                'codigo_barras' => $barras['codigo'] ?? ($insumo['sku'] !== InsumoRepository::SIN_CODIGO_BARRAS ? $insumo['sku'] : null),
             ]);
 
             return ['id' => $id, 'codigo' => $insumo['codigo'], 'nombre' => $insumo['nombre']];
@@ -384,18 +391,25 @@ final class InsumoService
     // ---------- Códigos de barra ----------
 
     /**
+     * Agrega un código escaneado a un producto (desde su ficha, desde «Registrar producto» con un código que nadie tenía
+     * o desde el conteo). Si el producto todavía no tiene código de barras (en ceros), ese pasa a ser su código de
+     * barras; si ya tiene uno, queda como otro código de barras del mismo producto (otra marca, la caja).
+     *
      * @param array<string, mixed> $datos codigo_barras y descripcion
      * @throws ValidationException
      */
     public function agregarCodigo(int $insumoId, array $datos): string
     {
-        if ($this->insumos->findById($insumoId) === null) {
-            throw new ValidationException(['codigo_barras' => 'Ese producto no existe.']);
-        }
+        $insumo = $this->insumos->findById($insumoId) ?? throw new ValidationException(['codigo_barras' => 'Ese producto no existe.']);
         $barras = $this->validarCodigoNuevo($datos, obligatorio: true);
+        $principal = $insumo['sku'] === InsumoRepository::SIN_CODIGO_BARRAS;
 
-        Database::transaction(function () use ($insumoId, $barras): void {
-            $this->insumos->guardarCodigo($insumoId, $barras['codigo'], $barras['descripcion']);
+        Database::transaction(function () use ($insumoId, $barras, $principal): void {
+            if ($principal) {
+                $this->insumos->fijarCodigoBarras($insumoId, $barras['codigo']);
+            } else {
+                $this->insumos->guardarCodigo($insumoId, $barras['codigo'], $barras['descripcion']);
+            }
             $this->auditoria->registrar('agregar_codigo', 'insumo', $insumoId, ['codigo_barras' => $barras['codigo']]);
         });
 
@@ -436,7 +450,7 @@ final class InsumoService
     private function validar(array $datos, ?int $id, ?array $campos = null): array
     {
         // Espacios repetidos fuera, para que "CLORO  1 L" y "CLORO 1 L" sean el mismo nombre.
-        foreach (['nombre', 'codigo_udec'] as $campo) {
+        foreach (['nombre', 'codigo_udec', 'sku'] as $campo) {
             if (is_string($datos[$campo] ?? null)) {
                 $datos[$campo] = preg_replace('/\s+/u', ' ', trim($datos[$campo]));
             }
@@ -447,6 +461,7 @@ final class InsumoService
             'categoria_id' => 'entero',
             'stock_minimo' => 'entero|min:0|max:999999',
             'codigo_udec' => 'max:20',
+            'sku' => 'max:20',
         ];
         $campos ??= array_keys($reglas);
         [$limpios, $errores] = self::validarCampos($datos, array_intersect_key($reglas, array_flip($campos)));
@@ -474,12 +489,25 @@ final class InsumoService
             }
         }
 
+        // Código de barras principal (columna sku): vacío o solo ceros es «todavía sin anotar»; si no, letras y números,
+        // y de un solo producto.
+        $sku = (string) ($limpios['sku'] ?? '');
+        $sku = $sku === '' || trim($sku, '0') === '' ? InsumoRepository::SIN_CODIGO_BARRAS : $sku;
+        if ($sku !== InsumoRepository::SIN_CODIGO_BARRAS && !isset($errores['sku'])) {
+            if (preg_match('/^[A-Za-z0-9-]+$/', $sku) !== 1) {
+                $errores['sku'] = 'Escribe el código de barras sin espacios: solo números y letras. Ejemplo: 7806505012554.';
+            } elseif (($duenio = $this->insumos->codigoEnUso($sku, $id)) !== null) {
+                $errores['sku'] = "Ese código de barras ya lo usa {$duenio}.";
+            }
+        }
+
         if ($errores !== []) {
             throw new ValidationException($errores);
         }
 
         return array_intersect_key([
             'codigo_udec' => $udec,
+            'sku' => $sku,
             'nombre' => $limpios['nombre'] ?? '',
             'categoria_id' => empty($limpios['categoria_id']) ? null : $limpios['categoria_id'],
             'stock_minimo' => (int) ($limpios['stock_minimo'] ?? 0),
