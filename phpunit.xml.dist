@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Pruebas del sistema (PHPUnit 12, como tools/phpunit.phar: solo en desarrollo, nunca en el servidor).
+  Se corren con: docker compose exec -T app php tools/phpunit.phar (ver README, sección Pruebas).
+  Usan su propia base, bodega_fcf_pruebas, que tests/bootstrap.php arma desde cero en cada corrida.
+-->
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/12.5/phpunit.xsd"
+         bootstrap="tests/bootstrap.php"
+         colors="true"
+         failOnWarning="true"
+         failOnRisky="true"
+         cacheResult="false">
+    <testsuites>
+        <testsuite name="Bodega FCF">
+            <directory>tests</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>

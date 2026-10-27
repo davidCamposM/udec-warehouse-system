@@ -15,6 +15,7 @@ declare(strict_types=1);
 
 use App\Core\Database;
 use App\Support\Consola;
+use App\Support\Migraciones;
 
 define('APP_ROOT', dirname(__DIR__));
 require APP_ROOT . '/app/bootstrap.php';
@@ -34,8 +35,7 @@ Database::query(
 );
 
 $aplicadas = array_column(Database::fetchAll('SELECT archivo, aplicada_en FROM migraciones'), 'aplicada_en', 'archivo');
-$archivos = glob(APP_ROOT . '/database/migrations/*.sql') ?: [];
-sort($archivos);
+$archivos = Migraciones::archivos();
 
 if (isset($opciones['estado'])) {
     foreach ($archivos as $ruta) {
@@ -57,19 +57,8 @@ if ($pendientes === []) {
 foreach ($pendientes as $ruta) {
     $nombre = basename($ruta);
 
-    // Las sentencias se separan por ";" al final de una línea. Las migraciones no usan
-    // procedimientos ni triggers, así que no hay ";" dentro de una sentencia.
-    $sql = (string) file_get_contents($ruta);
-    // Se descartan los trozos que solo tienen comentarios.
-    $sentencias = array_filter(
-        array_map('trim', preg_split('/;\s*$/m', $sql) ?: []),
-        static fn (string $s): bool => trim((string) preg_replace('/^\s*--.*$/m', '', $s)) !== ''
-    );
-
     try {
-        foreach ($sentencias as $sentencia) {
-            Database::query($sentencia);
-        }
+        Migraciones::aplicar($ruta);
         Database::insert('INSERT INTO migraciones (archivo) VALUES (?)', [$nombre]);
         Consola::exito($nombre);
     } catch (Throwable $e) {
