@@ -14,7 +14,7 @@ use App\Support\Consola;
 
 defined('APP_ROOT') || exit;
 
-// [código UdeC, nombre, categoría, subcategoría]
+// [código UdeC, nombre, categoría UdeC, subcategoría UdeC] (la categoría que queda la decide $categoriaId, más abajo)
 $insumos = [
     ['2005017', 'GUANTES DE NITRILO T/L LIBRE DE TALCO/FENOL CJA 100 UNID.', 'Ropa e Implementos de Trabajo', 'Ropa de Trabajo'],
     ['2005018', 'GUANTES DE NITRILO T/M LIBRE DE TALCO/FENOL CJA 100 UNID.', 'Ropa e Implementos de Trabajo', 'Ropa de Trabajo'],
@@ -78,29 +78,30 @@ $insumos = [
     ['4305038', 'GUARDAPOLVO BLANCO P/HOMBRE T/XXL', 'Ropa e Implementos de Trabajo', 'Ropa de Trabajo'],
 ];
 
-/** Id de la categoría (o subcategoría) por nombre; null si no tiene. */
-$categoriaId = static function (?string $categoria, ?string $subcategoria): ?int {
-    if ($categoria === null) {
-        return null;
-    }
+/**
+ * Id de la categoría de un producto. La lista conserva la clasificación del catálogo UdeC (categoría y subcategoría,
+ * como venía en el Excel); se traduce a las cuatro categorías simples (seed 020): todo lo de Aseo y de Ropa e
+ * Implementos va en Limpieza, Oficina en Oficina y las pilas en Pilas. Excepciones, por su código UdeC: la corchetera y
+ * el borrador para tiza (la UdeC los tenía en Aseo) y el teléfono, en Oficina.
+ */
+$categoriaId = static function (string $codigoUdec, ?string $categoria): int {
+    $excepciones = ['4100022' => 'Oficina', '4100041' => 'Oficina', '2201268' => 'Oficina'];
+    $nombre = $excepciones[$codigoUdec] ?? match ($categoria) {
+        'Materiales de Oficina' => 'Oficina',
+        'Materiales Especializados' => 'Pilas',
+        default => 'Limpieza', // Materiales y Útiles de Aseo, Ropa e Implementos de Trabajo y los sin categoría
+    };
 
-    $padre = Database::fetchValue(
+    $id = Database::fetchValue(
         'SELECT id FROM categorias WHERE ambito = ? AND padre_id IS NULL AND nombre = ?',
-        ['insumo', $categoria]
+        ['insumo', $nombre]
     );
 
-    if ($padre === null) {
-        throw new RuntimeException("Falta la categoría {$categoria}: ejecuta antes 020_categorias_udec.php.");
+    if ($id === null) {
+        throw new RuntimeException("Falta la categoría {$nombre}: ejecuta antes 020_categorias_udec.php.");
     }
 
-    if ($subcategoria === null) {
-        return (int) $padre;
-    }
-
-    return (int) Database::fetchValue(
-        'SELECT id FROM categorias WHERE ambito = ? AND padre_id = ? AND nombre = ?',
-        ['insumo', $padre, $subcategoria]
-    );
+    return (int) $id;
 };
 
 $nuevos = Database::transaction(static function () use ($insumos, $categoriaId): int {
@@ -110,14 +111,14 @@ $nuevos = Database::transaction(static function () use ($insumos, $categoriaId):
     );
     $nuevos = 0;
 
-    foreach ($insumos as [$codigoUdec, $nombre, $categoria, $subcategoria]) {
+    foreach ($insumos as [$codigoUdec, $nombre, $categoria]) {
         if (Database::fetchValue('SELECT id FROM insumos WHERE codigo_udec = ?', [$codigoUdec]) !== null) {
             continue;
         }
 
         Database::insert(
             'INSERT INTO insumos (codigo, codigo_udec, nombre, categoria_id) VALUES (?, ?, ?, ?)',
-            [sprintf('INS%05d', ++$numero), $codigoUdec, $nombre, $categoriaId($categoria, $subcategoria)]
+            [sprintf('INS%05d', ++$numero), $codigoUdec, $nombre, $categoriaId($codigoUdec, $categoria)]
         );
         $nuevos++;
     }

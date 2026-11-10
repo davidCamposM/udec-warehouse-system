@@ -1,12 +1,15 @@
 <?php
 
 /**
- * Catálogo oficial de herramientas e instrumentos de terreno, entregado por la bodega el 15/10/2026. Se corrigen los
- * tildes y algunos errores de tipeo de la lista original (Hiposómetro → Hipsómetro, Cinómetro → Clinómetro,
- * Relacopio → Relascopio, Huincha Carpinteri → Huincha Carpintero).
+ * Catálogo oficial de herramientas e instrumentos de terreno, entregado por la bodega el 15/10/2026, con las unidades
+ * del inventario del 06/11/2026 (la columna DISPONIBLE: cantidad + nuevas − dadas de baja). Se corrigen los tildes y
+ * algunos errores de tipeo de la lista original (Hiposómetro → Hipsómetro, Cinómetro → Clinómetro, Relacopio →
+ * Relascopio, Huincha Carpinteri → Huincha Carpintero, Barreros → Barrenos, Taba Munsell → Tabla Munsell).
  *
- * Las categorías no venían en la lista: se agruparon por uso, para encontrarlas rápido al solicitar.
- * Solo agrega lo que falta, con 1 unidad cada una. Las herramientas activas que no están en esta lista (el catálogo
+ * Las categorías no venían en la lista: se agruparon por para qué sirven, en cuatro (Para medir, Para cortar y podar,
+ * Para el suelo y plantar, Seguridad y terreno), para encontrarlas rápido al solicitar. El Rozón (corta maleza) va con
+ * las de cortar; el McLeod y el Mata chispas (combate de incendios), con las de seguridad. Solo agrega lo que falta,
+ * con sus unidades (las que ya existen no se tocan). Las herramientas activas que no están en esta lista (el catálogo
  * provisorio anterior) se desactivan, salvo las prestadas, pedidas o por resolver: las solicitudes que ya las usaron las
  * siguen mostrando.
  */
@@ -18,71 +21,73 @@ use App\Support\Consola;
 
 defined('APP_ROOT') || exit;
 
-// categoría => herramientas
+// categoría => [herramienta => unidades] (la columna DISPONIBLE del inventario de la bodega, 06/11/2026)
 $catalogo = [
-    'Medición forestal' => [
-        'Barra Telescópica',
-        'Brújulas',
-        'Calibrador Corteza',
-        'Clinómetro',
-        'Forcípulas',
-        'Forcípulas 100 cm / 80 cm',
-        'Forcípulas 40-60 cm',
-        'GPS',
-        'Hipsómetro',
-        'Huincha Carpintero (3 y 5 m)',
-        'Huincha Diamétrica',
-        'Huincha Distancia (10 m)',
-        'Huincha Distancia (30 m)',
-        'Huincha Distancia (50 m)',
-        'Huincha Distancia (60 m)',
-        'Huincha tela metric diameter',
-        'Medidor espesor de corteza Haglof Bark Gauge',
-        'Niveles de Adney',
-        'Pie de Metro Análogo',
-        'Pilodon Medido Corteza',
-        'Placa Conteo (Relascopía)',
-        'Prisma (Relascopía)',
-        'Relascopio',
-        'Relascopio Análogo',
-        'Taladro Incremento (Normal 14")',
-        'Taladro Incremento (8")',
+    'Para medir' => [
+        'Barra Telescópica' => 3,
+        'Brújulas' => 20,
+        'Calibrador Corteza' => 14,
+        'Clinómetro' => 12,
+        'Forcípulas' => 23,
+        'Forcípulas 100 cm / 80 cm' => 7,
+        'Forcípulas 40-60 cm' => 13,
+        'GPS' => 12,
+        'Hipsómetro' => 11,
+        'Huincha Carpintero (3 y 5 m)' => 8,
+        'Huincha Diamétrica' => 9,
+        'Huincha Distancia (10 m)' => 6,
+        'Huincha Distancia (30 m)' => 24,
+        'Huincha Distancia (50 m)' => 3,
+        'Huincha Distancia (60 m)' => 3,
+        'Huincha tela metric diameter' => 15,
+        'Medidor espesor de corteza Haglof Bark Gauge' => 14,
+        'Niveles de Adney' => 1,
+        'Pie de Metro Análogo' => 10,
+        'Pilodon Medido Corteza' => 12,
+        'Placa Conteo (Relascopía)' => 7,
+        'Prisma (Relascopía)' => 12,
+        'Relascopio' => 1,
+        'Relascopio Análogo' => 2,
+        'Taladro Incremento (Normal 14")' => 4,
+        'Taladro Incremento (8")' => 4,
     ],
-    'Corte y poda' => [
-        'Arco Sierra Trozar 21"',
-        'Arco Sierra Trozar 30"',
-        'Esmeril',
-        'Hacha',
-        'Hachas Casoc',
-        'Machetes',
-        'Marco Sierra Telescópica',
-        'Motosierra',
-        'Podadoras',
-        'Serrucho cola de zorro',
-        'Sierra Madera Grande',
-        'Sierra Madera Pequeña',
-        'Tijerones Poda',
+    'Para cortar y podar' => [
+        'Arco Sierra Trozar 21"' => 19,
+        'Arco Sierra Trozar 30"' => 13,
+        'Esmeril' => 1,
+        'Hacha' => 12,
+        'Hachas Casoc' => 19,
+        'Machetes' => 13,
+        'Marco Sierra Telescópica' => 2,
+        'Motosierra' => 1,
+        'Podadoras' => 1,
+        'Rozón' => 21,
+        'Serrucho cola de zorro' => 28,
+        'Sierra Madera Grande' => 12,
+        'Sierra Madera Pequeña' => 16,
+        'Tijerones Poda' => 9,
     ],
-    'Suelo y plantación' => [
-        'Azacha',
-        'Azadones',
-        'Carretilla Concretera 90 litros',
-        'Chuzos',
-        'Laya',
-        'Mcleod',
-        'Palas',
-        'Palas Plantadoras',
-        'Picotas',
-        'Rastrillos',
-        'Rodillo Metálico',
-        'Rozón',
+    'Para el suelo y plantar' => [
+        'Azacha' => 2,
+        'Azadones' => 6,
+        'Barrenos' => 4,
+        'Chuzos' => 1,
+        'Laya' => 4,
+        'Palas' => 10,
+        'Palas Plantadoras' => 94,
+        'Picotas' => 8,
+        'Rastrillos' => 3,
+        'Rodillo Metálico' => 2,
+        'Tabla Munsell' => 5,
     ],
-    'Equipamiento de terreno' => [
-        'Botas Wader',
-        'Cajas Metálicas',
-        'Chaleco Reflectante para terreno',
-        'Estanques Plásticos',
-        'Mata Chispas',
+    'Seguridad y terreno' => [
+        'Botas Wader' => 15,
+        'Cajas Metálicas' => 2,
+        'Carretilla Concretera 90 litros' => 2,
+        'Chaleco Reflectante para terreno' => 23,
+        'Estanques Plásticos' => 2,
+        'Mata Chispas' => 17,
+        'Mcleod' => 6,
     ],
 ];
 
@@ -96,13 +101,12 @@ foreach ($catalogo as $categoria => $herramientas) {
         [$categoria]
     ) ?? Database::insert("INSERT INTO categorias (nombre, ambito) VALUES (?, 'herramienta')", [$categoria]);
 
-    foreach ($herramientas as $nombre) {
+    foreach ($herramientas as $nombre => $unidades) {
         $nombres[] = $nombre;
         $existente = Database::fetch('SELECT id, categoria_id, activo FROM herramientas WHERE nombre = ?', [$nombre]);
 
         if ($existente === null) {
-            // Al menos una: el encargado anota cuántas hay en «Editar herramienta».
-            Database::insert('INSERT INTO herramientas (nombre, categoria_id, unidades) VALUES (?, ?, 1)', [$nombre, $categoriaId]);
+            Database::insert('INSERT INTO herramientas (nombre, categoria_id, unidades) VALUES (?, ?, ?)', [$nombre, $categoriaId, $unidades]);
             $nuevas++;
         } elseif ($existente['categoria_id'] === null) {
             // Ya estaba (del catálogo provisorio, como GPS): toma su categoría y queda activa.
