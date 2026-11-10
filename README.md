@@ -1,89 +1,74 @@
-# Sistema de Bodega FCF UdeC
+# Bodega FCF UdeC
 
 Sistema web para la bodega de la Facultad de Ciencias Forestales de la Universidad de Concepción.
-Controla dos áreas:
 
-- **Insumos generales** (consumo): entradas, salidas, stock y aviso de stock mínimo.
-- **Herramientas e instrumentos de terreno** (préstamo): solicitudes, préstamos con fecha pactada,
-  devoluciones, atrasos y daños.
+Permite llevar el control de:
 
-Funciona como inventario perpetuo con código de barras: cada ítem se escanea al entrar o salir y el
-stock se actualiza al confirmar la operación. El lector de códigos es opcional; todo se puede hacer
-escribiendo el código o buscando por nombre.
+- **Insumos:** ingresos, retiros, stock y productos por reponer.
+- **Herramientas:** catálogo, solicitudes de los docentes, préstamos y devoluciones.
 
-> Estado: en desarrollo. Los requisitos son preliminares y pueden cambiar.
+Funciona en computadores y celulares. Se puede usar con lector de código de barras o escribiendo el código o el
+nombre del producto.
 
-## Stack
+## Requisitos
 
-| Capa          | Tecnología                                  |
-|---------------|---------------------------------------------|
-| Servidor      | PHP 8.5 puro (sin frameworks, sin Composer) |
-| Base de datos | MySQL, InnoDB, utf8mb4                      |
-| Cliente       | JavaScript vanilla y CSS puro               |
-| Desarrollo    | Docker (PHP 8.5 + Apache + MySQL 8.4)       |
+- PHP 8.4 o superior, con las extensiones `pdo_mysql`, `mbstring`, `zip` e `intl`
+- MySQL 8 o MariaDB
+- Apache con `mod_rewrite` y `.htaccess` habilitados
 
-Sin librerías externas, CDNs ni servicios de terceros en producción: el servidor institucional
-solo admite PHP, MySQL y JavaScript sin frameworks.
+No usa frameworks ni librerías externas.
 
-## Desarrollo local
+## Instalación
 
-Requiere Docker. Desde la carpeta del proyecto:
+1. Copiar el proyecto al servidor.
+2. Crear una base de datos vacía en MySQL (`utf8mb4`).
+3. Copiar `config/config.example.php` como `config/config.php` y completar los datos de la base de datos y la
+   dirección del sistema.
+4. Crear las tablas y cargar los datos iniciales:
 
-```bash
-cp config/config.example.php config/config.php
-docker compose up -d --build
-docker compose exec -u www-data app php bin/migrar.php
-docker compose exec -u www-data app php bin/sembrar.php
-```
+   ```bash
+   php bin/migrar.php
+   php bin/sembrar.php
+   ```
 
-- Sistema en http://localhost:8080 y phpMyAdmin en http://localhost:8081. Para cambiar puertos o
-  credenciales, copiar `.env.example` como `.env`.
-- `sembrar.php` carga el catálogo inicial y, solo en desarrollo local, tres cuentas de prueba:
-  `admin@bodega.test`, `administrativa@bodega.test` y `docente@bodega.test`, con la clave `Bodega2026`.
+5. Crear la primera cuenta de administrador:
 
-Cuentas de usuario por consola:
+   ```bash
+   php bin/crear-usuario.php
+   ```
 
-```bash
-docker compose exec -u www-data app php bin/crear-usuario.php
-docker compose exec -u www-data app php bin/restablecer-clave.php --email=nombre@udec.cl
-```
+La carpeta `storage/` debe tener permiso de escritura para Apache.
 
-Con `--sql`, ninguno de los dos toca la base: imprimen la sentencia para ejecutarla en phpMyAdmin,
-útil en un servidor sin acceso a consola.
+## Actualizar
 
-## Pruebas
-
-Con PHPUnit 12 como un solo archivo (`tools/phpunit.phar`, fuera de git: solo se usa en desarrollo, nunca
-en el servidor). Las pruebas usan su propia base, `bodega_fcf_pruebas`, que se arma desde cero con las
-migraciones en cada corrida; la base de desarrollo no se toca. Preparación, una sola vez:
+Después de descargar una versión nueva, aplicar los cambios de la base de datos:
 
 ```bash
-curl -L https://phar.phpunit.de/phpunit-12.phar -o tools/phpunit.phar
-docker compose exec db sh -c 'mysql -uroot -p"$MYSQL_ROOT_PASSWORD" -e "CREATE DATABASE IF NOT EXISTS bodega_fcf_pruebas CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; GRANT ALL ON bodega_fcf_pruebas.* TO \"bodega\"@\"%\";"'
+php bin/migrar.php
 ```
 
-Correrlas (`--testdox` muestra el nombre de cada prueba en español):
+## Cuentas
+
+Para restablecer la contraseña de una persona:
 
 ```bash
-docker compose exec -T app php tools/phpunit.phar --testdox
+php bin/restablecer-clave.php --email=nombre@udec.cl
 ```
 
-## Estructura
+Si el servidor no tiene acceso a consola, ambos scripts aceptan `--sql`: muestran la instrucción para ejecutarla
+en phpMyAdmin.
+
+## Carpetas
 
 ```
-public/      Única carpeta expuesta a la web: index.php y assets (CSS, JS, fuentes, íconos, sonidos)
-app/
-  Core/      Núcleo propio: router, petición/respuesta, vistas, base de datos, sesión, CSRF, permisos
-  Support/   Utilidades sin estado: fechas, RUT, números, íconos, tareas del inicio
-  Modules/   Un módulo por área funcional (Insumos, Historial, Panel, Sectores, ...)
-  views/     Layouts y fragmentos compartidos
-config/      config.example.php (plantilla). config.php real fuera de git
-database/    migrations/ (SQL numerado) y seeds/ (datos iniciales)
-bin/         Scripts de consola: migrar, sembrar, crear usuario, restablecer clave
-storage/     Logs y respaldos (escribible por el servidor, fuera de git)
-tests/       Pruebas con PHPUnit (phpunit.xml.dist): Auth/ (inicio de sesión) y Core/
+public/      Archivos visibles en la web (index.php, estilos, scripts e imágenes)
+app/         Código del sistema
+config/      Configuración
+database/    Estructura de la base de datos y datos iniciales
+bin/         Scripts de instalación y cuentas
+storage/     Registros y archivos del sistema
 ```
 
 ## Autor
 
-David Campos, práctica profesional, Facultad de Ciencias Forestales, UdeC (2026).
+David Campos, Facultad de Ciencias Forestales, Universidad de Concepción, 2026.
