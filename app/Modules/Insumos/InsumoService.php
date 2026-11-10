@@ -147,7 +147,7 @@ final class InsumoService
     }
 
     /**
-     * Las categorías principales de insumos (Materiales de Oficina, Materiales Especializados…), por nombre.
+     * Las categorías principales de insumos (Cafetería, Limpieza, Oficina, Pilas), por nombre.
      *
      * @return list<array{id: int, nombre: string, padre_id: null}>
      */
@@ -219,7 +219,7 @@ final class InsumoService
         return $limpios;
     }
 
-    /** «Materiales de Oficina › Papeles y Cartones», o «Sin categoría». */
+    /** «Oficina» (o «Principal › Subcategoría», si tuviera una), o «Sin categoría». */
     public function nombreCategoria(?int $id): string
     {
         $categorias = array_column($this->insumos->categorias(), null, 'id');
@@ -269,7 +269,7 @@ final class InsumoService
      * Crea el producto con el siguiente código interno y, si viene, su código de barras.
      *
      * @param array<string, mixed> $datos lo enviado por el formulario
-     * @return array{id: int, codigo: string, nombre: string}
+     * @return array{id: int, codigo: string, codigo_udec: ?string, nombre: string}
      * @throws ValidationException
      */
     public function crear(array $datos): array
@@ -319,7 +319,7 @@ final class InsumoService
                 'codigo_barras' => $barras['codigo'] ?? ($insumo['sku'] !== InsumoRepository::SIN_CODIGO_BARRAS ? $insumo['sku'] : null),
             ]);
 
-            return ['id' => $id, 'codigo' => $insumo['codigo'], 'nombre' => $insumo['nombre']];
+            return ['id' => $id, 'codigo' => $insumo['codigo'], 'codigo_udec' => $insumo['codigo_udec'] ?? null, 'nombre' => $insumo['nombre']];
         });
     }
 
@@ -348,7 +348,7 @@ final class InsumoService
 
     /**
      * Por qué todavía no se puede eliminar (null: se puede). Con unidades en bodega, eliminarlo las haría desaparecer
-     * sin dejar rastro en las entradas y salidas: primero se deja en 0 con «Actualizar cantidad», que anota el motivo.
+     * sin dejar rastro en las entradas y salidas: primero se deja en 0 con «Corregir stock», que anota el motivo.
      *
      * @param array<string, mixed> $insumo
      */
@@ -357,7 +357,7 @@ final class InsumoService
         $hay = (int) $insumo['stock_actual'];
 
         return $hay > 0
-            ? 'Según el sistema hay ' . unidades($hay) . ' en bodega. Si ya no están, primero déjalo en 0 con «Actualizar cantidad»: así queda anotado por qué.'
+            ? 'Según el sistema hay ' . unidades($hay) . ' en bodega. Si ya no están, primero déjalo en 0 con «Corregir stock»: así queda anotado por qué.'
             : null;
     }
 
@@ -391,7 +391,7 @@ final class InsumoService
     // ---------- Códigos de barra ----------
 
     /**
-     * Agrega un código escaneado a un producto (desde su ficha, desde «Registrar producto» con un código que nadie tenía
+     * Agrega un código escaneado a un producto (desde su ficha, desde «Ingresar productos» con un código que nadie tenía
      * o desde el conteo). Si el producto todavía no tiene código de barras (en ceros), ese pasa a ser su código de
      * barras; si ya tiene uno, queda como otro código de barras del mismo producto (otra marca, la caja).
      *
@@ -454,6 +454,10 @@ final class InsumoService
             if (is_string($datos[$campo] ?? null)) {
                 $datos[$campo] = preg_replace('/\s+/u', ' ', trim($datos[$campo]));
             }
+        }
+        // Los nombres de los productos van en mayúsculas, como en el catálogo de abasto: «Cloro 1 L» queda «CLORO 1 L».
+        if (is_string($datos['nombre'] ?? null)) {
+            $datos['nombre'] = mb_strtoupper($datos['nombre'], 'UTF-8');
         }
 
         $reglas = [

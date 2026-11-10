@@ -4,7 +4,7 @@
  * Tareas del sistema: los botones del inicio, en el orden en que aparecen (las del día a día y, aparte, las de administración).
  * Cada tarea exige un permiso de config/permisos.php; quien no lo tiene, no la ve.
  *
- * - 'texto': lo que se hace, con un verbo («Registrar producto»).
+ * - 'texto': lo que se hace, con un verbo («Ingresar productos»).
  * - 'descripcion': una línea corta que explica para qué sirve; va bajo el nombre en el botón del inicio.
  * - 'color': azul, verde, naranja (terracota), turquesa (petróleo), grafito, ocre o pizarra (salvia),
  *   de los tokens --tarea-* de tokens.css. La pantalla de la tarea usa el mismo color en su encabezado, así la
@@ -13,7 +13,9 @@
  *   y aparece sola en el inicio.
  * - 'boton' => false: no va como botón. «Buscar producto» es la barra de búsqueda de arriba del inicio.
  * - 'perfiles' (opcional): solo esos perfiles la ven, aunque otro tenga el permiso (el encargado tiene todos los
- *   permisos, pero no solicita herramientas: las entrega).
+ *   permisos, pero no solicita herramientas: las entrega). Ingresar, retirar y corregir stock son el trabajo diario
+ *   del operador de bodega: no van en el inicio del encargado, que fiscaliza y conserva el permiso como respaldo (los
+ *   hace desde la ficha del producto si el operador falta).
  *
  * Preliminar: se ajusta a medida que se construye cada módulo.
  */
@@ -35,30 +37,33 @@ return [
     ],
     [
         'clave' => 'guardar-en-bodega',
-        'texto' => 'Registrar producto',
-        'descripcion' => 'Anotar lo que llegó y dónde quedó',
+        'texto' => 'Ingresar productos',
+        'descripcion' => 'Lo que llega: un producto que ya existe, uno nuevo o un abastecimiento SAP',
         'ruta' => '/guardar',
         'icono' => 'box',
         'color' => 'verde',
         'permiso' => 'insumos.entrada',
+        'perfiles' => ['operador'],
     ],
     [
         'clave' => 'retirar-producto',
-        'texto' => 'Retirar producto',
-        'descripcion' => 'Descontar lo que sale de la bodega',
+        'texto' => 'Retirar productos',
+        'descripcion' => 'Lo que sale de la bodega',
         'ruta' => '/retirar',
         'icono' => 'arrow-out',
         'color' => 'ocre',
         'permiso' => 'insumos.salida',
+        'perfiles' => ['operador'],
     ],
     [
         'clave' => 'ajustar-cantidad',
-        'texto' => 'Actualizar cantidad',
-        'descripcion' => 'Dejar lo que realmente hay, después de contar',
+        'texto' => 'Corregir stock',
+        'descripcion' => 'Cuando contaste y el número no cuadra',
         'ruta' => '/ajustar',
         'icono' => 'refresh',
         'color' => 'naranja',
         'permiso' => 'insumos.ajuste',
+        'perfiles' => ['operador'],
     ],
     [
         'clave' => 'agregar-producto',
@@ -67,36 +72,39 @@ return [
         'ruta' => '/insumos/nuevo',
         'icono' => 'plus',
         'color' => 'turquesa',
-        'permiso' => 'insumos.administrar',
+        'permiso' => 'insumos.crear',
+        'boton' => false, // va como ícono dentro de «Ingresar productos»
     ],
     [
         'clave' => 'ingresar-abastecimiento',
-        'texto' => 'Ingresar abastecimiento',
-        'descripcion' => 'Lo que llegó con una reserva de SAP',
+        'texto' => 'Ingresar productos',
+        'descripcion' => 'Lo que llega, por código SAP, código de barras o nombre',
         'ruta' => '/abastecimiento',
         'icono' => 'inbox',
         'color' => 'pizarra',
         'permiso' => 'insumos.abastecimiento',
+        // Las administrativas la tienen en su inicio; el encargado, como ícono dentro de «Ingresar productos».
+        'perfiles' => ['administrativa'],
     ],
     [
         'clave' => 'practica-invierno',
         'texto' => 'Insumos Práctica de Invierno',
-        'descripcion' => 'El equipo de montaña: cuánto hay y qué está prestado',
+        'descripcion' => 'El equipo de montaña (en preparación)',
         'ruta' => '/practica-invierno',
         'icono' => 'tree',
         'color' => 'turquesa',
         'permiso' => 'herramientas.ver',
-        'perfiles' => ['administrativa'],
+        'perfiles' => ['administrativa', 'administrador'],
     ],
     [
         'clave' => 'difusion',
         'texto' => 'Difusión',
-        'descripcion' => 'Pedidos a proveedores fuera de abasto',
+        'descripcion' => 'Artículos y servicios para actividades de difusión',
         'ruta' => '/difusion',
         'icono' => 'clipboard',
         'color' => 'ocre',
         'permiso' => 'difusion.ver',
-        'perfiles' => ['administrativa'],
+        'perfiles' => ['administrativa', 'administrador'],
     ],
     [
         'clave' => 'contar-bodega',

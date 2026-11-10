@@ -2,44 +2,28 @@
 
 defined('APP_ROOT') || exit;
 
-// Etapa 1, en la ventana: se escaneó un código que no tiene ningún producto. ¿Es nuevo, u otro envase de uno que ya
-// existe?
+// Etapa 1, en la ventana («Este código no está en el sistema»): se escaneó un código que no tiene ningún producto. Lo
+// principal es agregarlo como producto nuevo (con el código ya puesto); más discreto, si es otro envase de uno que ya
+// existe (solo el encargado). Quien no puede crear productos ve que debe avisar al encargado.
 ?>
 
 <div class="formulario">
-    <div class="alert alert--warning" role="status">
-        <?= icon('alert') ?>
-        <p>El código <strong><?= e($codigo) ?></strong> no está registrado en ningún producto.</p>
-    </div>
+    <p class="desconocido__codigo"><?= icon('barcode') ?><span><?= e($codigo) ?></span></p>
 
-    <?php if ($puedeAdministrar) : ?>
-        <div class="campo">
-            <p class="campo__etiqueta">¿Qué es este producto?</p>
-            <ul class="lista-acciones lista-acciones--una-columna">
-                <li>
-                    <a class="accion accion--turquesa" href="<?= e(url('insumos/nuevo', ['para' => 'guardar', 'codigo' => $codigo])) ?>">
-                        <span class="accion__icono"><?= icon('plus') ?></span>
-                        <span class="accion__texto">
-                            <strong class="accion__titulo">Es un producto nuevo</strong>
-                            <span class="accion__detalle">Todavía no está en el sistema: lo agregamos con este código</span>
-                        </span>
-                        <span class="accion__flecha" aria-hidden="true"><?= icon('arrow-right') ?></span>
-                    </a>
-                </li>
-                <li>
-                    <a class="accion accion--azul" href="<?= e(url('guardar/envase', ['codigo' => $codigo])) ?>">
-                        <span class="accion__icono"><?= icon('barcode') ?></span>
-                        <span class="accion__texto">
-                            <strong class="accion__titulo">Es otro envase de uno que ya existe</strong>
-                            <span class="accion__detalle">Por ejemplo, otra marca o tamaño del mismo producto</span>
-                        </span>
-                        <span class="accion__flecha" aria-hidden="true"><?= icon('arrow-right') ?></span>
-                    </a>
-                </li>
-            </ul>
+    <?php if ($puedeCrear) : ?>
+        <div class="desconocido__opciones">
+            <a class="btn btn--si" href="<?= e(url('insumos/nuevo', ['para' => 'guardar', 'codigo' => $codigo])) ?>">
+                <?= icon('plus') ?>Agregarlo como producto nuevo
+            </a>
+            <?php // Sumar el código a un producto que ya existe es gestionar sus códigos: solo el encargado. ?>
+            <?php if ($puedeAdministrar) : ?>
+                <a class="boton-fila" href="<?= e(url('guardar/envase', ['codigo' => $codigo])) ?>">
+                    <?= icon('barcode') ?>Es otro envase de un producto que ya existe
+                </a>
+            <?php endif; ?>
         </div>
     <?php else : ?>
-        <p class="caja caja--nota">Pide al encargado de bodega que lo agregue con «Agregar nuevo producto». Después podrás registrarlo.</p>
+        <p class="desconocido__aviso"><?= icon('info') ?>Avisa al encargado para que lo agregue.</p>
     <?php endif; ?>
 
     <div class="formulario__acciones">

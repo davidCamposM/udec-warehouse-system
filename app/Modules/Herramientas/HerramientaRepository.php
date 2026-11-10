@@ -42,13 +42,20 @@ final class HerramientaRepository
         LEFT JOIN categorias c ON c.id = h.categoria_id
         LEFT JOIN categorias cp ON cp.id = c.padre_id';
 
-    /** @return list<array<string, mixed>> las activas, por categoría, subcategoría y nombre (las sin categoría al final) */
-    public function activas(): array
+    /**
+     * Las activas, por categoría, subcategoría y nombre (las sin categoría al final). El equipo de la Práctica de
+     * Invierno va aparte (su sección está en preparación): no está en el catálogo, ni se pide, ni cuenta en los gráficos,
+     * salvo con $conInvierno.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function activas(bool $conInvierno = false): array
     {
         return Database::fetchAll(
             'SELECT ' . self::COLUMNAS . ' FROM ' . self::DESDE . '
-              WHERE h.activo = 1
-              ORDER BY categoria IS NULL, categoria, subcategoria, h.nombre'
+              WHERE h.activo = 1' . ($conInvierno ? '' : ' AND COALESCE(cp.clave, c.clave, \'\') <> ?') . '
+              ORDER BY categoria IS NULL, categoria, subcategoria, h.nombre',
+            $conInvierno ? [] : [self::PRACTICA_INVIERNO]
         );
     }
 
@@ -94,7 +101,7 @@ final class HerramientaRepository
 
     /**
      * Las categorías donde puede ir una herramienta: las principales sin subcategorías y las subcategorías (con el
-     * nombre de su principal), por principal y nombre.
+     * nombre de su principal), por principal y nombre. Sin las de la Práctica de Invierno (va aparte).
      *
      * @return list<array{id: int, nombre: string, padre: ?string}>
      */
@@ -105,7 +112,9 @@ final class HerramientaRepository
                FROM categorias c LEFT JOIN categorias p ON p.id = c.padre_id
               WHERE c.ambito = 'herramienta' AND c.activo = 1
                 AND NOT EXISTS (SELECT 1 FROM categorias h WHERE h.padre_id = c.id AND h.activo = 1)
-              ORDER BY COALESCE(p.nombre, c.nombre), p.nombre IS NOT NULL, c.nombre"
+                AND COALESCE(p.clave, c.clave, '') <> ?
+              ORDER BY COALESCE(p.nombre, c.nombre), p.nombre IS NOT NULL, c.nombre",
+            [self::PRACTICA_INVIERNO]
         );
     }
 

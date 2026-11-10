@@ -30,7 +30,7 @@ final class SectorController
     }
 
     /**
-     * Con ?para=guardar se llegó desde «Registrar producto», y con ?para=nuevo desde «Agregar nuevo producto» (no había
+     * Con ?para=guardar se llegó desde «Ingresar productos», y con ?para=nuevo desde «Agregar nuevo producto» (no había
      * sectores): al terminar, se vuelve ahí.
      */
     public function create(Request $request): Response

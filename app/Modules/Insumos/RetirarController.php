@@ -15,8 +15,8 @@ use App\Modules\Panel\Inicio;
 defined('APP_ROOT') || exit;
 
 /**
- * «Retirar producto»: un formulario por etapas, en una ventana sobre el inicio (con el fondo difuminado), igual que
- * «Registrar producto»: cada etapa es su propia ventana. Lo hace la cuenta del encargado; el retiro queda a su nombre.
+ * «Retirar productos»: un formulario por etapas, en una ventana sobre el inicio (con el fondo difuminado), igual que
+ * «Ingresar productos»: cada etapa es su propia ventana. Lo hace la cuenta del encargado; el retiro queda a su nombre.
  * 1) El producto: se escanea (o se escribe y se elige en la lista que aparece al escribir).
  * 2) Cuántas unidades se retiran: el número en grande. Escanear otra vez el mismo producto suma 1 (sin pasar de lo que
  *    hay). «Retirar» descuenta; si no alcanza, no se descuenta nada.
@@ -26,7 +26,7 @@ final class RetirarController
 {
     /** Cada etapa es su propia ventana: etapa => [número, la pregunta que va de título]. */
     private const ETAPAS = [
-        'producto' => [1, '¿Qué producto se retira?'],
+        'producto' => [1, '¿Qué se retira?'],
         'cantidad' => [2, '¿Cuántas unidades se retiran?'],
     ];
 
@@ -152,7 +152,7 @@ final class RetirarController
 
     /**
      * Cada etapa es su propia ventana sobre el inicio (que queda de fondo, difuminado): su pregunta de título y, debajo,
-     * en qué etapa va («Retirar producto · 2 de 2»). Al avanzar, ventana.js cambia una ventana por la otra.
+     * en qué etapa va («Retirar productos · 2 de 2»). Al avanzar, ventana.js cambia una ventana por la otra.
      *
      * @param array<string, mixed> $datos los de la vista de la etapa (Insumos::retirar/{$etapa})
      */
@@ -162,7 +162,7 @@ final class RetirarController
 
         return Inicio::conVentana(
             'retirar-producto',
-            "Retirar producto · {$numero} de 2",
+            "Retirar productos · {$numero} de 2",
             View::render("Insumos::retirar/{$etapa}", $datos, null),
             scripts: ['js/modules/insumos.js'],
             titulo: $pregunta,

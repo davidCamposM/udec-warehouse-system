@@ -4,8 +4,8 @@ use App\Modules\Usuarios\CuentaService;
 
 defined('APP_ROOT') || exit;
 
-// «Agregar persona»: su nombre, su correo (UdeC o Gmail) y si es docente o administrativa. Al guardar se muestra el
-// enlace para que cree su contraseña (Usuarios::enlace).
+// «Agregar persona»: su nombre, su correo (UdeC o Gmail) y su perfil (docente, administrativa u operador de bodega).
+// Al guardar se muestra el enlace para que cree su contraseña (Usuarios::enlace).
 $perfil = old('perfil');
 ?>
 <?= partial('encabezado', [

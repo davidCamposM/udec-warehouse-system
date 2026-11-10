@@ -5,41 +5,51 @@ use App\Support\Fecha;
 
 defined('APP_ROOT') || exit;
 
-// «Entradas y salidas», con los componentes básicos (basico.css): los filtros (período y tipo) como pastillas en una
-// tarjeta y la tabla por páginas. Cada fila es un producto movido: fecha, tipo, producto, cantidad (+ o −), quién y
+// «Entradas y salidas», con los componentes básicos (basico.css): a la derecha del título, las descargas (Excel y PDF);
+// debajo, los filtros (período y tipo) en una fila y la tabla por páginas. Cada fila es un producto movido: fecha, tipo, producto, cantidad (+ o −), quién y
 // dónde.
 $enlace = static fn (array $cambios): string => url('movimientos', array_filter([
     'periodo' => $cambios['periodo'] ?? $filtros['periodo'],
     'tipo' => array_key_exists('tipo', $cambios) ? $cambios['tipo'] : $filtros['tipo'],
     'pagina' => ($cambios['pagina'] ?? 1) > 1 ? $cambios['pagina'] : null,
 ]));
-// «Descargar para Excel» baja lo mismo que muestran los filtros elegidos (período y tipo).
+// Las descargas (Excel y PDF) bajan lo mismo que muestran los filtros elegidos (período y tipo).
 $excel = url('movimientos/excel', array_filter(['periodo' => $filtros['periodo'], 'tipo' => $filtros['tipo']]));
+$pdf = url('movimientos/pdf', array_filter(['periodo' => $filtros['periodo'], 'tipo' => $filtros['tipo']]));
 $tipoActual = $filtros['tipo'] ?? '';
+?>
+<?php
+// Las descargas van a la derecha del título: dos botones chicos con lo mismo que muestran los filtros elegidos.
+$descargas = '<div class="descargas"><span class="descargas__titulo">Descargar</span>'
+    . '<a class="descargas__boton" href="' . e($excel) . '" download title="Resumen, por producto y detalle editable">'
+    . icon('chart') . 'Excel' . icon('arrow-in') . '</a>'
+    . '<a class="descargas__boton" href="' . e($pdf) . '" download title="Informe formal en blanco y negro">'
+    . icon('printer') . 'PDF' . icon('arrow-in') . '</a></div>';
 ?>
 <?= partial('encabezado', [
     'volver' => [url(), 'Volver al inicio'],
     'tarea' => 'historial',
     'titulo' => 'Entradas y salidas',
     'texto' => 'Lo que llegó, lo que se retiró y los ajustes de cantidad, con quién y cuándo.',
-    'acciones' => '<a class="btn btn-outline-secondary btn-sm" href="' . e($excel) . '" download>' . icon('arrow-in') . 'Descargar para Excel</a>',
+    'lateral' => $descargas,
 ]) ?>
 
-<div class="card card-body filtros">
-    <div class="filtros__fila">
+<?php // Los filtros, compactos y en una fila: el período y el tipo como selectores de pocas opciones. ?>
+<div class="filtros">
+    <div class="filtros__grupo">
         <span class="filtros__nombre" id="filtro-periodo">Período</span>
-        <nav class="nav-pills" aria-labelledby="filtro-periodo">
+        <nav class="segmento" aria-labelledby="filtro-periodo">
             <?php foreach (MovimientoService::PERIODOS as $clave => $nombre) : ?>
-                <a class="nav-link<?= $clave === $filtros['periodo'] ? ' active' : '' ?>" href="<?= e($enlace(['periodo' => $clave])) ?>"
+                <a class="segmento__opcion<?= $clave === $filtros['periodo'] ? ' is-activa' : '' ?>" href="<?= e($enlace(['periodo' => $clave])) ?>"
                     <?= $clave === $filtros['periodo'] ? 'aria-current="true"' : '' ?>><?= e($nombre) ?></a>
             <?php endforeach; ?>
         </nav>
     </div>
-    <div class="filtros__fila">
+    <div class="filtros__grupo">
         <span class="filtros__nombre" id="filtro-tipo">Tipo</span>
-        <nav class="nav-pills" aria-labelledby="filtro-tipo">
+        <nav class="segmento" aria-labelledby="filtro-tipo">
             <?php foreach (MovimientoService::TIPOS as $clave => $nombre) : ?>
-                <a class="nav-link<?= $clave === $tipoActual ? ' active' : '' ?>" href="<?= e($enlace(['tipo' => $clave === '' ? null : $clave])) ?>"
+                <a class="segmento__opcion<?= $clave === $tipoActual ? ' is-activa' : '' ?>" href="<?= e($enlace(['tipo' => $clave === '' ? null : $clave])) ?>"
                     <?= $clave === $tipoActual ? 'aria-current="true"' : '' ?>><?= e($nombre) ?></a>
             <?php endforeach; ?>
         </nav>

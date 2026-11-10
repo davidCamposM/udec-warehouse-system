@@ -16,7 +16,7 @@ defined('APP_ROOT') || exit;
  */
 final class PanelRepository
 {
-    /** Retiros de insumos registrados hoy (cada «Retirar producto» confirmado cuenta como uno). */
+    /** Retiros de insumos registrados hoy (cada «Retirar productos» confirmado cuenta como uno). */
     public function contarSalidasDeHoy(): int
     {
         return (int) Database::fetchValue("SELECT COUNT(*) FROM movimientos WHERE tipo = 'salida' AND fecha >= CURDATE()");
@@ -41,6 +41,26 @@ final class PanelRepository
     public function contarSolicitudesPendientes(): int
     {
         return (int) Database::fetchValue("SELECT COUNT(*) FROM solicitudes WHERE estado = 'pendiente'");
+    }
+
+    /**
+     * Las solicitudes por entregar que llegaron después de la última vez que esta persona vio sus notificaciones (el
+     * número de la campana del encargado y del operador).
+     */
+    public function contarSolicitudesNuevas(int $usuarioId): int
+    {
+        return (int) Database::fetchValue(
+            "SELECT COUNT(*) FROM solicitudes s
+              WHERE s.estado = 'pendiente'
+                AND s.creado_en > COALESCE((SELECT notificaciones_vistas_en FROM usuarios WHERE id = ?), '1000-01-01')",
+            [$usuarioId]
+        );
+    }
+
+    /** Esta persona acaba de ver sus notificaciones: desde ahora, la campana cuenta solo lo que llegue después. */
+    public function marcarNotificacionesVistas(int $usuarioId): void
+    {
+        Database::execute('UPDATE usuarios SET notificaciones_vistas_en = NOW() WHERE id = ?', [$usuarioId]);
     }
 
     /**
@@ -153,6 +173,51 @@ final class PanelRepository
     {
         return (int) Database::fetchValue(
             "SELECT COUNT(*) FROM solicitudes WHERE docente_id = ? AND estado = 'prestada' AND fecha_devolucion < CURDATE()",
+            [$usuarioId]
+        );
+    }
+
+    /**
+     * Las notificaciones del docente (la campana de su inicio): sus solicitudes vivas (por entregar o prestadas) y las
+     * que la bodega rechazó o recibió en los últimos 14 días. Primero las atrasadas, después las por entregar, las
+     * prestadas y, al final, las recién cerradas (de la más reciente a la más antigua). Cada una con lo que pidió
+     * («2 Brújulas, 1 GPS»).
+     *
+     * «nueva»: lo que hizo la bodega (entregarla, rechazarla, recibirla) o el atraso (desde el día siguiente a la fecha de
+     * devolución) pasó después de la última vez que el docente abrió su campana. Las por entregar las creó él: no son
+     * nuevas.
+     *
+     * @return list<array{id: int, estado: string, fecha_retiro: string, fecha_devolucion: string, motivo_rechazo: ?string,
+     *     cerrada_en: ?string, atrasada: int, nueva: int, herramientas: ?string}>
+     */
+    public function notificacionesDocente(int $usuarioId): array
+    {
+        return Database::fetchAll(
+            "SELECT s.id, s.estado, s.fecha_retiro, s.fecha_devolucion, s.motivo_rechazo,
+                    COALESCE(s.recibida_en, s.revisada_en) AS cerrada_en,
+                    (s.estado = 'prestada' AND s.fecha_devolucion < CURDATE()) AS atrasada,
+                    COALESCE(
+                        (CASE
+                            WHEN s.estado = 'prestada' AND s.fecha_devolucion < CURDATE()
+                                THEN TIMESTAMP(s.fecha_devolucion + INTERVAL 1 DAY)
+                            WHEN s.estado = 'prestada' THEN s.entregada_en
+                            WHEN s.estado = 'rechazada' THEN s.revisada_en
+                            WHEN s.estado = 'devuelta' THEN s.recibida_en
+                        END) > COALESCE(u.notificaciones_vistas_en, '1000-01-01'),
+                        0
+                    ) AS nueva,
+                    (SELECT GROUP_CONCAT(CONCAT(si.cantidad, ' ', h.nombre) ORDER BY h.nombre SEPARATOR ', ')
+                       FROM solicitud_items si JOIN herramientas h ON h.id = si.herramienta_id
+                      WHERE si.solicitud_id = s.id) AS herramientas
+               FROM solicitudes s JOIN usuarios u ON u.id = s.docente_id
+              WHERE s.docente_id = ?
+                AND (s.estado IN ('pendiente', 'prestada')
+                     OR (s.estado = 'rechazada' AND s.revisada_en >= NOW() - INTERVAL 14 DAY)
+                     OR (s.estado = 'devuelta' AND s.recibida_en >= NOW() - INTERVAL 14 DAY))
+              ORDER BY atrasada DESC,
+                       FIELD(s.estado, 'pendiente', 'prestada', 'rechazada', 'devuelta'),
+                       CASE WHEN s.estado IN ('pendiente', 'prestada') THEN s.fecha_retiro END,
+                       cerrada_en DESC, s.id DESC",
             [$usuarioId]
         );
     }

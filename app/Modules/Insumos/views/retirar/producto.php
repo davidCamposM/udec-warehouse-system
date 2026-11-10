@@ -2,7 +2,7 @@
 
 defined('APP_ROOT') || exit;
 
-// Etapa 1, su propia ventana («¿Qué producto se retira?»): el producto, y nada más. Se escanea (con la pistola salta
+// Etapa 1, su propia ventana («¿Qué se retira?»): el producto, y nada más. Se escanea (con la pistola salta
 // sola a «¿Cuántas unidades se retiran?») o se escribe y se elige en la lista que aparece al escribir. Si se acaba de
 // retirar uno, arriba va la boleta de lo retirado (qué, cuántas y el stock) y el campo queda listo para el siguiente.
 ?>

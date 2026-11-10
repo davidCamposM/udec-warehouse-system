@@ -36,7 +36,7 @@ $anuncio = match ($total) {
                         <span class="sugerencia__nombre" data-resaltar><?= e($insumo['nombre']) ?></span>
                         <span class="sugerencia__cantidad"><?= e($numero) ?> <small><?= e($unidad) ?></small></span>
                         <span class="sugerencia__meta" data-resaltar><?= e(implode(' · ', array_filter([
-                            $insumo['codigo'],
+                            codigo_producto($insumo),
                             $insumo['categoria'] ?? 'Sin categoría',
                             $insumo['sector'],
                         ]))) ?></span>
@@ -51,11 +51,9 @@ $anuncio = match ($total) {
     <?php else : ?>
         <div class="sugerencias__vacio">
             <p class="sugerencias__titulo">No encontramos «<?= e($texto) ?>»</p>
-            <p>
-                <?= $para === 'envase'
-                    ? 'Prueba con otra palabra. Si no está, vuelve atrás y elige «Es un producto nuevo».'
-                    : 'Revisa lo escrito, busca con otra palabra o escanea el código del producto.' ?>
-            </p>
+            <?php if ($para === 'envase') : ?>
+                <p>Si no está, vuelve atrás y elige «Es un producto nuevo».</p>
+            <?php endif; ?>
             <?php if ($agregar !== null) : ?>
                 <a class="btn btn--tarea tono-turquesa" href="<?= e($agregar) ?>"><?= icon('plus') ?>Agregar nuevo producto</a>
             <?php endif; ?>

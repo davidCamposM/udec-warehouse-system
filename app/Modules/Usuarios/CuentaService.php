@@ -24,13 +24,14 @@ defined('APP_ROOT') || exit;
 final class CuentaService
 {
     /** Los perfiles que se cargan desde aquí (la cuenta del encargado se crea aparte, con bin/crear-usuario.php). */
-    public const PERFILES = ['docente' => 'Docente', 'administrativa' => 'Administrativa'];
+    public const PERFILES = ['docente' => 'Docente', 'administrativa' => 'Administrativa', 'operador' => 'Operador de bodega'];
 
     /** Filtros de la lista de cuentas: filtro => nombre. */
     public const FILTROS = [
         'todas' => 'Todas',
         'docente' => 'Docentes',
         'administrativa' => 'Administrativas',
+        'operador' => 'Operadores',
         'sin-clave' => 'Falta crear contraseña',
     ];
 
@@ -67,7 +68,7 @@ final class CuentaService
         return $conteo;
     }
 
-    /** @return array<string, mixed>|null una cuenta activa de docente o administrativa */
+    /** @return array<string, mixed>|null una cuenta activa de docente, administrativa u operador de bodega */
     public function buscar(int $id): ?array
     {
         $cuenta = $this->usuarios->findById($id);
@@ -309,7 +310,7 @@ final class CuentaService
             $errores['nombre'] = 'El nombre es muy largo: usa 120 letras como máximo.';
         }
         if (!isset(self::PERFILES[$perfil])) {
-            $errores['perfil'] = 'Elige si es docente o administrativa.';
+            $errores['perfil'] = 'Elige su perfil: docente, administrativa u operador de bodega.';
         }
         if ($errores !== []) {
             throw new ValidationException($errores);

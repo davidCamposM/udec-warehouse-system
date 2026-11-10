@@ -10,7 +10,7 @@ use App\Core\Response;
 
 defined('APP_ROOT') || exit;
 
-/** «Entradas y salidas»: lo que entró, salió o se ajustó, con filtros por período y tipo, y su descarga para Excel. */
+/** «Entradas y salidas»: lo que entró, salió o se ajustó, con filtros por período y tipo, y descargas Excel y PDF. */
 final class MovimientoController
 {
     private MovimientoService $movimientos;
@@ -45,6 +45,20 @@ final class MovimientoController
             iconv('UTF-8', 'ASCII//TRANSLIT', $nombre) . '.xlsx',
             $this->movimientos->libroExcel($filtros, (string) (Auth::user()['nombre'] ?? '')),
             'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        );
+    }
+
+    /** Informe formal en PDF de los mismos filtros, con resumen, productos y detalle. */
+    public function pdf(Request $request): Response
+    {
+        $filtros = $this->filtros($request);
+        $nombre = 'Entradas y salidas - ' . MovimientoService::PERIODOS[$filtros['periodo']] . ' - '
+            . MovimientoService::TIPOS[$filtros['tipo'] ?? ''] . ' - ' . date('Y-m-d');
+
+        return Response::descarga(
+            iconv('UTF-8', 'ASCII//TRANSLIT', $nombre) . '.pdf',
+            $this->movimientos->libroPdf($filtros, (string) (Auth::user()['nombre'] ?? '')),
+            'application/pdf',
         );
     }
 

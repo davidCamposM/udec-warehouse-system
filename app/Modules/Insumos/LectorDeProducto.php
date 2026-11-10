@@ -10,8 +10,8 @@ use App\Modules\Sectores\SectorService;
 defined('APP_ROOT') || exit;
 
 /**
- * Interpreta lo que llega del cuadro «Escanea el código del producto o escribe su nombre» (Registrar producto,
- * Actualizar cantidad, Retirar producto): un código de producto, un código que nadie tiene o un nombre para buscar.
+ * Interpreta lo que llega del cuadro «Escanea el código del producto o escribe su nombre» (Ingresar productos,
+ * Corregir stock, Retirar productos): un código de producto, un código que nadie tiene o un nombre para buscar.
  */
 final class LectorDeProducto
 {

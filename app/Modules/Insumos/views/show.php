@@ -27,19 +27,22 @@ $frase = static function (array $movimiento): string {
 // Lo que se puede hacer con este producto, según los permisos: [texto, descripción, ícono, color, URL]
 $tareas = [];
 if ($puedeGuardar) {
-    $tareas[] = ['Registrar producto', 'Anotar lo que llegó y dónde quedó', 'box', 'verde', url('guardar', ['producto' => $insumo['id']])];
+    $tareas[] = ['Ingresar productos', '', 'box', 'verde', url('guardar', ['producto' => $insumo['id']])];
 }
 if ($puedeRetirar && (int) $insumo['stock_actual'] > 0) {
-    $tareas[] = ['Retirar producto', 'Descontar lo que sale de la bodega', 'arrow-out', 'ocre', url('retirar', ['producto' => $insumo['id']])];
+    $tareas[] = ['Retirar productos', '', 'arrow-out', 'ocre', url('retirar', ['producto' => $insumo['id']])];
 }
 if ($puedeAjustar) {
-    $tareas[] = ['Actualizar cantidad', 'Dejar lo que realmente hay, después de contar', 'refresh', 'naranja', url('ajustar', ['producto' => $insumo['id']])];
+    $tareas[] = ['Corregir stock', '', 'refresh', 'naranja', url('ajustar', ['producto' => $insumo['id']])];
 }
 if ($puedeAdministrar) {
-    $tareas[] = ['Editar datos', 'Nombre, tipo, stock mínimo, código UdeC o código de barras', 'edit', 'pizarra', url("{$base}/editar")];
+    $tareas[] = ['Editar datos', '', 'edit', 'pizarra', url("{$base}/editar")];
     $tareas[] = $insumo['sku'] === InsumoRepository::SIN_CODIGO_BARRAS
-        ? ['Agregar código de barras', 'Escanear el código del envase', 'barcode', 'turquesa', url("{$base}/codigos/nuevo")]
-        : ['Agregar otro código de barras', 'Otra marca o la caja de este mismo producto', 'barcode', 'turquesa', url("{$base}/codigos/nuevo")];
+        ? ['Agregar código de barras', '', 'barcode', 'turquesa', url("{$base}/codigos/nuevo")]
+        : ['Agregar otro código de barras', '', 'barcode', 'turquesa', url("{$base}/codigos/nuevo")];
+}
+if ($puedeCrear) {
+    $tareas[] = ['Imprimir etiqueta', '', 'barcode', 'grafito', url("{$base}/etiqueta")];
 }
 ?>
 <?= partial('encabezado', [
@@ -47,11 +50,11 @@ if ($puedeAdministrar) {
     'tarea' => 'buscar-producto',
     'icono' => 'box',
     'titulo' => $insumo['nombre'],
-    'texto' => $insumo['codigo'] . ' · ' . $categoria,
+    'texto' => codigo_producto($insumo) . ' · ' . $categoria,
 ]) ?>
 
 <?php $foto = foto_producto($insumo['codigo_udec'], $insumo['codigo']); ?>
-<section class="producto" aria-label="El producto">
+<section class="producto" aria-label="El producto" data-insumo-id="<?= e($insumo['id']) ?>">
     <div class="producto__info">
         <div class="producto__cantidad">
             <p class="producto__etiqueta">Hay en bodega</p>
@@ -103,7 +106,9 @@ if ($puedeAdministrar) {
                         <span class="accion__icono"><?= icon($icono) ?></span>
                         <span class="accion__texto">
                             <strong class="accion__titulo"><?= e($texto) ?></strong>
-                            <span class="accion__detalle"><?= e($descripcion) ?></span>
+                            <?php if ($descripcion !== '') : ?>
+                                <span class="accion__detalle"><?= e($descripcion) ?></span>
+                            <?php endif; ?>
                         </span>
                         <span class="accion__flecha" aria-hidden="true"><?= icon('arrow-right') ?></span>
                     </a>
@@ -152,10 +157,7 @@ if ($puedeAdministrar) {
             <h2 class="card-title" id="titulo-codigos">Otros códigos de barras</h2>
         </div>
         <?php if ($codigos === []) : ?>
-            <p class="card-body text-muted">
-                Este producto no tiene otros códigos de barras. Se puede escanear su código interno
-                <strong><?= e($insumo['codigo']) ?></strong> desde su etiqueta.
-            </p>
+            <p class="card-body text-muted">Ninguno.</p>
         <?php else : ?>
             <ul class="list-group">
                 <?php foreach ($codigos as $codigo) : ?>
@@ -180,7 +182,6 @@ if ($puedeAdministrar) {
 
 <?php if ($puedeAdministrar) : ?>
     <section class="card card-body ficha__eliminar">
-        <p class="text-muted">¿Ya no se usa este producto?</p>
         <a class="btn btn-outline-danger btn-sm" href="<?= e(url($base . '/eliminar')) ?>">Eliminar este producto</a>
     </section>
 <?php endif; ?>

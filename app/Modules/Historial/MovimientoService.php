@@ -86,20 +86,13 @@ final class MovimientoService
     public function libroExcel(array $filtros, string $quien): string
     {
         [$periodo, $tipo] = [$filtros['periodo'], $filtros['tipo']];
-        $productos = $this->movimientos->porProducto($periodo, $tipo);
-        $total = $this->movimientos->contar($periodo, $tipo);
-        $detalle = $total === 0 ? [] : $this->movimientos->buscar($periodo, $tipo, $total, 0, true);
-
-        $entraron = array_sum(array_map(static fn (array $p): int => (int) $p['entraron'], $productos));
-        $salieron = array_sum(array_map(static fn (array $p): int => (int) $p['salieron'], $productos));
-        $ajustes = array_sum(array_map(static fn (array $p): int => (int) $p['ajustes'], $productos));
-        $inicio = $this->movimientos->inicioDelPeriodo($periodo);
-        $hoy = date('d/m/Y');
-        $rango = match (true) {
-            $inicio === null => 'todo el historial, hasta el ' . $hoy,
-            $inicio === date('Y-m-d') => 'el ' . $hoy,
-            default => 'del ' . date('d/m/Y', (int) strtotime($inicio)) . ' al ' . $hoy,
-        };
+        $datos = $this->datosReporte($filtros);
+        $productos = $datos['productos'];
+        $detalle = $datos['detalle'];
+        $entraron = $datos['entraron'];
+        $salieron = $datos['salieron'];
+        $ajustes = $datos['ajustes'];
+        $rango = $datos['rango'];
         $encabezado = static function (Xlsx $libro, string $titulo) use ($periodo, $tipo, $rango, $quien): void {
             $libro->fila([$titulo], 'titulo')
                 ->fila(['Período: ' . self::PERIODOS[$periodo] . ' (' . $rango . ') · Tipo: ' . self::TIPOS[$tipo ?? '']], 'gris')
@@ -110,7 +103,7 @@ final class MovimientoService
         $libro = new Xlsx();
 
         // 1) Resumen
-        $libro->hoja('Resumen', [34, 14, 40, 14]);
+        $libro->hoja('Resumen', [46, 18, 44, 16]);
         $encabezado($libro, 'Entradas y salidas de la bodega');
         $libro->fila(['Totales'], 'subtitulo')
             ->tabla(['Concepto', 'Cantidad'], [
@@ -143,7 +136,7 @@ final class MovimientoService
             : $libro->tabla(['Categoría', 'Entraron', 'Salieron'], [...array_values($categorias), ['Total', $entraron, $salieron]], true);
 
         // 2) Por producto
-        $libro->hoja('Por producto', [12, 40, 28, 14, 11, 11, 11, 13]);
+        $libro->hoja('Por producto', [14, 46, 32, 16, 13, 13, 13, 16], 2);
         $encabezado($libro, 'Entradas y salidas por producto');
         $filas = array_map(static fn (array $p): array => [
             $p['codigo'], $p['nombre'], $p['categoria'],
@@ -159,7 +152,7 @@ final class MovimientoService
             );
 
         // 3) Detalle
-        $libro->hoja('Detalle', [12, 8, 12, 40, 10, 9, 9, 9, 11, 13, 34, 30]);
+        $libro->hoja('Detalle', [14, 9, 14, 46, 12, 10, 10, 10, 13, 26, 17, 36, 42], 4);
         $encabezado($libro, 'Detalle de entradas y salidas');
         $filas = array_map(static function (array $m): array {
             $cantidad = (int) $m['cantidad'];
@@ -173,6 +166,7 @@ final class MovimientoService
                 $m['tipo'] === 'salida' ? abs($cantidad) : null,
                 $m['tipo'] === 'ajuste' ? $cantidad : null,
                 (int) $m['stock_resultante'],
+                (string) ($m['quien'] ?? ''),
                 (string) ($m['reserva'] ?? ''),
                 $m['sector'] !== null ? $m['sector_codigo'] . ' · ' . $m['sector'] : '',
                 (string) ($m['motivo'] ?? ''),
@@ -181,10 +175,44 @@ final class MovimientoService
         $filas === []
             ? $libro->fila(['No hubo movimientos en este período.'], 'gris')
             : $libro->tabla(
-                ['Fecha', 'Hora', 'Código', 'Producto', 'Tipo', 'Entró', 'Salió', 'Ajuste', 'Quedaron', 'Reserva', 'Ubicación', 'Motivo'],
+                ['Fecha', 'Hora', 'Código', 'Producto', 'Tipo', 'Entró', 'Salió', 'Ajuste', 'Quedaron', 'Quién', 'Reserva', 'Ubicación', 'Motivo'],
                 $filas,
             );
 
         return $libro->contenido();
     }
+    /** La misma selección de registros y totales alimenta las descargas XLSX y PDF. */
+    public function libroPdf(array $filtros, string $quien): string
+    {
+        return (new MovimientoPdf($this->datosReporte($filtros), $filtros, $quien))->contenido();
+    }
+
+    /**
+     * @param array{periodo: string, tipo: ?string, pagina: int} $filtros
+     * @return array{productos: list<array<string, mixed>>, detalle: list<array<string, mixed>>, entraron: int, salieron: int, ajustes: int, rango: string}
+     */
+    private function datosReporte(array $filtros): array
+    {
+        $periodo = $filtros['periodo'];
+        $tipo = $filtros['tipo'];
+        $productos = $this->movimientos->porProducto($periodo, $tipo);
+        $total = $this->movimientos->contar($periodo, $tipo);
+        $detalle = $total === 0 ? [] : $this->movimientos->buscar($periodo, $tipo, $total, 0, true);
+        $inicio = $this->movimientos->inicioDelPeriodo($periodo);
+        $hoy = date('d/m/Y');
+        $rango = match (true) {
+            $inicio === null => 'todo el historial, hasta el ' . $hoy,
+            $inicio === date('Y-m-d') => 'el ' . $hoy,
+            default => 'del ' . date('d/m/Y', (int) strtotime($inicio)) . ' al ' . $hoy,
+        };
+        return [
+            'productos' => $productos,
+            'detalle' => $detalle,
+            'entraron' => array_sum(array_map(static fn (array $p): int => (int) $p['entraron'], $productos)),
+            'salieron' => array_sum(array_map(static fn (array $p): int => (int) $p['salieron'], $productos)),
+            'ajustes' => array_sum(array_map(static fn (array $p): int => (int) $p['ajustes'], $productos)),
+            'rango' => $rango,
+        ];
+    }
+
 }

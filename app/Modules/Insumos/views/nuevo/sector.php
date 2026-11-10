@@ -4,7 +4,8 @@ defined('APP_ROOT') || exit;
 
 // Etapa 4, su propia ventana («¿Dónde quedó?»). Lo principal es escanear la etiqueta de la repisa (al leerla, se agrega
 // el producto con sus unidades). Sin etiqueta, la lista de sectores va plegada debajo: se toca uno y se confirma.
-// Arriba, lo de las etapas anteriores (con «Cambiar»).
+// Arriba, lo de las etapas anteriores (con «Cambiar»). «Sin ubicación por ahora» lo agrega sin sector (repisas aún sin
+// etiqueta).
 $marcado = old('sector_id', $nuevo['sector_id']);
 ?>
 
@@ -83,5 +84,9 @@ $marcado = old('sector_id', $nuevo['sector_id']);
         <?php if ($sectores !== []) : ?>
             <button class="btn btn--si" type="submit" data-loading-text="Agregando…"><?= icon('ok') ?>Agregar producto</button>
         <?php endif; ?>
+        <?php // Después de «Agregar producto»: Enter en la etiqueta envía ese, no este. ?>
+        <button class="btn btn--secondary" type="submit" name="sin_sector" value="1" data-loading-text="Agregando…">
+            <?= icon('map-pin') ?>Sin ubicación por ahora
+        </button>
     </div>
 </form>

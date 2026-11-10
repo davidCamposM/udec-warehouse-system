@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Modules\Sectores;
 
 use App\Core\Database;
+use App\Modules\Insumos\InsumoRepository;
 
 defined('APP_ROOT') || exit;
 
@@ -120,9 +121,10 @@ final class SectorRepository
             'SELECT i.nombre FROM insumo_codigos ic JOIN insumos i ON i.id = ic.insumo_id
               WHERE ic.codigo = ? AND ic.activo = 1 AND i.activo = 1
              UNION ALL
-             SELECT nombre FROM insumos WHERE (codigo = ? OR codigo_udec = ?) AND activo = 1
+             SELECT nombre FROM insumos
+              WHERE (codigo = ? OR codigo_udec = ? OR (sku = ? AND sku <> ?)) AND activo = 1
              LIMIT 1',
-            [$codigo, $codigo, $codigo]
+            [$codigo, $codigo, $codigo, $codigo, InsumoRepository::SIN_CODIGO_BARRAS]
         );
 
         return $nombre === null ? null : (string) $nombre;

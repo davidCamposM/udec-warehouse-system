@@ -17,7 +17,7 @@ $anterior = $insumo['sector_id'] !== null ? $insumo['sector'] : null;
             'etiqueta' => 'Producto',
             'icono' => 'box',
             'valor' => $insumo['nombre'],
-            'detalle' => $insumo['codigo'],
+            'detalle' => codigo_producto($insumo),
             'cambiar' => url('guardar'),
             'compacto' => true,
         ]) ?>

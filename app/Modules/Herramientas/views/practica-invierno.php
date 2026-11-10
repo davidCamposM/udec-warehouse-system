@@ -19,7 +19,7 @@ $vacios = [
     'volver' => [url(), 'Volver al inicio'],
     'tarea' => 'practica-invierno',
     'titulo' => 'Insumos Práctica de Invierno',
-    'texto' => 'El equipo de montaña de la práctica: se presta y se devuelve. Cuántos hay en la bodega.',
+    'texto' => 'El equipo de montaña de la práctica.',
 ]) ?>
 
 <nav class="nav-pills invierno__filtros" aria-label="Mostrar">

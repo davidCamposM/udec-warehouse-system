@@ -29,7 +29,9 @@ $datosTarea = Tareas::tarea($tarea);
             <a class="ventana__cerrar" href="<?= e($cerrar) ?>"><?= icon('close') ?><span>Cerrar</span></a>
         </header>
 
-        <?= partial('flash') ?>
-        <?= $cuerpo ?>
+        <div class="ventana__cuerpo">
+            <?= partial('flash') ?>
+            <?= $cuerpo ?>
+        </div>
     </section>
 </div>

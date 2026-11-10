@@ -56,8 +56,7 @@ $base = 'prestamos/' . $solicitud['id'];
             <form method="post" action="<?= e(url($base . '/rechazar')) ?>" data-submit-once>
                 <?= csrf_field() ?>
                 <label class="campo__etiqueta" for="motivo">¿Por qué?</label>
-                <p class="campo__ayuda" id="motivo-ayuda">Opcional. El docente lo verá. Ejemplo: no hay hipsómetros disponibles ese día.</p>
-                <input class="input" id="motivo" name="motivo" type="text" maxlength="255" aria-describedby="motivo-ayuda"
+                <input class="input" id="motivo" name="motivo" type="text" maxlength="255"
                     value="<?= e(old('motivo')) ?>" <?= aria_error('motivo') ?>>
                 <?= mensaje_error('motivo') ?>
                 <button class="btn btn-outline-danger" type="submit" data-loading-text="Rechazando…">Rechazar solicitud</button>

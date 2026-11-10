@@ -5,23 +5,25 @@ use App\Support\Fecha;
 
 defined('APP_ROOT') || exit;
 
-// «Usuarios»: las cuentas de docentes y administrativas, con los componentes básicos (basico.css). Arriba, «Agregar
-// persona» y los filtros; debajo, una tabla: nombre y correo, perfil, si ya creó su contraseña, último ingreso y los
-// botones «Dar enlace» (para crear su contraseña, o una nueva si la olvidó), «Editar» y «Eliminar».
+// «Usuarios»: las cuentas de docentes, administrativas y operadores de bodega, con los componentes básicos
+// (basico.css). Arriba, «Agregar persona» y los filtros; debajo, una tabla: nombre y correo, perfil, si ya creó su
+// contraseña, último ingreso y, en una fila, los botones chicos «Dar enlace» (para crear su contraseña, o una nueva
+// si la olvidó), «Editar» y «Eliminar».
 ?>
 <?= partial('encabezado', [
     'volver' => [url(), 'Volver al inicio'],
     'tarea' => 'usuarios',
     'titulo' => 'Usuarios',
     'texto' => 'Las personas que pueden entrar al sistema. Cada una crea su contraseña con el enlace que le compartes.',
-    'acciones' => '<a class="btn btn-success" href="' . e(url('usuarios/agregar')) . '">' . icon('plus') . 'Agregar persona</a>',
+    // «Agregar persona», arriba a la derecha (en la línea de «Volver»), como botón chico.
+    'lateral' => '<a class="boton-nuevo" href="' . e(url('usuarios/agregar')) . '">' . icon('plus') . 'Agregar persona</a>',
 ]) ?>
 
-<nav class="nav-pills usuarios__filtros" aria-label="Mostrar">
+<nav class="segmento usuarios__filtros" aria-label="Mostrar">
     <?php foreach (CuentaService::FILTROS as $clave => $nombre) : ?>
-        <a class="nav-link<?= $clave === 'sin-clave' ? ' nav-link--atencion' : '' ?><?= $clave === $filtro ? ' active' : '' ?>"
+        <a class="segmento__opcion<?= $clave === 'sin-clave' ? ' segmento__opcion--atencion' : '' ?><?= $clave === $filtro ? ' is-activa' : '' ?>"
             href="<?= e(url('usuarios', $clave === 'todas' ? [] : ['ver' => $clave])) ?>" <?= $clave === $filtro ? 'aria-current="true"' : '' ?>>
-            <?= e($nombre) ?> <span class="nav-count"><?= e($conteo[$clave]) ?></span>
+            <?= e($nombre) ?><span class="segmento__cuenta"><?= e($conteo[$clave]) ?></span>
         </a>
     <?php endforeach; ?>
 </nav>
@@ -31,7 +33,7 @@ defined('APP_ROOT') || exit;
         <span class="vacio-simple__icono"><?= icon('users') ?></span>
         <p class="vacio-simple__titulo"><?= $filtro === 'todas' ? 'Todavía no hay personas' : 'No hay personas aquí' ?></p>
         <?php if ($filtro === 'todas') : ?>
-            <p class="text-muted">Toca «Agregar persona» y escribe su nombre, su correo (UdeC o Gmail) y si es docente o administrativa.</p>
+            <p class="text-muted">Toca «Agregar persona» y escribe su nombre, su correo (UdeC o Gmail) y su perfil.</p>
         <?php endif; ?>
     </div>
 <?php else : ?>
@@ -62,18 +64,18 @@ defined('APP_ROOT') || exit;
                                     <span class="status status--low"><?= icon('clock') ?>Falta crearla</span>
                                 <?php endif; ?>
                             </td>
-                            <td class="text-muted"><?= e($cuenta['ultimo_acceso'] !== null ? Fecha::mostrar($cuenta['ultimo_acceso']) : 'Nunca') ?></td>
+                            <td class="text-muted usuarios__fecha"><?= e($cuenta['ultimo_acceso'] !== null ? Fecha::mostrar($cuenta['ultimo_acceso']) : 'Nunca') ?></td>
                             <td>
                                 <div class="usuarios__acciones">
                                     <form method="post" action="<?= e(url('usuarios/' . $cuenta['id'] . '/enlace')) ?>" data-submit-once>
                                         <?= csrf_field() ?>
-                                        <button class="btn btn-outline-secondary btn-sm" type="submit" data-loading-text="Un momento…"
+                                        <button class="boton-fila" type="submit" data-loading-text="Un momento…"
                                             title="Un enlace para que <?= (bool) $cuenta['con_clave'] ? 'cree una contraseña nueva' : 'cree su contraseña' ?>">
                                             <?= icon('lock') ?>Dar enlace
                                         </button>
                                     </form>
-                                    <a class="btn btn-outline-secondary btn-sm" href="<?= e(url('usuarios/' . $cuenta['id'] . '/editar')) ?>"><?= icon('edit') ?>Editar</a>
-                                    <a class="btn btn-outline-danger btn-sm" href="<?= e(url('usuarios/' . $cuenta['id'] . '/eliminar')) ?>">Eliminar</a>
+                                    <a class="boton-fila" href="<?= e(url('usuarios/' . $cuenta['id'] . '/editar')) ?>"><?= icon('edit') ?>Editar</a>
+                                    <a class="boton-fila boton-fila--peligro" href="<?= e(url('usuarios/' . $cuenta['id'] . '/eliminar')) ?>"><?= icon('close') ?>Eliminar</a>
                                 </div>
                             </td>
                         </tr>

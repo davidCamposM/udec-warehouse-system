@@ -24,10 +24,10 @@ $urlAgregar = url('insumos/nuevo', InsumoService::paraAgregar($texto));
     'volver' => [url(), 'Volver al inicio'],
     'tarea' => 'buscar-producto',
     'titulo' => 'Buscar producto',
-    'texto' => 'Para ver cuánto hay en bodega y dónde está.',
 ]) ?>
 
-<form class="card card-body buscar" method="get" action="<?= e(url('insumos')) ?>" role="search">
+<section class="consulta-productos" aria-label="Buscar y filtrar productos">
+<form class="buscar" method="get" action="<?= e(url('insumos')) ?>" role="search">
     <?= route_field('insumos') ?>
     <?php if ($filtro !== 'todos') : ?>
         <input type="hidden" name="ver" value="<?= e($filtro) ?>">
@@ -63,33 +63,33 @@ $urlAgregar = url('insumos/nuevo', InsumoService::paraAgregar($texto));
     <?php endif; ?>
 </div>
 
+</section>
+
 <?php if ($insumos === []) : ?>
     <div class="card card-body vacio-simple">
         <span class="vacio-simple__icono"><?= icon('search') ?></span>
         <p class="vacio-simple__titulo">No hay productos para mostrar</p>
-        <p class="text-muted">
-            <?= $texto !== ''
-                ? 'Revisa lo escrito o busca con otra palabra.'
-                : 'En esta lista no hay productos por ahora.' ?>
-        </p>
-        <?php if ($texto !== '' && $puedeAdministrar) : ?>
-            <p class="vacio-simple__pregunta">¿Es un producto que todavía no está en el sistema?</p>
+        <?php if ($texto === '') : ?>
+            <p class="text-muted">En esta lista no hay productos por ahora.</p>
+        <?php endif; ?>
+        <?php if ($texto !== '' && $puedeCrear) : ?>
             <a class="btn btn-success" href="<?= e($urlAgregar) ?>"><?= icon('plus') ?>Agregar nuevo producto</a>
         <?php endif; ?>
     </div>
 <?php else : ?>
+    <div class="resultados__cabecera"><h2>Productos</h2><span><?= e($conteo[$filtro]) ?> <?= $conteo[$filtro] === 1 ? 'producto' : 'productos' ?></span></div>
     <ul class="resultados">
         <?php foreach ($insumos as $insumo) : ?>
             <?php
             [$numero, $unidad] = explode(' ', unidades($insumo['stock_actual']), 2);
             $foto = foto_producto($insumo['codigo_udec'], $insumo['codigo']);
             ?>
-            <li>
+            <li id="insumo-<?= e($insumo['id']) ?>">
                 <a class="resultado" href="<?= e(url('insumos/' . $insumo['id'])) ?>">
                     <span class="resultado__texto">
                         <strong class="resultado__nombre"><?= e($insumo['nombre']) ?></strong>
                         <span class="resultado__datos">
-                            <span><?= e($insumo['codigo']) ?></span>
+                            <span><?= e(codigo_producto($insumo)) ?></span>
                             <span><?= e($insumo['categoria'] ?? 'Sin categoría') ?></span>
                             <span><?= icon('map-pin') ?><?= e($insumo['sector'] ?? 'Sin ubicación') ?></span>
                         </span>

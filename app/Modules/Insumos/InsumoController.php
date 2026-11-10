@@ -45,16 +45,17 @@ final class InsumoController
             'filtro' => $filtro,
             'insumos' => $this->insumos->buscar($texto, $filtro),
             'conteo' => $this->insumos->contar($texto),
+            'puedeCrear' => Permission::can('insumos.crear'),
             'puedeAdministrar' => Permission::can('insumos.administrar'),
             'estilos' => ['css/pages/insumos.css'],
-            'scripts' => ['js/modules/insumos.js'],
+            'scripts' => ['js/modules/insumos.js', 'js/modules/insumos-regreso.js'],
         ]);
     }
 
     /**
      * La lista que aparece bajo una barra de búsqueda mientras se escribe (la pide insumos.js): los productos que
      * coinciden con ?q=. Tocar uno hace lo que toca en esa pantalla (?para=): abrir su ficha, elegirlo en «Registrar
-     * producto», «Actualizar cantidad» o «Retirar producto», o elegirlo como el producto de un envase nuevo.
+     * producto», «Corregir stock» o «Retirar productos», o elegirlo como el producto de un envase nuevo.
      */
     public function sugerencias(Request $request): Response
     {
@@ -76,7 +77,7 @@ final class InsumoController
         return Response::view('Insumos::partials/sugerencias', $this->insumos->sugerencias($texto, self::SUGERENCIAS) + [
             'texto' => $texto,
             'para' => $para,
-            'agregar' => Permission::can('insumos.administrar') ? $agregar : null,
+            'agregar' => Permission::can('insumos.crear') ? $agregar : null,
         ], null);
     }
 
@@ -91,11 +92,22 @@ final class InsumoController
         return Response::view('Insumos::show', $ficha + [
             'titulo' => $ficha['insumo']['nombre'],
             'puedeAdministrar' => Permission::can('insumos.administrar'),
+            'puedeCrear' => Permission::can('insumos.crear'),
             'puedeGuardar' => Permission::can('insumos.entrada'),
             'puedeAjustar' => Permission::can('insumos.ajuste'),
             'puedeRetirar' => Permission::can('insumos.salida'),
             'estilos' => ['css/pages/insumos.css'],
+            'scripts' => ['js/modules/insumos-regreso.js'],
         ]);
+    }
+
+    /**
+     * Etiqueta para imprimir: el nombre y un código de barras con el código interno (INS00080), que la pistola siempre
+     * lee y lleva a este producto. Para envases cuyo código de fábrica no se lee bien (bolsas transparentes o arrugadas).
+     */
+    public function etiqueta(Request $request): Response
+    {
+        return Response::view('Insumos::etiqueta', ['insumo' => $this->insumo($request)], null);
     }
 
     // ---------- Editar (agregar uno nuevo es NuevoProductoController) ----------

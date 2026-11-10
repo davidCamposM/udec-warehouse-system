@@ -87,7 +87,7 @@ final class SolicitudController
     {
         return Inicio::conVentana(
             'solicitar-herramientas',
-            'Como el formulario en papel: lo que necesitas, para qué y cuándo.',
+            'Indica la actividad, las fechas y las herramientas.',
             View::render("Herramientas::solicitar/{$vista}", $datos, null),
             ['css/pages/herramientas.css'],
             ['js/modules/herramientas.js'],

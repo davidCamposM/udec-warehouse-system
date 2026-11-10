@@ -113,7 +113,7 @@ final class UsuarioController
         return Response::redirect(Url::to('usuarios'));
     }
 
-    /** @return array<string, mixed> la cuenta del {id} de la ruta (docente o administrativa) */
+    /** @return array<string, mixed> la cuenta del {id} de la ruta (docente, administrativa u operador de bodega) */
     private function cuenta(Request $request): array
     {
         $id = (string) $request->param('id');

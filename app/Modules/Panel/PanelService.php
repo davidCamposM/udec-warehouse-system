@@ -45,57 +45,77 @@ final class PanelService
     }
 
     /**
-     * Los dos gráficos de torta del inicio: los insumos de consumo y las herramientas, cada uno partido en lo que está en
-     * bodega y lo que no, con unos datos más debajo. Cada parte: [clave, nombre, explicación, ícono, cantidad, enlace].
+     * Los dos estados del inicio (Panel::grafico): los insumos de consumo y las herramientas, cada uno partido en lo que
+     * está en bodega y lo que no, con unos datos más debajo. La primera parte es la cifra principal (su porcentaje va en
+     * grande, con la frase). Cada parte: [clave, nombre, explicación, ícono, cantidad, enlace].
      *
-     * @return list<array{titulo: string, texto: string, unidad: array{0: string, 1: string}, centro: string,
+     * @return list<array{titulo: string, icono: string, unidad: array{0: string, 1: string}, frase: string,
      *     partes: list<array{0: string, 1: string, 2: string, 3: string, 4: int, 5: ?string}>, datos: list<array{0: string, 1: string}>}>
      */
     public function graficos(): array
     {
         $insumos = $this->panel->resumenInsumos();
-        $herramientas = $this->herramientas->resumen();
         $verInsumos = Permission::can('insumos.ver');
         $enlace = static fn (string $ver): ?string => $verInsumos ? url('insumos', ['ver' => $ver]) : null;
-        $verHerramientas = Permission::can('herramientas.ver');
-        $catalogo = static fn (string $ver): ?string => $verHerramientas ? url('herramientas', ['ver' => $ver]) : null;
         $unidades = static fn (int $n): string => unidades($n);
 
         return [
             [
                 'titulo' => 'Insumos de consumo',
-                'texto' => 'Los productos según lo que queda en bodega',
+                'corto' => 'Productos', // el título de la torta simple del modelo nuevo (Panel::torta)
+                'icono' => 'box',
                 'unidad' => ['producto', 'productos'],
-                'centro' => 'con unidades',
+                'frase' => 'de los productos tiene stock',
                 'partes' => [
                     ['bien', 'Con stock', 'Hay unidades suficientes', 'check', $insumos['con_stock'], $enlace('con-stock')],
                     ['atencion', 'Por reponer', 'Quedan pocas: hay que pedir más', 'alert', $insumos['por_reponer'], $enlace('reponer')],
                     ['grave', 'Sin stock', 'No queda ninguna en bodega', 'x-circle', $insumos['sin_stock'], $enlace('no-queda')],
                 ],
                 'datos' => [
-                    ['Unidades en bodega', $unidades($insumos['unidades'])],
+                    ['Unidades totales', $unidades($insumos['unidades'])],
                     ['Salieron este mes', $unidades($insumos['salieron_mes'])],
                     ['Entraron este mes', $unidades($insumos['entraron_mes'])],
                 ],
             ],
-            [
-                'titulo' => 'Herramientas',
-                'texto' => 'Las herramientas del catálogo (también el equipo de la Práctica de Invierno) según dónde están',
-                'unidad' => ['herramienta', 'herramientas'],
-                'centro' => 'en bodega',
-                'partes' => [
-                    ['bien', 'En bodega', 'Ninguna prestada y hay para prestar', 'check', $herramientas['en_bodega'], $catalogo('en-bodega')],
-                    ['fuera', 'Prestadas', 'Alguna unidad fuera de la bodega, a tiempo', 'swap', $herramientas['prestadas'], $catalogo('prestadas')],
-                    ['grave', 'Atrasadas', 'Alguna unidad debió volver a la bodega', 'clock', $herramientas['atrasadas'], $catalogo('atrasadas')],
-                    ['atencion', 'Sin unidades', 'No hay ninguna para prestar', 'alert', $herramientas['sin_unidades'], $catalogo('sin-unidades')],
-                ],
-                'datos' => [
-                    ['Unidades en bodega', $unidades($herramientas['unidades_en_bodega']) . ' de ' . $unidades($herramientas['unidades'])],
-                    ['Unidades prestadas ahora', $unidades($herramientas['unidades_prestadas'])],
-                    ['Solicitudes por entregar', (string) $this->panel->contarSolicitudesPendientes()],
-                    ['Dañadas o perdidas sin resolver', (string) $this->panel->contarHerramientasPorResolver()],
-                ],
+            $this->graficoHerramientas(),
+        ];
+    }
+
+    /**
+     * El estado de las herramientas (Panel::grafico). Con $completo, los datos de la bodega (solicitudes por entregar,
+     * dañadas o perdidas); sin él (el docente, al abrir su inicio), solo cuántas hay, en bodega y prestadas.
+     *
+     * @return array{titulo: string, icono: string, unidad: array{0: string, 1: string}, frase: string,
+     *     partes: list<array{0: string, 1: string, 2: string, 3: string, 4: int, 5: ?string}>, datos: list<array{0: string, 1: string}>}
+     */
+    public function graficoHerramientas(bool $completo = true): array
+    {
+        $herramientas = $this->herramientas->resumen();
+        $verHerramientas = Permission::can('herramientas.ver');
+        $catalogo = static fn (string $ver): ?string => $verHerramientas ? url('herramientas', ['ver' => $ver]) : null;
+        $unidades = static fn (int $n): string => unidades($n);
+        $datos = [
+            ['Unidades totales', $unidades($herramientas['unidades'])],
+            ['En bodega', $unidades($herramientas['unidades_en_bodega'])],
+            ['Prestadas ahora', $unidades($herramientas['unidades_prestadas'])],
+        ];
+        if ($completo) {
+            $datos[] = ['Solicitudes por entregar', (string) $this->panel->contarSolicitudesPendientes()];
+            $datos[] = ['Dañadas o perdidas', (string) $this->panel->contarHerramientasPorResolver()];
+        }
+
+        return [
+            'titulo' => 'Herramientas',
+            'icono' => 'tool',
+            'unidad' => ['herramienta', 'herramientas'],
+            'frase' => 'de las herramientas, en bodega',
+            'partes' => [
+                ['bien', 'En bodega', 'Ninguna prestada y hay para prestar', 'check', $herramientas['en_bodega'], $catalogo('en-bodega')],
+                ['fuera', 'Prestadas', 'Alguna unidad fuera de la bodega, a tiempo', 'swap', $herramientas['prestadas'], $catalogo('prestadas')],
+                ['grave', 'Atrasadas', 'Alguna unidad debió volver a la bodega', 'clock', $herramientas['atrasadas'], $catalogo('atrasadas')],
+                ['atencion', 'Sin unidades', 'No hay ninguna para prestar', 'alert', $herramientas['sin_unidades'], $catalogo('sin-unidades')],
             ],
+            'datos' => $datos,
         ];
     }
 
@@ -134,6 +154,16 @@ final class PanelService
     }
 
     /** @return array<string, int> aviso => cantidad */
+    /**
+     * Las notificaciones de la campana del docente (ver PanelRepository::notificacionesDocente).
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function notificacionesDocente(int $usuarioId): array
+    {
+        return $this->panel->notificacionesDocente($usuarioId);
+    }
+
     public function avisosDocente(int $usuarioId): array
     {
         return [

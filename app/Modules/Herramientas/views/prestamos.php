@@ -22,11 +22,12 @@ $vacios = [
     'texto' => 'Lo que piden los docentes: entrégalo el día del retiro y recíbelo cuando vuelva.',
 ]) ?>
 
-<nav class="card card-body nav-pills prestamos__filtros" aria-label="Ver solicitudes">
+<?php // Los filtros en un selector compacto, con cuántas hay en cada uno. ?>
+<nav class="segmento prestamos__filtros" aria-label="Ver solicitudes">
     <?php foreach (SolicitudService::FILTROS as $clave => $nombre) : ?>
-        <a class="nav-link<?= $clave === $filtro ? ' active' : '' ?>" href="<?= e(url('prestamos', ['ver' => $clave])) ?>"
+        <a class="segmento__opcion<?= $clave === $filtro ? ' is-activa' : '' ?>" href="<?= e(url('prestamos', ['ver' => $clave])) ?>"
             <?= $clave === $filtro ? 'aria-current="true"' : '' ?>>
-            <?= e($nombre) ?> <span class="nav-count"><?= e($conteo[$clave]) ?></span>
+            <?= e($nombre) ?><span class="segmento__cuenta"><?= e($conteo[$clave]) ?></span>
         </a>
     <?php endforeach; ?>
 </nav>

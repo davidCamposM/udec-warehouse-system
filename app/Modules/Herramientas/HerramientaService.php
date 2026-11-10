@@ -107,7 +107,7 @@ final class HerramientaService
     public function practicaInvierno(string $estado): array
     {
         $equipo = array_values(array_filter(
-            $this->activas(),
+            $this->activas(true),
             static fn (array $herramienta): bool => $herramienta['clave'] === HerramientaRepository::PRACTICA_INVIERNO
         ));
 
@@ -252,9 +252,9 @@ final class HerramientaService
     // ---------- Apoyo ----------
 
     /** @return list<array<string, mixed>> las activas, cada una con su estado y cuántas hay en bodega */
-    private function activas(): array
+    private function activas(bool $conInvierno = false): array
     {
-        return array_map(self::completar(...), $this->herramientas->activas());
+        return array_map(self::completar(...), $this->herramientas->activas($conInvierno));
     }
 
     /**

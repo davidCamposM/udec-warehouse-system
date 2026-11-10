@@ -11,12 +11,16 @@ declare(strict_types=1);
 
 defined('APP_ROOT') || exit;
 
+// Solo en desarrollo, pruebas E2E (e2e/): entrando por http://e2e.localhost:8080 el sistema usa la base de pruebas
+// (bodega_fcf_pruebas), que las pruebas reinician en cada corrida. En el servidor, dejar 'bodega_fcf' fijo abajo.
+$e2e = strtolower((string) ($_SERVER['HTTP_HOST'] ?? '')) === 'e2e.localhost:8080';
+
 return [
     'app' => [
         'name' => 'Bodega FCF UdeC',
         'env' => 'local',                       // local | produccion
         'debug' => false,                       // true solo en desarrollo: muestra errores detallados
-        'base_url' => 'http://localhost:8080',  // URL pública del sistema, sin barra final
+        'base_url' => $e2e ? 'http://e2e.localhost:8080' : 'http://localhost:8080',  // URL pública del sistema, sin barra final
         'url_mode' => 'rewrite',                // rewrite: /insumos/entradas · query: index.php?r=insumos/entradas
         'timezone' => 'America/Santiago',
         'https' => false,                       // true si el servidor tiene HTTPS: activa la cookie Secure
@@ -26,7 +30,7 @@ return [
     'db' => [
         'host' => 'db',                         // nombre del servicio en docker-compose.yml
         'port' => 3306,
-        'name' => 'bodega_fcf',
+        'name' => $e2e ? 'bodega_fcf_pruebas' : 'bodega_fcf',
         'user' => 'bodega',
         'pass' => 'bodega',
         'charset' => 'utf8mb4',

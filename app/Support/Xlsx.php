@@ -30,9 +30,13 @@ final class Xlsx
         'gris' => 5,
         'negrita' => 6,
         'subtitulo' => 7,
+        'alterno' => 8,
+        'fecha-alterno' => 9,
+        'numero' => 10,
+        'numero-alterno' => 11,
     ];
 
-    /** @var list<array{nombre: string, anchos: list<int>, filas: list<string>, fija: ?int, filtro: ?string}> */
+    /** @var list<array{nombre: string, anchos: list<int>, filas: list<string>, fija: ?int, fijaColumnas: int, filtro: ?string, merges: list<string>}> */
     private array $hojas = [];
 
     /**
@@ -40,11 +44,11 @@ final class Xlsx
      *
      * @param list<int> $anchos ancho de cada columna, en caracteres
      */
-    public function hoja(string $nombre, array $anchos): self
+    public function hoja(string $nombre, array $anchos, int $fijaColumnas = 0): self
     {
         // Hasta 31 letras y sin los caracteres que Excel no acepta en el nombre de una hoja.
         $nombre = mb_substr(str_replace(['\\', '/', '?', '*', '[', ']', ':'], '-', $nombre), 0, 31);
-        $this->hojas[] = ['nombre' => $nombre, 'anchos' => $anchos, 'filas' => [], 'fija' => null, 'filtro' => null];
+        $this->hojas[] = ['nombre' => $nombre, 'anchos' => $anchos, 'filas' => [], 'fija' => null, 'fijaColumnas' => max(0, min($fijaColumnas, count($anchos) - 1)), 'filtro' => null, 'merges' => []];
 
         return $this;
     }
@@ -53,13 +57,17 @@ final class Xlsx
      * Una fila suelta (un título, una línea de datos, una fila vacía).
      *
      * @param list<string|int|float|DateTimeInterface|null> $celdas
-     * @param 'normal'|'titulo'|'subtitulo'|'gris'|'negrita' $estilo
+     * @param 'normal'|'alterno'|'titulo'|'subtitulo'|'gris'|'negrita'|'total'|'encabezado' $estilo
      */
     public function fila(array $celdas = [], string $estilo = 'normal'): self
     {
         $hoja = array_key_last($this->hojas);
         $numero = count($this->hojas[$hoja]['filas']) + 1;
-        $this->hojas[$hoja]['filas'][] = self::xmlFila($numero, $celdas, $estilo);
+        $this->hojas[$hoja]['filas'][] = self::xmlFila($numero, $celdas, $estilo, $this->hojas[$hoja]['anchos']);
+        if (count($celdas) === 1 && count($this->hojas[$hoja]['anchos']) > 1
+            && in_array($estilo, ['titulo', 'subtitulo', 'gris'], true)) {
+            $this->hojas[$hoja]['merges'][] = 'A' . $numero . ':' . self::columna(count($this->hojas[$hoja]['anchos']) - 1) . $numero;
+        }
 
         return $this;
     }
@@ -77,7 +85,7 @@ final class Xlsx
         $inicio = count($this->hojas[$hoja]['filas']) + 1;
         $this->fila($titulos, 'encabezado');
         foreach ($filas as $i => $fila) {
-            $this->fila($fila, $total && $i === count($filas) - 1 ? 'total' : 'normal');
+            $this->fila($fila, $total && $i === count($filas) - 1 ? 'total' : ($i % 2 === 0 ? 'normal' : 'alterno'));
         }
 
         // La primera tabla de la hoja: fija al desplazarse y con el filtro de Excel (sin la fila de total).
@@ -107,16 +115,24 @@ final class Xlsx
             foreach ($hoja['anchos'] as $c => $ancho) {
                 $columnas .= '<col min="' . ($c + 1) . '" max="' . ($c + 1) . '" width="' . $ancho . '" customWidth="1"/>';
             }
+            $columnasFijas = $hoja['fijaColumnas'];
             $panel = $hoja['fija'] !== null
-                ? '<pane ySplit="' . $hoja['fija'] . '" topLeftCell="A' . ($hoja['fija'] + 1) . '" activePane="bottomLeft" state="frozen"/>'
+                ? '<pane' . ($columnasFijas > 0 ? ' xSplit="' . $columnasFijas . '"' : '')
+                    . ' ySplit="' . $hoja['fija'] . '" topLeftCell="' . self::columna($columnasFijas)
+                    . ($hoja['fija'] + 1) . '" activePane="' . ($columnasFijas > 0 ? 'bottomRight' : 'bottomLeft')
+                    . '" state="frozen"/>'
                 : '';
+            $merges = $hoja['merges'] === [] ? '' : '<mergeCells count="' . count($hoja['merges']) . '">'
+                . implode('', array_map(static fn (string $ref): string => '<mergeCell ref="' . $ref . '"/>', $hoja['merges']))
+                . '</mergeCells>';
 
             $zip->agregar("xl/worksheets/sheet{$n}.xml", $xml . "<worksheet {$ns}>"
+                . '<sheetPr><tabColor rgb="FF477E46"/></sheetPr>'
                 . '<sheetViews><sheetView workbookViewId="0"' . ($i === 0 ? ' tabSelected="1"' : '') . '>' . $panel . '</sheetView></sheetViews>'
-                . '<sheetFormatPr defaultRowHeight="15"/>'
+                . '<sheetFormatPr defaultRowHeight="26"/>'
                 . ($columnas !== '' ? '<cols>' . $columnas . '</cols>' : '')
                 . '<sheetData>' . implode('', $hoja['filas']) . '</sheetData>'
-                . ($hoja['filtro'] !== null ? '<autoFilter ref="' . $hoja['filtro'] . '"/>' : '')
+                . ($hoja['filtro'] !== null ? '<autoFilter ref="' . $hoja['filtro'] . '"/>' : '') . $merges
                 . '</worksheet>');
 
             $hojas .= '<sheet name="' . self::xml($hoja['nombre']) . '" sheetId="' . $n . '" r:id="rId' . $n . '"/>';
@@ -125,28 +141,7 @@ final class Xlsx
         }
         $estilos = count($this->hojas) + 1;
 
-        // Estilos (en el orden de ESTILOS): normal; encabezado (negrita, gris claro, línea abajo); título (negrita 14);
-        // total (negrita, línea arriba); fecha (dd/mm/aaaa); gris; negrita; subtítulo (negrita 12).
-        $zip->agregar('xl/styles.xml', $xml . "<styleSheet {$ns}>"
-            . '<numFmts count="1"><numFmt numFmtId="164" formatCode="dd/mm/yyyy"/></numFmts>'
-            . '<fonts count="5"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font>'
-            . '<font><b/><sz val="14"/><name val="Calibri"/></font><font><sz val="11"/><color rgb="FF595959"/><name val="Calibri"/></font>'
-            . '<font><b/><sz val="12"/><name val="Calibri"/></font></fonts>'
-            . '<fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill>'
-            . '<fill><patternFill patternType="solid"><fgColor rgb="FFE7E6E6"/><bgColor indexed="64"/></patternFill></fill></fills>'
-            . '<borders count="3"><border><left/><right/><top/><bottom/><diagonal/></border>'
-            . '<border><left/><right/><top/><bottom style="thin"><color rgb="FF000000"/></bottom><diagonal/></border>'
-            . '<border><left/><right/><top style="thin"><color rgb="FF000000"/></top><bottom/><diagonal/></border></borders>'
-            . '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>'
-            . '<cellXfs count="8"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>'
-            . '<xf numFmtId="0" fontId="1" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1"/>'
-            . '<xf numFmtId="0" fontId="2" fillId="0" borderId="0" xfId="0" applyFont="1"/>'
-            . '<xf numFmtId="0" fontId="1" fillId="0" borderId="2" xfId="0" applyFont="1" applyBorder="1"/>'
-            . '<xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>'
-            . '<xf numFmtId="0" fontId="3" fillId="0" borderId="0" xfId="0" applyFont="1"/>'
-            . '<xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/>'
-            . '<xf numFmtId="0" fontId="4" fillId="0" borderId="0" xfId="0" applyFont="1"/></cellXfs>'
-            . '<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>');
+        $zip->agregar('xl/styles.xml', self::estilosXml($xml, $ns));
 
         $zip->agregar('xl/workbook.xml', $xml . "<workbook {$ns} {$nsR}><sheets>" . $hojas . '</sheets></workbook>');
         $zip->agregar('xl/_rels/workbook.xml.rels', $xml . '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
@@ -167,27 +162,83 @@ final class Xlsx
     }
 
     /** @param list<string|int|float|DateTimeInterface|null> $celdas */
-    private static function xmlFila(int $numero, array $celdas, string $estilo): string
+    private static function xmlFila(int $numero, array $celdas, string $estilo, array $anchos): string
     {
-        $xml = '<row r="' . $numero . '">';
+        $alto = match ($estilo) {
+            'titulo' => 42, 'subtitulo' => 30, 'encabezado' => 34, 'total' => 30, 'gris' => 24,
+            default => 28,
+        };
+        if (in_array($estilo, ['normal', 'alterno'], true)) {
+            foreach ($celdas as $i => $valor) {
+                if (is_string($valor) && $valor !== '') {
+                    $lineas = max(1, (int) ceil(mb_strlen($valor) / max(8, ($anchos[$i] ?? 20) - 3)));
+                    $alto = max($alto, min(130, $lineas * 15 + 10));
+                }
+            }
+        }
+        $xml = '<row r="' . $numero . '" ht="' . $alto . '" customHeight="1">';
         foreach ($celdas as $i => $valor) {
             $ref = self::columna($i) . $numero;
             $s = self::ESTILOS[$estilo];
             if ($valor instanceof DateTimeInterface) {
                 // Excel cuenta los días desde el 30/12/1899.
                 $dias = intdiv((int) $valor->format('U') + (int) $valor->format('Z'), 86400) + 25569;
-                $xml .= '<c r="' . $ref . '" s="' . ($estilo === 'normal' ? self::ESTILOS['fecha'] : $s) . '"><v>' . $dias . '</v></c>';
+                $xml .= '<c r="' . $ref . '" s="' . (in_array($estilo, ['normal', 'alterno'], true) ? self::ESTILOS[$estilo === 'alterno' ? 'fecha-alterno' : 'fecha'] : $s) . '"><v>' . $dias . '</v></c>';
             } elseif (is_int($valor) || is_float($valor)) {
-                $xml .= '<c r="' . $ref . '"' . ($s > 0 ? ' s="' . $s . '"' : '') . '><v>' . $valor . '</v></c>';
+                $numerico = $estilo === 'normal' ? self::ESTILOS['numero'] : ($estilo === 'alterno' ? self::ESTILOS['numero-alterno'] : $s);
+                $xml .= '<c r="' . $ref . '" s="' . $numerico . '"><v>' . $valor . '</v></c>';
             } elseif ($valor !== null && $valor !== '') {
                 $xml .= '<c r="' . $ref . '"' . ($s > 0 ? ' s="' . $s . '"' : '') . ' t="inlineStr"><is><t xml:space="preserve">'
                     . self::xml($valor) . '</t></is></c>';
-            } elseif ($s > 0) {
+            } else {
                 $xml .= '<c r="' . $ref . '" s="' . $s . '"/>';
             }
         }
 
         return $xml . '</row>';
+    }
+
+    /** Paleta verde de la aplicación, con rayado suave, texto legible y cifras alineadas. */
+    private static function estilosXml(string $xml, string $ns): string
+    {
+        return $xml . "<styleSheet {$ns}>"
+            . '<numFmts count="1"><numFmt numFmtId="164" formatCode="dd/mm/yyyy"/></numFmts>'
+            . '<fonts count="6">'
+            . '<font><sz val="11"/><color rgb="FF212529"/><name val="Calibri"/></font>'
+            . '<font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Calibri"/></font>'
+            . '<font><b/><sz val="16"/><color rgb="FF192C19"/><name val="Calibri"/></font>'
+            . '<font><sz val="10"/><color rgb="FF59665A"/><name val="Calibri"/></font>'
+            . '<font><b/><sz val="12"/><color rgb="FF325931"/><name val="Calibri"/></font>'
+            . '<font><b/><sz val="11"/><color rgb="FF192C19"/><name val="Calibri"/></font>'
+            . '</fonts>'
+            . '<fills count="6">'
+            . '<fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill>'
+            . '<fill><patternFill patternType="solid"><fgColor rgb="FF325931"/><bgColor indexed="64"/></patternFill></fill>'
+            . '<fill><patternFill patternType="solid"><fgColor rgb="FFF1F6F1"/><bgColor indexed="64"/></patternFill></fill>'
+            . '<fill><patternFill patternType="solid"><fgColor rgb="FFF7FAF7"/><bgColor indexed="64"/></patternFill></fill>'
+            . '<fill><patternFill patternType="solid"><fgColor rgb="FFE5EFE5"/><bgColor indexed="64"/></patternFill></fill>'
+            . '</fills>'
+            . '<borders count="4">'
+            . '<border><left/><right/><top/><bottom/><diagonal/></border>'
+            . '<border><left/><right/><top/><bottom style="medium"><color rgb="FF254724"/></bottom><diagonal/></border>'
+            . '<border><left/><right/><top style="thin"><color rgb="FF9DBD9D"/></top><bottom/><diagonal/></border>'
+            . '<border><left/><right/><top/><bottom style="hair"><color rgb="FFDDE8DD"/></bottom><diagonal/></border>'
+            . '</borders>'
+            . '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>'
+            . '<cellXfs count="12">'
+            . '<xf numFmtId="0" fontId="0" fillId="0" borderId="3" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="center" wrapText="1" indent="1"/></xf>'
+            . '<xf numFmtId="0" fontId="1" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="center" wrapText="1" indent="1"/></xf>'
+            . '<xf numFmtId="0" fontId="2" fillId="3" borderId="0" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="center" indent="1"/></xf>'
+            . '<xf numFmtId="0" fontId="5" fillId="5" borderId="2" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="center" indent="1"/></xf>'
+            . '<xf numFmtId="164" fontId="0" fillId="0" borderId="3" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1" applyNumberFormat="1"><alignment vertical="center" indent="1"/></xf>'
+            . '<xf numFmtId="0" fontId="3" fillId="0" borderId="0" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="center" indent="1"/></xf>'
+            . '<xf numFmtId="0" fontId="5" fillId="0" borderId="0" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="center" indent="1"/></xf>'
+            . '<xf numFmtId="0" fontId="4" fillId="3" borderId="0" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="center" indent="1"/></xf>'
+            . '<xf numFmtId="0" fontId="0" fillId="4" borderId="3" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="center" wrapText="1" indent="1"/></xf>'
+            . '<xf numFmtId="164" fontId="0" fillId="4" borderId="3" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1" applyNumberFormat="1"><alignment vertical="center" indent="1"/></xf>'
+            . '<xf numFmtId="0" fontId="0" fillId="0" borderId="3" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="right" vertical="center" indent="1"/></xf>'
+            . '<xf numFmtId="0" fontId="0" fillId="4" borderId="3" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="right" vertical="center" indent="1"/></xf>'
+            . '</cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>';
     }
 
     /** 0 → A, 25 → Z, 26 → AA */

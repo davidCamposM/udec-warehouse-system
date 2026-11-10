@@ -2,12 +2,12 @@
 
 defined('APP_ROOT') || exit;
 
-// Etapa 1, su propia ventana («¿Qué producto vas a actualizar?»): el producto que se va a actualizar. Tocar un producto
+// Etapa 1, su propia ventana («¿Qué producto vas a corregir?»): el producto que se va a corregir. Tocar un producto
 // lo elige; «Siguiente» busca lo escrito o escaneado.
 ?>
 <?php if ($actualizado !== null) : ?>
     <?= partial('boleta', [
-        'titulo' => '¡Listo! Quedó actualizado',
+        'titulo' => '¡Listo! Quedó corregido',
         'filas' => [
             ['box', '<strong>' . e($actualizado['nombre']) . '</strong>'],
             ['refresh', 'Antes había ' . e(cantidad($actualizado['antes'])) . '.'],

@@ -17,7 +17,7 @@ use App\Modules\Sectores\SectorService;
 defined('APP_ROOT') || exit;
 
 /**
- * «Registrar producto»: un formulario por etapas, en una ventana sobre el inicio (con el fondo difuminado), pensado para
+ * «Ingresar productos»: un formulario por etapas, en una ventana sobre el inicio (con el fondo difuminado), pensado para
  * hacerse casi entero con la pistola, una cosa por pantalla:
  * 1) El producto: se escanea (o se escribe y se elige en la lista que aparece al escribir).
  * 2) Cuántas llegaron: el número en grande. Escanear otra vez el mismo producto suma 1, así se cuenta pasando cada
@@ -30,10 +30,10 @@ final class GuardarController
 {
     /** Cada etapa es su propia ventana: etapa => [número, la pregunta que va de título]. */
     private const ETAPAS = [
-        'producto' => [1, '¿Qué producto llegó?'],
+        'producto' => [1, '¿Qué llegó?'],
         'cantidad' => [2, '¿Cuántas unidades llegaron?'],
         'sector' => [3, '¿Dónde quedó?'],
-        'desconocido' => [1, 'Ese código no está registrado'],
+        'desconocido' => [1, 'Este código no está en el sistema'],
         'envase' => [1, '¿De qué producto es este envase?'],
     ];
 
@@ -68,7 +68,9 @@ final class GuardarController
             'resultados' => $texto === '' ? [] : $this->insumos->buscar($texto, 'todos'),
             // Recién registrado: el aviso va arriba, y el campo queda listo para el siguiente producto.
             'registrado' => Session::getFlash('registrado'),
-            'puedeAdministrar' => Permission::can('insumos.administrar'),
+            'puedeCrear' => Permission::can('insumos.crear'),
+            // Las otras formas de ingresar productos, como accesos chicos bajo los botones.
+            'puedeAbastecer' => Permission::can('insumos.abastecimiento'),
         ]);
     }
 
@@ -110,6 +112,7 @@ final class GuardarController
 
         return $this->ventana('desconocido', [
             'codigo' => $codigo,
+            'puedeCrear' => Permission::can('insumos.crear'),
             'puedeAdministrar' => Permission::can('insumos.administrar'),
         ]);
     }
@@ -253,7 +256,7 @@ final class GuardarController
 
     /**
      * Cada etapa es su propia ventana sobre el inicio (que queda de fondo, difuminado): su pregunta de título y, debajo,
-     * en qué etapa va («Registrar producto · 2 de 3»). Al avanzar, ventana.js cambia una ventana por la otra.
+     * en qué etapa va («Ingresar productos · 2 de 3»). Al avanzar, ventana.js cambia una ventana por la otra.
      *
      * @param array<string, mixed> $datos los de la vista de la etapa (Insumos::guardar/{$etapa})
      */
@@ -263,7 +266,7 @@ final class GuardarController
 
         return Inicio::conVentana(
             'guardar-en-bodega',
-            "Registrar producto · {$numero} de 3",
+            "Ingresar productos · {$numero} de 3",
             View::render("Insumos::guardar/{$etapa}", $datos, null),
             scripts: ['js/modules/insumos.js'],
             titulo: $pregunta,

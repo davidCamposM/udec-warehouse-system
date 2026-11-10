@@ -18,7 +18,7 @@ final class NuevoProducto
 
     /**
      * Parte de nuevo, con lo que venga ya escrito: lo que se buscó sin encontrarlo o el código leído. Con $paraGuardar
-     * se llegó desde «Registrar producto»: «Atrás» vuelve ahí y, al terminar, se muestra lo registrado como allí.
+     * se llegó desde «Ingresar productos»: «Atrás» vuelve ahí y, al terminar, se muestra lo registrado como allí.
      * El stock mínimo no se pregunta: queda en 0 (sin aviso de «Por reponer»).
      */
     public static function empezar(string $nombre = '', string $codigoBarras = '', bool $paraGuardar = false): void

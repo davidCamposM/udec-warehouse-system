@@ -39,6 +39,19 @@ function asset(string $ruta): string
 }
 
 /**
+ * El código que se muestra de un producto: el código UdeC (el de abasto.udec.cl y las reservas de SAP) o, si no
+ * tiene, el código interno (INS00065). La etiqueta impresa sigue llevando el interno.
+ *
+ * @param array<string, mixed> $insumo con 'codigo' y, si lo tiene, 'codigo_udec'
+ */
+function codigo_producto(array $insumo): string
+{
+    $udec = $insumo['codigo_udec'] ?? null;
+
+    return $udec !== null && $udec !== '' ? (string) $udec : (string) $insumo['codigo'];
+}
+
+/**
  * Foto de un producto: public/assets/img/productos/{código UdeC}.jpg (sacadas de abasto.udec.cl) o, si no tiene código
  * UdeC, {código interno}.jpg (INS00065.jpg, fotos propias). Null si no hay foto.
  */

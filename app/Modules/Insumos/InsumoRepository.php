@@ -34,6 +34,12 @@ final class InsumoRepository
         i.categoria_id, c.nombre AS categoria, cp.nombre AS categoria_padre,
         i.sector_id, s.nombre AS sector, s.codigo AS sector_codigo';
 
+    /**
+     * Orden de las búsquedas: el código UdeC es el que se escribe de la reserva de SAP, así que el producto con ese código
+     * exacto va primero y después los que empiezan con lo escrito. Va con self::parametrosCodigoUdec().
+     */
+    private const PRIMERO_CODIGO_UDEC = '(i.codigo_udec = ?) DESC, (i.codigo_udec LIKE ?) DESC';
+
     private const DESDE = 'insumos i
         LEFT JOIN categorias c ON c.id = i.categoria_id
         LEFT JOIN categorias cp ON cp.id = c.padre_id
@@ -50,14 +56,15 @@ final class InsumoRepository
 
         return Database::fetchAll(
             'SELECT ' . self::COLUMNAS . ' FROM ' . self::DESDE
-            . ' WHERE ' . self::FILTROS[$filtro] . " AND {$condicion} ORDER BY i.nombre",
-            $parametros
+            . ' WHERE ' . self::FILTROS[$filtro] . " AND {$condicion} ORDER BY " . self::PRIMERO_CODIGO_UDEC . ', i.nombre',
+            [...$parametros, ...self::parametrosCodigoUdec($texto)]
         );
     }
 
     /**
-     * Los primeros productos activos que coinciden con el texto, para la lista bajo una barra de búsqueda: primero los
-     * que empiezan con la primera palabra escrita y después el resto, por nombre.
+     * Los primeros productos activos que coinciden con el texto, para la lista bajo una barra de búsqueda: primero el
+     * que tiene ese código UdeC y los que empiezan con él, después los que empiezan con la primera palabra escrita y
+     * después el resto, por nombre.
      *
      * @return list<array<string, mixed>>
      */
@@ -70,8 +77,8 @@ final class InsumoRepository
         return Database::fetchAll(
             'SELECT ' . self::COLUMNAS . ' FROM ' . self::DESDE
             . ' WHERE ' . self::FILTROS['todos'] . " AND {$condicion}"
-            . ' ORDER BY i.nombre LIKE ? DESC, i.nombre LIMIT ' . max(1, $limite),
-            $parametros
+            . ' ORDER BY ' . self::PRIMERO_CODIGO_UDEC . ', i.nombre LIKE ? DESC, i.nombre LIMIT ' . max(1, $limite),
+            [...array_slice($parametros, 0, -1), ...self::parametrosCodigoUdec($texto), ...array_slice($parametros, -1)]
         );
     }
 
@@ -324,6 +331,14 @@ final class InsumoRepository
     public function quitarCodigo(int $codigoId): void
     {
         Database::execute('UPDATE insumo_codigos SET activo = 0 WHERE id = ?', [$codigoId]);
+    }
+
+    /** @return array{0: string, 1: string} lo escrito, exacto y como comienzo, para self::PRIMERO_CODIGO_UDEC */
+    private static function parametrosCodigoUdec(string $texto): array
+    {
+        $exacto = trim($texto);
+
+        return [$exacto, addcslashes($exacto, '%_\\') . '%'];
     }
 
     /**

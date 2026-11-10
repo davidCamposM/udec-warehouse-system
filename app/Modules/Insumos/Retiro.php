@@ -9,7 +9,7 @@ use App\Core\Session;
 defined('APP_ROOT') || exit;
 
 /**
- * El producto que se está retirando y cuántas unidades, entre una etapa y otra de «Retirar producto». Vive en la
+ * El producto que se está retirando y cuántas unidades, entre una etapa y otra de «Retirar productos». Vive en la
  * sesión, así no se pierde si la persona recarga la página.
  */
 final class Retiro

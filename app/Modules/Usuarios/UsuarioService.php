@@ -26,6 +26,7 @@ final class UsuarioService
     private const NOMBRES_PERFIL = [
         'administrador' => 'Administrador',
         'administrativa' => 'Administrativa',
+        'operador' => 'Operador de bodega',
         'docente' => 'Docente',
     ];
 

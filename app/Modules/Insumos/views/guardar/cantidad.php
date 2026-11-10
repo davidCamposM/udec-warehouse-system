@@ -5,7 +5,7 @@ defined('APP_ROOT') || exit;
 // Etapa 2, su propia ventana («¿Cuántas unidades llegaron?»): el número en grande y al centro. Parte en 1 (la unidad
 // recién escaneada). Se cambia con − y +, con +5 / +10, escribiendo el número o escaneando otra vez el mismo producto,
 // que suma 1. Enter pasa a «Dónde quedó». Arriba, el producto elegido, con «Cambiar».
-$detalle = $insumo['codigo'] . ' · Hay ' . unidades($insumo['stock_actual']) . ' en bodega'
+$detalle = codigo_producto($insumo) . ' · Hay ' . unidades($insumo['stock_actual']) . ' en bodega'
     . ($insumo['sector'] !== null ? ' · ' . $insumo['sector'] : '');
 ?>
 
@@ -27,7 +27,7 @@ $detalle = $insumo['codigo'] . ' · Hay ' . unidades($insumo['stock_actual']) . 
             <div class="cantidad-foco__fila">
                 <button class="cantidad-foco__boton" type="button" data-step="-1"><?= icon('minus') ?><span class="visually-hidden">Restar uno</span></button>
                 <input class="cantidad-foco__numero" id="cantidad" name="cantidad" type="text" inputmode="numeric" autocomplete="off"
-                    autofocus aria-required="true" aria-describedby="cantidad-ayuda"
+                    autofocus aria-required="true"
                     value="<?= e(old('cantidad', (string) $cantidad)) ?>" <?= aria_error('cantidad') ?>>
                 <button class="cantidad-foco__boton" type="button" data-step="1"><?= icon('plus') ?><span class="visually-hidden">Sumar uno</span></button>
             </div>
@@ -43,9 +43,6 @@ $detalle = $insumo['codigo'] . ' · Hay ' . unidades($insumo['stock_actual']) . 
             <p class="cantidad-foco__sumada" role="status"><?= icon('check') ?>Se sumó 1 al escanear</p>
         <?php endif; ?>
         <?= mensaje_error('cantidad') ?>
-        <p class="cantidad-foco__ayuda" id="cantidad-ayuda">
-            <?= icon('scan') ?>¿Llegaron varias? Escanea cada una y se suman solas. Enter para seguir.
-        </p>
     </div>
 
     <div class="formulario__acciones">

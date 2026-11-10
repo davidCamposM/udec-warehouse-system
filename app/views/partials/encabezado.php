@@ -14,6 +14,8 @@ defined('APP_ROOT') || exit;
  *             'rojo', para las confirmaciones de algo delicado.
  * - $titulo:  qué se hace en esta pantalla. $texto (opcional): la instrucción.
  * - $acciones (opcional): HTML de botones que van bajo el título.
+ * - $lateral (opcional): HTML chico que va arriba a la derecha, en la línea de «Volver» (como las descargas de
+ *   «Entradas y salidas»).
  */
 if (isset($tarea)) {
     $datosTarea = Tareas::tarea($tarea);
@@ -22,7 +24,14 @@ if (isset($tarea)) {
 }
 ?>
 <header class="encabezado tono-<?= e($color) ?>">
-    <a class="back-link" href="<?= e($volver[0]) ?>"><?= icon('arrow-left') ?><?= e($volver[1]) ?></a>
+    <?php if (($lateral ?? '') !== '') : ?>
+        <div class="encabezado__arriba">
+            <a class="back-link" href="<?= e($volver[0]) ?>"><?= icon('arrow-left') ?><?= e($volver[1]) ?></a>
+            <div class="encabezado__lateral"><?= $lateral ?></div>
+        </div>
+    <?php else : ?>
+        <a class="back-link" href="<?= e($volver[0]) ?>"><?= icon('arrow-left') ?><?= e($volver[1]) ?></a>
+    <?php endif; ?>
     <div class="encabezado__fila">
         <span class="encabezado__icono"><?= icon($icono) ?></span>
         <div class="encabezado__textos">

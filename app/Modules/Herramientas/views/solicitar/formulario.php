@@ -5,11 +5,8 @@ use App\Support\Fecha;
 
 defined('APP_ROOT') || exit;
 
-// «Solicitar herramientas», en una ventana ancha: el formulario en papel «Solicitud de instrumentos y herramientas»,
-// en el mismo orden, con la forma sobria y compacta de un formulario de Bootstrap (form-bs, en herramientas.css):
-// la etiqueta arriba de cada campo, campos de altura normal y filas de dos o tres columnas.
-// - Los datos: departamento (dos opciones) y funcionario (el de la cuenta: no se escribe ni se firma); tipo de
-//   actividad y quién retira; las dos fechas.
+// «Solicitar herramientas»: datos esenciales en dos filas y catálogo acotado dentro de la ventana.
+// - Los datos: departamento, funcionario de la cuenta, actividad, fechas y quién retira.
 // - Los detalles: el buscador, las categorías y una línea por herramienta con sus unidades (− y +), varias por fila.
 //   La elegida se marca y abajo se ve el total que se lleva (herramientas.js). Las que quedan en 0 no se piden. Junto
 //   al nombre, cuántas hay en bodega hoy; el + llega hasta las que tiene la bodega (pueden volver antes del retiro).
@@ -22,10 +19,13 @@ $invalido = static fn (string $campo): string => error_de($campo) !== null ? ' i
     <?= csrf_field() ?>
 
     <div class="hoja hoja--formulario">
-        <?= partial('Herramientas::partials/membrete') ?>
+        <p class="pedir__solicitante">
+            <span>Nombre del funcionario</span>
+            <strong><?= e($nombre) ?></strong>
+        </p>
 
-        <div class="form-row">
-            <fieldset class="form-group col-md-6">
+        <div class="pedir__datos">
+            <fieldset class="form-group pedir__departamento">
                 <legend class="form-label">Departamento <span class="form-requerido" aria-hidden="true">*</span></legend>
                 <div class="form-checks">
                     <?php foreach (SolicitudService::DEPARTAMENTOS as $clave => $texto) : ?>
@@ -39,15 +39,7 @@ $invalido = static fn (string $campo): string => error_de($campo) !== null ? ' i
                 <?= mensaje_error('departamento') ?>
             </fieldset>
 
-            <div class="form-group col-md-6">
-                <label class="form-label" for="funcionario">Nombre del funcionario</label>
-                <input class="form-control" id="funcionario" type="text" value="<?= e($nombre) ?>" readonly aria-describedby="funcionario-ayuda">
-                <small class="form-text" id="funcionario-ayuda">Va con tu cuenta: no necesitas firmar.</small>
-            </div>
-        </div>
-
-        <div class="form-row">
-            <div class="form-group col-md-6">
+            <div class="form-group pedir__actividad">
                 <label class="form-label" for="tipo_actividad">Tipo de actividad <span class="form-requerido" aria-hidden="true">*</span></label>
                 <input class="form-control<?= $invalido('tipo_actividad') ?>" id="tipo_actividad" name="tipo_actividad" type="text"
                     maxlength="255" autofocus aria-required="true" placeholder="Ejemplo: Terreno de ecología en la cantera"
@@ -55,7 +47,22 @@ $invalido = static fn (string $campo): string => error_de($campo) !== null ? ' i
                 <?= mensaje_error('tipo_actividad') ?>
             </div>
 
-            <div class="form-group col-md-6">
+            <div class="form-group pedir__retiro">
+                <label class="form-label" for="fecha_retiro">Fecha de retiro <span class="form-requerido" aria-hidden="true">*</span></label>
+                <input class="form-control<?= $invalido('fecha_retiro') ?>" id="fecha_retiro" name="fecha_retiro" type="date"
+                    min="<?= e($hoy) ?>" aria-required="true" value="<?= e(old('fecha_retiro')) ?>" <?= aria_error('fecha_retiro') ?>>
+                <?= mensaje_error('fecha_retiro') ?>
+            </div>
+
+            <div class="form-group pedir__recepcion">
+                <label class="form-label" for="fecha_devolucion">Fecha de recepción <span class="form-requerido" aria-hidden="true">*</span></label>
+                <input class="form-control<?= $invalido('fecha_devolucion') ?>" id="fecha_devolucion" name="fecha_devolucion" type="date"
+                    min="<?= e($hoy) ?>" aria-required="true" title="El día en que vuelven a la bodega"
+                    value="<?= e(old('fecha_devolucion')) ?>" <?= aria_error('fecha_devolucion') ?>>
+                <?= mensaje_error('fecha_devolucion') ?>
+            </div>
+
+            <div class="form-group pedir__autoriza">
                 <label class="form-label" for="autoriza_retiro">Autoriza el retiro a <span class="form-opcional">(opcional)</span></label>
                 <input class="form-control<?= $invalido('autoriza_retiro') ?>" id="autoriza_retiro" name="autoriza_retiro" type="text"
                     maxlength="150" placeholder="Quien las retira, si no eres tú" value="<?= e(old('autoriza_retiro')) ?>"
@@ -64,26 +71,9 @@ $invalido = static fn (string $campo): string => error_de($campo) !== null ? ' i
             </div>
         </div>
 
-        <div class="form-row">
-            <div class="form-group col-md-6">
-                <label class="form-label" for="fecha_retiro">Fecha de retiro <span class="form-requerido" aria-hidden="true">*</span></label>
-                <input class="form-control<?= $invalido('fecha_retiro') ?>" id="fecha_retiro" name="fecha_retiro" type="date"
-                    min="<?= e($hoy) ?>" aria-required="true" value="<?= e(old('fecha_retiro')) ?>" <?= aria_error('fecha_retiro') ?>>
-                <?= mensaje_error('fecha_retiro') ?>
-            </div>
-
-            <div class="form-group col-md-6">
-                <label class="form-label" for="fecha_devolucion">Fecha de recepción <span class="form-requerido" aria-hidden="true">*</span></label>
-                <input class="form-control<?= $invalido('fecha_devolucion') ?>" id="fecha_devolucion" name="fecha_devolucion" type="date"
-                    min="<?= e($hoy) ?>" aria-required="true" title="El día en que vuelven a la bodega"
-                    value="<?= e(old('fecha_devolucion')) ?>" <?= aria_error('fecha_devolucion') ?>>
-                <?= mensaje_error('fecha_devolucion') ?>
-            </div>
-        </div>
-
         <fieldset class="pedir__detalles">
             <legend class="pedir__titulo">
-                Detalles <span class="pedir__instruccion">Con − y + elige cuántas unidades de cada una. Las que quedan en 0 no se piden.</span>
+                Herramientas
             </legend>
             <?= mensaje_error('detalle') ?>
 
@@ -119,11 +109,6 @@ $invalido = static fn (string $campo): string => error_de($campo) !== null ? ' i
                     </section>
                 <?php endforeach; ?>
             </div>
-
-            <p class="pedir__pie">
-                <span class="pedir__total" data-total aria-live="polite">Todavía no eliges herramientas.</span>
-                <span class="form-text">El estado en la recepción lo anota la bodega cuando vuelven.</span>
-            </p>
         </fieldset>
     </div>
 

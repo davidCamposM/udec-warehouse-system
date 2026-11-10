@@ -19,13 +19,13 @@ defined('APP_ROOT') || exit;
 
 /**
  * «Agregar nuevo producto»: un formulario por etapas, en una ventana sobre el inicio (con el fondo difuminado), pensado
- * para la pistola como «Registrar producto»:
+ * para la pistola como «Ingresar productos»:
  * 1) El producto: se escanea su código de barras (Enter pasa al nombre) y se escribe el nombre; el código UdeC va
  *    plegado, porque casi nunca se tiene a mano. 2) El tipo: tocar uno avanza solo. 3) Cuántas llegaron: el número en
  *    grande; escanear otra vez el producto suma 1. 4) Dónde quedaron: se escanea la etiqueta de la repisa y se agrega
  *    (crea el producto y registra esas unidades, todo junto).
  * Cada etapa revisa lo suyo antes de seguir. Al agregar se vuelve a la etapa 1 con el aviso de lo agregado, lista para
- * el siguiente; si se llegó desde «Registrar producto», se vuelve allí con lo registrado.
+ * el siguiente; si se llegó desde «Ingresar productos», se vuelve allí con lo registrado.
  */
 final class NuevoProductoController
 {
@@ -48,7 +48,7 @@ final class NuevoProductoController
         $this->sectores = new SectorService();
     }
 
-    /** Empieza de nuevo. Con ?nombre= o ?codigo= parte con eso escrito; con ?para=guardar, desde «Registrar producto». */
+    /** Empieza de nuevo. Con ?nombre= o ?codigo= parte con eso escrito; con ?para=guardar, desde «Ingresar productos». */
     public function empezar(Request $request): Response
     {
         $nombre = $request->query('nombre');
@@ -187,7 +187,10 @@ final class NuevoProductoController
         ]);
     }
 
-    /** «Agregar producto»: con el sector elegido o escaneado, crea el producto y registra las unidades que llegaron. */
+    /**
+     * «Agregar producto»: con el sector elegido o escaneado, crea el producto y registra las unidades que llegaron. Con
+     * «Sin ubicación por ahora» (las repisas aún sin etiqueta), lo agrega sin sector.
+     */
     public function agregar(Request $request): Response
     {
         $nuevo = NuevoProducto::actual();
@@ -195,13 +198,13 @@ final class NuevoProductoController
             return $this->volverA($nuevo);
         }
 
-        $sector = $this->sectorElegido($request);
-        NuevoProducto::completar(['sector_id' => (string) $sector['id']], 4);
+        $sector = $request->input('sin_sector') === '1' ? null : $this->sectorElegido($request);
+        NuevoProducto::completar(['sector_id' => (string) ($sector['id'] ?? '')], 4);
 
         try {
             [$creado, $registrado] = Database::transaction(function () use ($nuevo, $sector): array {
                 $creado = $this->insumos->crear($nuevo);
-                $registrado = (new StockService())->guardarEnBodega($creado['id'], (int) $nuevo['cantidad'], (int) $sector['id']);
+                $registrado = (new StockService())->guardarEnBodega($creado['id'], (int) $nuevo['cantidad'], $sector !== null ? (int) $sector['id'] : null);
 
                 return [$creado, $registrado];
             });

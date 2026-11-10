@@ -15,7 +15,7 @@ use App\Modules\Panel\Inicio;
 defined('APP_ROOT') || exit;
 
 /**
- * «Actualizar cantidad»: dos ventanas sobre el inicio (con el fondo difuminado), cada etapa la suya.
+ * «Corregir stock»: dos ventanas sobre el inicio (con el fondo difuminado), cada etapa la suya.
  * 1) El producto: se escanea, o se escribe y se elige (los que coinciden aparecen al escribir). 2) Lo que hay: cuántas
  *    hay realmente y por qué cambia; «Actualizar» deja la cantidad nueva al tiro, sin otra confirmación.
  * Al terminar se vuelve a la etapa 1 con la boleta de lo actualizado (antes, ahora, motivo y stock), lista para el
@@ -25,7 +25,7 @@ final class AjusteController
 {
     /** Cada etapa es su propia ventana: etapa => [número, la pregunta que va de título]. */
     private const ETAPAS = [
-        'producto' => [1, '¿Qué producto vas a actualizar?'],
+        'producto' => [1, '¿Qué producto vas a corregir?'],
         'contar' => [2, '¿Cuántas hay realmente?'],
     ];
 
@@ -72,7 +72,7 @@ final class AjusteController
             'producto' => $this->empezarCon($lectura['id']),
             'nombre' => $this->elegirPorNombre($lectura['texto']),
             'desconocido' => throw new ValidationException(['codigo' => 'Ese código no está registrado. Si es un producto nuevo, '
-                . 'agrégalo con «Agregar nuevo producto» y después regístralo con «Registrar producto».']),
+                . 'agrégalo con «Agregar nuevo producto» y después regístralo con «Ingresar productos».']),
         };
     }
 
@@ -148,7 +148,7 @@ final class AjusteController
 
     /**
      * Cada etapa es su propia ventana sobre el inicio (que queda de fondo, difuminado): su pregunta de título y, debajo,
-     * en qué etapa va («Actualizar cantidad · 2 de 2»). Al avanzar, ventana.js cambia una ventana por la otra.
+     * en qué etapa va («Corregir stock · 2 de 2»). Al avanzar, ventana.js cambia una ventana por la otra.
      *
      * @param array<string, mixed> $datos los de la vista de la etapa (Insumos::ajustar/{$etapa})
      */
@@ -158,7 +158,7 @@ final class AjusteController
 
         return Inicio::conVentana(
             'ajustar-cantidad',
-            "Actualizar cantidad · {$numero} de 2",
+            "Corregir stock · {$numero} de 2",
             View::render("Insumos::ajustar/{$etapa}", $datos, null),
             scripts: ['js/modules/insumos.js'],
             titulo: $pregunta,

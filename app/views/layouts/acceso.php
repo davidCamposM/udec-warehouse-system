@@ -1,8 +1,9 @@
 <?php defined('APP_ROOT') || exit; ?>
 <!DOCTYPE html>
-<html lang="es">
+<?php // El ingreso va en el modelo nuevo de la interfaz (azul marino, base/tema-azul.css). ?>
+<html lang="es" class="tema-azul">
 <head>
-    <?= partial('head', ['titulo' => $titulo ?? null, 'estilos' => ['css/layout/auth.css']]) ?>
+    <?= partial('head', ['titulo' => $titulo ?? null, 'estilos' => ['css/layout/auth.css'], 'temaColor' => '#223c6a']) ?>
     <script src="<?= e(asset('js/core/ui.js')) ?>" defer></script>
 </head>
 <body class="auth">

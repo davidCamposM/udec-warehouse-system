@@ -1,8 +1,7 @@
 <?php
 
 /**
- * Rutas del módulo Difusión: los pedidos a proveedores fuera de abasto (las administrativas). Pendiente: por ahora
- * solo la pantalla que avisa que está en preparación.
+ * Ruta del catálogo de Difusión: artículos y servicios con cantidad aún no verificada.
  *
  * @var App\Core\Router $router
  */

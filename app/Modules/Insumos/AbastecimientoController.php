@@ -15,22 +15,14 @@ use App\Modules\Panel\Inicio;
 defined('APP_ROOT') || exit;
 
 /**
- * «Ingresar abastecimiento» (las administrativas): lo que llega a la bodega con una reserva de SAP. Un formulario por
- * etapas en una ventana sobre el inicio, como «Registrar producto»:
- * 1) El número de reserva («Se creó la Reserva 0000018857»; sirve sin los ceros).
- * 2) Lo que llegó: se escribe el código del material de la reserva (es el código UdeC del producto: 4105031), o su
- *    nombre, con su cantidad al lado, y «Agregar» (o Enter, o la pistola) lo suma a la lista de abajo. En la lista se
- *    cambia la cantidad de cada uno o se quita. «Ingresar a la bodega» suma todo de una vez.
- * Al ingresar se vuelve a la etapa 1 con la boleta, lista para la siguiente reserva.
+ * «Ingresar abastecimiento» (las administrativas): lo que va llegando a la bodega, en una sola ventana sobre el inicio.
+ * Se escribe o escanea cada producto (su código SAP, que es el código UdeC: 4105031; su código de barras; o su nombre),
+ * con su cantidad al lado, y «Agregar» (o Enter, o la pistola) lo suma a la lista de abajo. En la lista se cambia la
+ * cantidad de cada uno o se quita. «Ingresar a la bodega» suma todo de una vez y deja la boleta arriba, con la lista
+ * vacía para lo siguiente que llegue.
  */
 final class AbastecimientoController
 {
-    /** Cada etapa es su propia ventana: etapa => [número, la pregunta que va de título]. */
-    private const ETAPAS = [
-        'reserva' => [1, '¿Cuál es el número de reserva?'],
-        'productos' => [2, '¿Qué llegó?'],
-    ];
-
     private InsumoService $insumos;
 
     public function __construct()
@@ -38,80 +30,55 @@ final class AbastecimientoController
         $this->insumos = new InsumoService();
     }
 
-    // ---------- Etapa 1: la reserva ----------
-
-    /** Con ?producto= (elegido en la lista que aparece al escribir, en la etapa 2) lo agrega a la lista, con 1. */
-    public function reserva(Request $request): Response
+    /**
+     * Con ?producto= (elegido en la lista que aparece al escribir) lo agrega a la lista, con 1. Con ?q= (un nombre que
+     * coincide con varios productos) muestra los que coinciden.
+     */
+    public function index(Request $request): Response
     {
         $producto = $request->query('producto');
-        if (is_string($producto) && ctype_digit($producto) && Abastecimiento::actual() !== null) {
+        if (is_string($producto) && ctype_digit($producto)) {
             return $this->agregar((int) $producto, 1);
-        }
-
-        $actual = Abastecimiento::actual();
-
-        return $this->ventana('reserva', [
-            'reserva' => $actual['reserva'] ?? '',
-            // Recién ingresada: la boleta arriba, y el campo listo para la siguiente reserva.
-            'ingresada' => Session::getFlash('ingresada'),
-        ]);
-    }
-
-    public function leerReserva(Request $request): Response
-    {
-        Abastecimiento::empezar(StockService::numeroReserva($request->input('reserva')));
-
-        return Response::redirect(Url::to('abastecimiento/productos'));
-    }
-
-    // ---------- Etapa 2: lo que llegó ----------
-
-    /** Con ?q= (un nombre que coincide con varios productos, o con ninguno) muestra los que coinciden. */
-    public function productos(Request $request): Response
-    {
-        $actual = Abastecimiento::actual();
-        if ($actual === null) {
-            return $this->sinReserva();
         }
 
         $texto = trim((string) $request->query('q', ''));
         $lista = [];
-        foreach ($actual['productos'] as $id => $cantidad) {
+        foreach (Abastecimiento::productos() as $id => $cantidad) {
             $insumo = $this->insumos->buscarPorId((int) $id);
             if ($insumo !== null) {
                 $lista[] = ['insumo' => $insumo, 'cantidad' => $cantidad];
             }
         }
 
-        return $this->ventana('productos', [
-            'reserva' => $actual['reserva'],
-            'anterior' => (new StockService())->reservaIngresada($actual['reserva']),
-            'lista' => $lista,
-            'texto' => $texto,
-            'resultados' => $texto === '' ? [] : $this->insumos->buscar($texto, 'todos'),
-            'agregado' => Session::getFlash('agregado'),
-        ]);
+        return Inicio::conVentana(
+            'ingresar-abastecimiento',
+            'Ingresar productos',
+            View::render('Insumos::abastecimiento/productos', [
+                'lista' => $lista,
+                'texto' => $texto,
+                'resultados' => $texto === '' ? [] : $this->insumos->buscar($texto, 'todos'),
+                'agregado' => Session::getFlash('agregado'),
+                'ingresado' => Session::getFlash('ingresado'),
+            ], null),
+            scripts: ['js/modules/insumos.js'],
+            titulo: '¿Qué llegó?',
+        );
     }
 
     /**
-     * El formulario de la etapa 2, que lleva todo: primero se guardan las cantidades de la lista (como estén escritas) y
-     * después se hace lo que se tocó: «Agregar» (o Enter) suma el producto escrito, la ✕ quita uno de la lista e
-     * «Ingresar a la bodega» suma todo al stock y vuelve a la etapa 1 con la boleta.
+     * El formulario, que lleva todo: primero se guardan las cantidades de la lista (como estén escritas) y después se
+     * hace lo que se tocó: «Agregar» (o Enter) suma el producto escrito, la ✕ quita uno de la lista e «Ingresar a la
+     * bodega» suma todo al stock.
      */
-    public function leerProducto(Request $request): Response
+    public function leer(Request $request): Response
     {
-        $actual = Abastecimiento::actual();
-        if ($actual === null) {
-            return $this->sinReserva();
-        }
-
-        $this->guardarCantidades($request->input('cantidades'), $actual['productos']);
+        $this->guardarCantidades($request->input('cantidades'), Abastecimiento::productos());
 
         $quitar = $request->input('quitar');
         if (is_string($quitar) && ctype_digit($quitar)) {
             Abastecimiento::cantidad((int) $quitar, 0);
 
-            return Response::redirect(Url::to('abastecimiento/productos'));
+            return Response::redirect(Url::to('abastecimiento'));
         }
 
         if ($request->input('accion') === 'ingresar') {
@@ -126,8 +93,8 @@ final class AbastecimientoController
             return $this->agregar((int) $elegido, $cantidad);
         }
         $codigo = $request->input('codigo');
-        if ((!is_string($codigo) || trim($codigo) === '') && (Abastecimiento::actual()['productos'] ?? []) !== []) {
-            return Response::redirect(Url::to('abastecimiento/productos'));
+        if ((!is_string($codigo) || trim($codigo) === '') && Abastecimiento::productos() !== []) {
+            return Response::redirect(Url::to('abastecimiento'));
         }
 
         $lectura = (new LectorDeProducto($this->insumos))->leer($codigo);
@@ -136,23 +103,23 @@ final class AbastecimientoController
             'producto' => $this->agregar($lectura['id'], $cantidad),
             'nombre' => $this->agregarPorNombre($lectura['texto'], $cantidad),
             'desconocido' => throw new ValidationException(['codigo' => "El código {$lectura['codigo']} no está en el sistema. "
-                . 'Revisa que sea el del material, o pide al encargado de bodega que agregue el producto.']),
+                . 'Revisa que esté bien escrito, o pide al encargado de bodega que agregue el producto.']),
         };
     }
 
     // ---------- Apoyo ----------
 
-    /** «Ingresar a la bodega»: suma todo lo de la lista con el número de reserva, y vuelve a la etapa 1 con la boleta. */
+    /** «Ingresar a la bodega»: suma todo lo de la lista y vuelve con la boleta y la lista vacía. */
     private function ingresar(): Response
     {
-        $actual = Abastecimiento::actual();
-        if ($actual === null || $actual['productos'] === []) {
+        $productos = Abastecimiento::productos();
+        if ($productos === []) {
             throw new ValidationException(['codigo' => 'Agrega al menos un producto de los que llegaron.']);
         }
 
-        $ingresados = (new StockService())->ingresarReserva($actual['reserva'], $actual['productos']);
+        $ingresados = (new StockService())->ingresarAbastecimiento($productos);
         Abastecimiento::terminar();
-        Session::flash('ingresada', ['reserva' => $actual['reserva'], 'productos' => $ingresados]);
+        Session::flash('ingresado', $ingresados);
 
         return Response::redirect(Url::to('abastecimiento'));
     }
@@ -194,7 +161,7 @@ final class AbastecimientoController
         Abastecimiento::sumar($insumoId, $cantidad);
         Session::flash('agregado', $insumo['nombre']);
 
-        return Response::redirect(Url::to('abastecimiento/productos'));
+        return Response::redirect(Url::to('abastecimiento'));
     }
 
     private function agregarPorNombre(string $texto, int $cantidad): Response
@@ -203,7 +170,7 @@ final class AbastecimientoController
 
         return count($coinciden) === 1
             ? $this->agregar((int) $coinciden[0]['id'], $cantidad)
-            : Response::redirect(Url::to('abastecimiento/productos', ['q' => $texto]));
+            : Response::redirect(Url::to('abastecimiento', ['q' => $texto]));
     }
 
     /**
@@ -223,26 +190,5 @@ final class AbastecimientoController
         }
 
         return $cantidad;
-    }
-
-    /** @param array<string, mixed> $datos los de la vista de la etapa (Insumos::abastecimiento/{$etapa}) */
-    private function ventana(string $etapa, array $datos): Response
-    {
-        [$numero, $pregunta] = self::ETAPAS[$etapa];
-
-        return Inicio::conVentana(
-            'ingresar-abastecimiento',
-            "Ingresar abastecimiento · {$numero} de 2",
-            View::render("Insumos::abastecimiento/{$etapa}", $datos, null),
-            scripts: ['js/modules/insumos.js'],
-            titulo: $pregunta,
-        );
-    }
-
-    private function sinReserva(): Response
-    {
-        Session::flash('aviso', 'Empieza escribiendo el número de reserva.');
-
-        return Response::redirect(Url::to('abastecimiento'));
     }
 }

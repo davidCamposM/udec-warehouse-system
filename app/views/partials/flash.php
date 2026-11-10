@@ -20,3 +20,13 @@ $tipos = [
         </div>
     <?php endif; ?>
 <?php endforeach; ?>
+
+<?php // Resumen de validación: los mensajes concretos permanecen junto a cada campo. ?>
+<?php if (errores() !== []) : ?>
+    <div class="alert alert--danger flash flash--errors" role="alert">
+        <?= icon('alert') ?>
+        <p><strong>Revisa los campos marcados.</strong> <?= count(errores()) === 1
+            ? 'Hay un dato por corregir antes de continuar.'
+            : 'Hay ' . e(count(errores())) . ' datos por corregir antes de continuar.' ?></p>
+    </div>
+<?php endif; ?>

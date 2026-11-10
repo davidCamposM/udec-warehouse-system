@@ -2,11 +2,11 @@
 
 defined('APP_ROOT') || exit;
 
-// Etapa 2, su propia ventana («¿Cuántas hay realmente?»): el producto elegido (con «Cambiar»), el número contado en
-// grande y al centro, y por qué cambia (los motivos en columnas, para que todo quepa sin bajar). «Actualizar» deja la
-// cantidad nueva al tiro y vuelve a la etapa 1 con la boleta.
+// Etapa 2, su propia ventana («¿Cuántas hay realmente?»), compacta: el producto elegido (con «Cambiar»), lo que dice
+// el sistema, el número contado en grande y el motivo (pastillas chicas). «Corregir» deja la cantidad nueva al tiro y
+// vuelve a la etapa 1 con la boleta.
 $elegido = old('motivo', $motivo);
-$detalleProducto = $insumo['codigo'] . ($insumo['sector'] !== null ? ' · ' . $insumo['sector'] : '');
+$detalleProducto = codigo_producto($insumo) . ($insumo['sector'] !== null ? ' · ' . $insumo['sector'] : '');
 ?>
 
 <form class="formulario" method="post" action="<?= e(url('ajustar/contar')) ?>" data-submit-once>
@@ -27,14 +27,12 @@ $detalleProducto = $insumo['codigo'] . ($insumo['sector'] !== null ? ' · ' . $i
         'valor' => $insumo['nombre'],
         'detalle' => $detalleProducto,
         'cambiar' => url('ajustar'),
+        'compacto' => true,
     ]) ?>
 
     <div class="cantidad-foco<?= error_de('contado') !== null ? ' has-error' : '' ?>">
         <label class="visually-hidden" for="contado">¿Cuántas hay realmente?</label>
-        <p class="cantidad-foco__sistema" id="contado-ayuda">
-            El sistema dice <strong><?= e(unidades($insumo['stock_actual'])) ?></strong>. Cuéntalas y escribe el total que hay
-            (0 si no queda ninguna).
-        </p>
+        <p class="cantidad-foco__sistema" id="contado-ayuda">El sistema dice <strong><?= e(unidades($insumo['stock_actual'])) ?></strong>.</p>
         <div class="cantidad-foco__control" data-stepper data-min="0">
             <div class="cantidad-foco__fila">
                 <button class="cantidad-foco__boton" type="button" data-step="-1"><?= icon('minus') ?><span class="visually-hidden">Restar uno</span></button>
@@ -49,13 +47,13 @@ $detalleProducto = $insumo['codigo'] . ($insumo['sector'] !== null ? ' · ' . $i
     </div>
 
     <fieldset class="campo<?= error_de('motivo') !== null ? ' has-error' : '' ?>">
-        <legend class="campo__etiqueta">¿Por qué cambia?<span class="campo__obligatorio" aria-hidden="true">*</span></legend>
-        <div class="options options--motivos">
+        <legend class="campo__etiqueta">Motivo<span class="campo__obligatorio" aria-hidden="true">*</span></legend>
+        <div class="pastillas__lista">
             <?php foreach ($motivos as $clave => $texto) : ?>
-                <label class="option">
-                    <input class="option__input" type="radio" name="motivo" value="<?= e($clave) ?>"
+                <label class="pastilla">
+                    <input class="pastilla__input" type="radio" name="motivo" value="<?= e($clave) ?>"
                         <?= $clave === $elegido ? 'checked' : '' ?>>
-                    <span class="option__box"><?= e($texto) ?></span>
+                    <span class="pastilla__texto"><?= e($texto) ?></span>
                 </label>
             <?php endforeach; ?>
         </div>
@@ -64,6 +62,6 @@ $detalleProducto = $insumo['codigo'] . ($insumo['sector'] !== null ? ' · ' . $i
 
     <div class="formulario__acciones">
         <a class="btn btn--secondary" href="<?= e(url('ajustar')) ?>"><?= icon('arrow-left') ?>Atrás</a>
-        <button class="btn btn--si" type="submit" data-loading-text="Actualizando…"><?= icon('ok') ?>Actualizar</button>
+        <button class="btn btn--si" type="submit" data-loading-text="Corrigiendo…"><?= icon('ok') ?>Corregir</button>
     </div>
 </form>

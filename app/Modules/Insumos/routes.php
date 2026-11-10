@@ -22,26 +22,27 @@ $router->get('/insumos', [InsumoController::class, 'index'], 'insumos.ver');
 // La lista que aparece bajo una barra de búsqueda mientras se escribe.
 $router->get('/insumos/sugerencias', [InsumoController::class, 'sugerencias'], 'insumos.ver');
 
-// Ingresar abastecimiento (administrativas): 1) la reserva, 2) lo que llegó (la lista, con la cantidad de cada uno).
-$router->get('/abastecimiento', [AbastecimientoController::class, 'reserva'], 'insumos.abastecimiento');
-$router->post('/abastecimiento', [AbastecimientoController::class, 'leerReserva'], 'insumos.abastecimiento');
-$router->get('/abastecimiento/productos', [AbastecimientoController::class, 'productos'], 'insumos.abastecimiento');
-$router->post('/abastecimiento/productos', [AbastecimientoController::class, 'leerProducto'], 'insumos.abastecimiento');
+// Ingresar abastecimiento (administrativas): lo que llegó, en una lista con la cantidad de cada uno.
+$router->get('/abastecimiento', [AbastecimientoController::class, 'index'], 'insumos.abastecimiento');
+$router->post('/abastecimiento', [AbastecimientoController::class, 'leer'], 'insumos.abastecimiento');
 
-// Agregar nuevo producto: 1) el producto, 2) el tipo, 3) cuántos llegaron, 4) dónde quedó.
-$router->get('/insumos/nuevo', [NuevoProductoController::class, 'empezar'], 'insumos.administrar');
-$router->get('/insumos/nuevo/producto', [NuevoProductoController::class, 'producto'], 'insumos.administrar');
-$router->post('/insumos/nuevo/producto', [NuevoProductoController::class, 'leerProducto'], 'insumos.administrar');
-$router->get('/insumos/nuevo/tipo', [NuevoProductoController::class, 'tipo'], 'insumos.administrar');
-$router->post('/insumos/nuevo/tipo', [NuevoProductoController::class, 'leerTipo'], 'insumos.administrar');
-$router->get('/insumos/nuevo/cantidad', [NuevoProductoController::class, 'cantidad'], 'insumos.administrar');
-$router->post('/insumos/nuevo/cantidad', [NuevoProductoController::class, 'leerCantidad'], 'insumos.administrar');
-$router->get('/insumos/nuevo/sector', [NuevoProductoController::class, 'sector'], 'insumos.administrar');
-$router->post('/insumos/nuevo/sector', [NuevoProductoController::class, 'agregar'], 'insumos.administrar');
+// Agregar nuevo producto (insumos.crear: el operador y el encargado): 1) el producto, 2) el tipo, 3) cuántos llegaron,
+// 4) dónde quedó.
+$router->get('/insumos/nuevo', [NuevoProductoController::class, 'empezar'], 'insumos.crear');
+$router->get('/insumos/nuevo/producto', [NuevoProductoController::class, 'producto'], 'insumos.crear');
+$router->post('/insumos/nuevo/producto', [NuevoProductoController::class, 'leerProducto'], 'insumos.crear');
+$router->get('/insumos/nuevo/tipo', [NuevoProductoController::class, 'tipo'], 'insumos.crear');
+$router->post('/insumos/nuevo/tipo', [NuevoProductoController::class, 'leerTipo'], 'insumos.crear');
+$router->get('/insumos/nuevo/cantidad', [NuevoProductoController::class, 'cantidad'], 'insumos.crear');
+$router->post('/insumos/nuevo/cantidad', [NuevoProductoController::class, 'leerCantidad'], 'insumos.crear');
+$router->get('/insumos/nuevo/sector', [NuevoProductoController::class, 'sector'], 'insumos.crear');
+$router->post('/insumos/nuevo/sector', [NuevoProductoController::class, 'agregar'], 'insumos.crear');
 
 $router->get('/insumos/{id}', [InsumoController::class, 'show'], 'insumos.ver');
 $router->get('/insumos/{id}/editar', [InsumoController::class, 'edit'], 'insumos.administrar');
 $router->post('/insumos/{id}', [InsumoController::class, 'update'], 'insumos.administrar');
+// Etiqueta para pegar en el envase o la repisa, cuando la pistola no lee el código de fábrica (bolsas arrugadas).
+$router->get('/insumos/{id}/etiqueta', [InsumoController::class, 'etiqueta'], 'insumos.crear');
 $router->get('/insumos/{id}/eliminar', [InsumoController::class, 'confirmDelete'], 'insumos.administrar');
 $router->post('/insumos/{id}/eliminar', [InsumoController::class, 'delete'], 'insumos.administrar');
 
@@ -50,7 +51,7 @@ $router->post('/insumos/{id}/codigos', [InsumoController::class, 'storeCode'], '
 $router->get('/insumos/{id}/codigos/{codigo}/quitar', [InsumoController::class, 'confirmRemoveCode'], 'insumos.administrar');
 $router->post('/insumos/{id}/codigos/{codigo}/quitar', [InsumoController::class, 'removeCode'], 'insumos.administrar');
 
-// Registrar producto: 1) el producto, 2) cuántos llegaron, 3) el sector donde quedó.
+// Ingresar productos: 1) el producto, 2) cuántos llegaron, 3) el sector donde quedó.
 $router->get('/guardar', [GuardarController::class, 'producto'], 'insumos.entrada');
 $router->post('/guardar/producto', [GuardarController::class, 'leerProducto'], 'insumos.entrada');
 $router->get('/guardar/desconocido', [GuardarController::class, 'desconocido'], 'insumos.entrada');
@@ -61,13 +62,13 @@ $router->post('/guardar/cantidad', [GuardarController::class, 'leerCantidad'], '
 $router->get('/guardar/sector', [GuardarController::class, 'sector'], 'insumos.entrada');
 $router->post('/guardar/sector', [GuardarController::class, 'guardarSector'], 'insumos.entrada');
 
-// Actualizar cantidad: 1) el producto, 2) cuántos hay realmente y por qué (y se actualiza).
+// Corregir stock: 1) el producto, 2) cuántos hay realmente y por qué (y se actualiza).
 $router->get('/ajustar', [AjusteController::class, 'producto'], 'insumos.ajuste');
 $router->post('/ajustar/producto', [AjusteController::class, 'leerProducto'], 'insumos.ajuste');
 $router->get('/ajustar/contar', [AjusteController::class, 'contar'], 'insumos.ajuste');
 $router->post('/ajustar/contar', [AjusteController::class, 'leerConteo'], 'insumos.ajuste');
 
-// Retirar producto: 1) el producto, 2) cuántos se retiran (y se descuenta).
+// Retirar productos: 1) el producto, 2) cuántos se retiran (y se descuenta).
 $router->get('/retirar', [RetirarController::class, 'producto'], 'insumos.salida');
 $router->post('/retirar/producto', [RetirarController::class, 'leerProducto'], 'insumos.salida');
 $router->get('/retirar/cantidad', [RetirarController::class, 'cantidad'], 'insumos.salida');

@@ -4,13 +4,14 @@ use App\Modules\Herramientas\HerramientaService;
 
 defined('APP_ROOT') || exit;
 
-// «Catálogo de herramientas»: lo que tiene la bodega para prestar, en una tarjeta por categoría, con cuántas hay en
+// «Catálogo de herramientas»: lo que tiene la bodega para prestar, una lista compacta por categoría, con cuántas hay en
 // bodega y cuántas están prestadas ahora. Arriba, los filtros por dónde están (todas, en bodega, prestadas, atrasadas,
 // sin unidades; ?ver=) y debajo el buscador y las categorías (herramientas.js). El encargado además agrega, edita (y
 // anota cuántas hay) y elimina (desde Editar). Cada estado con su color, el mismo del gráfico del inicio.
-$acciones = match (true) {
-    $puedeAdministrar => '<a class="btn btn-success" href="' . e(url('herramientas/nueva')) . '">' . icon('plus') . 'Agregar herramienta</a>',
-    $puedeSolicitar => '<a class="btn btn-success" href="' . e(url('herramientas/solicitar')) . '">' . icon('tool') . 'Solicitar herramientas</a>',
+// El botón principal va arriba a la derecha, en la línea de «Volver».
+$lateral = match (true) {
+    $puedeAdministrar => '<a class="boton-nuevo" href="' . e(url('herramientas/nueva')) . '">' . icon('plus') . 'Agregar herramienta</a>',
+    $puedeSolicitar => '<a class="boton-nuevo" href="' . e(url('herramientas/solicitar')) . '">' . icon('tool') . 'Solicitar herramientas</a>',
     default => '',
 };
 ?>
@@ -19,16 +20,16 @@ $acciones = match (true) {
     'tarea' => 'ver-herramientas',
     'titulo' => 'Catálogo de herramientas',
     'texto' => 'Las herramientas e instrumentos de terreno que la bodega presta.',
-    'acciones' => $acciones,
+    'lateral' => $lateral,
 ]) ?>
 
 <?php // Arriba, dónde están: todas, en bodega, prestadas, atrasadas o sin unidades, con los colores del gráfico del inicio. ?>
-<nav class="nav-pills catalogo__estados" aria-label="Mostrar">
+<nav class="segmento catalogo__estados" aria-label="Mostrar">
     <?php foreach (HerramientaService::ESTADOS as $clave => $nombre) : ?>
-        <a class="nav-link<?= isset(HerramientaService::COLORES[$clave]) ? ' nav-link--' . e(HerramientaService::COLORES[$clave]) : '' ?><?= $clave === $estado ? ' active' : '' ?>"
+        <a class="segmento__opcion<?= isset(HerramientaService::COLORES[$clave]) ? ' segmento__opcion--' . e(HerramientaService::COLORES[$clave]) : '' ?><?= $clave === $estado ? ' is-activa' : '' ?>"
             href="<?= e(url('herramientas', $clave === 'todas' ? [] : ['ver' => $clave])) ?>"
             <?= $clave === $estado ? 'aria-current="true"' : '' ?>>
-            <?= e($nombre) ?> <span class="nav-count"><?= e($conteo[$clave]) ?></span>
+            <?= e($nombre) ?><span class="segmento__cuenta"><?= e($conteo[$clave]) ?></span>
         </a>
     <?php endforeach; ?>
 </nav>
@@ -69,8 +70,8 @@ $acciones = match (true) {
                                 default => 'Sin unidades',
                             }) ?></span>
                             <?php if ($puedeAdministrar) : ?>
-                                <a class="catalogo__editar" href="<?= e(url('herramientas/' . $herramienta['id'] . '/editar')) ?>"
-                                    title="Editar <?= e($herramienta['nombre']) ?>"><?= icon('edit') ?><span class="visually-hidden">Editar <?= e($herramienta['nombre']) ?></span></a>
+                                <a class="boton-fila catalogo__editar" href="<?= e(url('herramientas/' . $herramienta['id'] . '/editar')) ?>"
+                                    ><?= icon('edit') ?>Editar<span class="visually-hidden"> <?= e($herramienta['nombre']) ?></span></a>
                             <?php endif; ?>
                         </li>
                     <?php endforeach; ?>

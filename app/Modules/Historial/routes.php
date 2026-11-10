@@ -14,3 +14,4 @@ defined('APP_ROOT') || exit;
 
 $router->get('/movimientos', [MovimientoController::class, 'index'], 'historial.ver');
 $router->get('/movimientos/excel', [MovimientoController::class, 'excel'], 'historial.ver');
+$router->get('/movimientos/pdf', [MovimientoController::class, 'pdf'], 'historial.ver');

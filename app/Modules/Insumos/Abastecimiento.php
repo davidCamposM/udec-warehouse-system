@@ -9,51 +9,42 @@ use App\Core\Session;
 defined('APP_ROOT') || exit;
 
 /**
- * La reserva que se está ingresando en «Ingresar abastecimiento», entre una etapa y otra: su número y los productos que
- * llegaron con su cantidad (en el orden en que se agregaron). Vive en la sesión, así no se pierde si la persona recarga
- * la página.
+ * La lista de lo que va llegando en «Ingresar abastecimiento»: cada producto con su cantidad (en el orden en que se
+ * agregaron). Vive en la sesión, así no se pierde si la persona recarga la página.
  */
 final class Abastecimiento
 {
-    private const CLAVE = 'abastecimiento';
+    private const CLAVE = 'abastecimiento-lista';
 
-    public static function empezar(string $reserva): void
+    /** @return array<int, int> insumo_id => cantidad */
+    public static function productos(): array
     {
-        // Cambiar el número no borra lo que ya se agregó.
-        Session::put(self::CLAVE, ['reserva' => $reserva, 'productos' => self::actual()['productos'] ?? []]);
-    }
+        $productos = Session::get(self::CLAVE);
 
-    /** @return array{reserva: string, productos: array<int, int>}|null */
-    public static function actual(): ?array
-    {
-        $abastecimiento = Session::get(self::CLAVE);
-
-        return is_array($abastecimiento) ? $abastecimiento : null;
+        return is_array($productos) ? $productos : [];
     }
 
     /** Agrega un producto a la lista; si ya estaba, le suma la cantidad (hasta el máximo de una operación). */
     public static function sumar(int $insumoId, int $cantidad): void
     {
-        $actual = self::actual();
-        if ($actual !== null) {
-            $actual['productos'][$insumoId] = min(($actual['productos'][$insumoId] ?? 0) + $cantidad, StockService::MAXIMO);
-            Session::put(self::CLAVE, $actual);
-        }
+        $productos = self::productos();
+        $productos[$insumoId] = min(($productos[$insumoId] ?? 0) + $cantidad, StockService::MAXIMO);
+        Session::put(self::CLAVE, $productos);
     }
 
     /** Deja la cantidad de un producto de la lista; con 0, lo quita. */
     public static function cantidad(int $insumoId, int $cantidad): void
     {
-        $actual = self::actual();
-        if ($actual === null || !isset($actual['productos'][$insumoId])) {
+        $productos = self::productos();
+        if (!isset($productos[$insumoId])) {
             return;
         }
         if ($cantidad > 0) {
-            $actual['productos'][$insumoId] = $cantidad;
+            $productos[$insumoId] = $cantidad;
         } else {
-            unset($actual['productos'][$insumoId]);
+            unset($productos[$insumoId]);
         }
-        Session::put(self::CLAVE, $actual);
+        Session::put(self::CLAVE, $productos);
     }
 
     public static function terminar(): void

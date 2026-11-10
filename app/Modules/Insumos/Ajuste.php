@@ -9,7 +9,7 @@ use App\Core\Session;
 defined('APP_ROOT') || exit;
 
 /**
- * El producto que se está actualizando, entre la etapa 1 y la 2 de «Actualizar cantidad». Vive en la sesión hasta que
+ * El producto que se está actualizando, entre la etapa 1 y la 2 de «Corregir stock». Vive en la sesión hasta que
  * se actualiza (lo contado y el motivo llegan con el formulario de la etapa 2).
  */
 final class Ajuste

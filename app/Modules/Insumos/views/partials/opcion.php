@@ -15,7 +15,7 @@ $atributos = isset($url)
 <<?= $etiqueta ?> class="item-row item-row--elegir" <?= $atributos ?>>
     <span class="item-row__name"><?= e($insumo['nombre']) ?></span>
     <span class="item-row__meta">
-        <?= e($insumo['codigo']) ?> · Hay <?= e($numero) ?> <?= e($unidad) ?>
+        <?= e(codigo_producto($insumo)) ?> · Hay <?= e($numero) ?> <?= e($unidad) ?>
         <?php if ($insumo['sector'] !== null) : ?> · <?= e($insumo['sector']) ?><?php endif; ?>
     </span>
     <span class="item-row__elegir"><?= icon('ok') ?>Elegir</span>

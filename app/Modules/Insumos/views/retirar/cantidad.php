@@ -2,13 +2,12 @@
 
 defined('APP_ROOT') || exit;
 
-// Etapa 2, su propia ventana («¿Cuántas unidades se retiran?»): el número en grande y al centro, como en «Registrar
-// producto». Parte en 1 (la unidad recién escaneada). Se cambia con − y +, escribiendo el número o escaneando otra vez
+// Etapa 2, su propia ventana («¿Cuántas unidades se retiran?»), compacta: el producto (con «Cambiar»), cuántas hay y
+// el número en grande y al centro, como en «Ingresar productos». Parte en 1 (la unidad recién escaneada). Se cambia con − y +, escribiendo el número o escaneando otra vez
 // el mismo producto, que suma 1. No se puede retirar más de lo que hay: el + se detiene ahí, y el servidor lo vuelve a
 // revisar al descontar. Enter retira. Arriba, el producto elegido, con «Cambiar».
 $hay = (int) $insumo['stock_actual'];
-$detalle = $insumo['codigo'] . ' · Hay ' . unidades($hay) . ' en bodega'
-    . ($insumo['sector'] !== null ? ' · ' . $insumo['sector'] : '');
+$detalle = codigo_producto($insumo) . ($insumo['sector'] !== null ? ' · ' . $insumo['sector'] : '');
 ?>
 <form class="formulario" method="post" action="<?= e(url('retirar/cantidad')) ?>" data-submit-once>
     <?= csrf_field() ?>
@@ -19,11 +18,12 @@ $detalle = $insumo['codigo'] . ' · Hay ' . unidades($hay) . ' en bodega'
         'valor' => $insumo['nombre'],
         'detalle' => $detalle,
         'cambiar' => url('retirar'),
+        'compacto' => true,
     ]) ?>
 
     <div class="cantidad-foco<?= error_de('cantidad') !== null ? ' has-error' : '' ?>">
         <label class="visually-hidden" for="cantidad">¿Cuántas unidades se retiran?</label>
-        <p class="cantidad-foco__sistema" id="cantidad-ayuda">Como máximo, <strong><?= e(unidades($hay)) ?></strong> (lo que hay en bodega).</p>
+        <p class="cantidad-foco__sistema" id="cantidad-ayuda">Hay <strong><?= e(unidades($hay)) ?></strong> en bodega.</p>
 
         <div class="cantidad-foco__control" data-stepper data-min="1" data-max="<?= e($hay) ?>">
             <div class="cantidad-foco__fila">
@@ -41,9 +41,6 @@ $detalle = $insumo['codigo'] . ' · Hay ' . unidades($hay) . ' en bodega'
             <p class="cantidad-foco__sumada" role="status"><?= icon('check') ?>Se sumó 1 al escanear</p>
         <?php endif; ?>
         <?= mensaje_error('cantidad') ?>
-        <p class="cantidad-foco__ayuda">
-            <?= icon('scan') ?>¿Se llevan varias? Escanea cada una y se suman solas. Enter para retirar.
-        </p>
     </div>
 
     <div class="formulario__acciones">

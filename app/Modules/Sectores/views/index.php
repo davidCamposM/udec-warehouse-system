@@ -1,12 +1,10 @@
 <?php
 
-use App\Support\Tareas;
-
 defined('APP_ROOT') || exit;
 
-// Sectores de la bodega, con los componentes básicos (basico.css): una tarjeta por sector (nombre, cuántos productos
-// guarda, su código como la etiqueta que se pega en el lugar y sus botones «Editar» y «Eliminar»). Los
-// eliminados no aparecen: para las personas ya no existen.
+// Sectores de la bodega: una lista de filas compactas (nombre, cuántos productos guarda, el código de su etiqueta y los
+// botones chicos «Editar» y «Eliminar»); «Agregar sector», arriba a la derecha. Los eliminados no aparecen: para las
+// personas ya no existen.
 
 /** "Sin productos", "1 producto guardado aquí", "4 productos guardados aquí" */
 $productos = static fn (int $n): string => match (true) {
@@ -20,7 +18,7 @@ $productos = static fn (int $n): string => match (true) {
     'tarea' => 'sectores',
     'titulo' => 'Sectores de bodega',
     'texto' => 'Cada parte de la bodega tiene su etiqueta. Al registrar un producto se escanea la etiqueta del lugar donde queda.',
-    'acciones' => '<a class="btn btn-success" href="' . e(url('sectores/nuevo')) . '">' . icon('plus') . 'Agregar sector</a>',
+    'lateral' => '<a class="boton-nuevo" href="' . e(url('sectores/nuevo')) . '">' . icon('plus') . 'Agregar sector</a>',
 ]) ?>
 
 <?php if ($sectores === []) : ?>
@@ -30,31 +28,29 @@ $productos = static fn (int $n): string => match (true) {
         <p class="text-muted">Toca «Agregar sector» y escanea la etiqueta impresa de una repisa o cubículo.</p>
     </div>
 <?php else : ?>
-    <ul class="registros tono-<?= e(Tareas::tarea('sectores')['color']) ?>">
+    <ul class="sectores">
         <?php foreach ($sectores as $sector) : ?>
-            <li class="registro">
-                <div class="registro__cabecera">
-                    <span class="registro__icono"><?= icon('map-pin') ?></span>
-                    <div>
-                        <p class="registro__nombre"><?= e($sector['nombre']) ?></p>
-                        <p class="registro__detalle"><?= e($productos((int) $sector['productos'])) ?></p>
-                    </div>
-                </div>
-                <span class="registro__etiqueta" title="Código del sector">
-                    <?= icon('scan') ?><span class="visually-hidden">Código del sector:</span><span class="registro__codigo"><?= e($sector['codigo']) ?></span>
+            <li class="sector">
+                <span class="sector__icono" aria-hidden="true"><?= icon('map-pin') ?></span>
+                <span class="sector__texto">
+                    <strong><?= e($sector['nombre']) ?></strong>
+                    <span><?= e($productos((int) $sector['productos'])) ?></span>
                 </span>
-                <div class="registro__acciones">
-                    <a class="btn btn-outline-secondary btn-sm" href="<?= e(url('sectores/' . $sector['id'] . '/editar')) ?>"><?= icon('edit') ?>Editar</a>
-                    <a class="btn btn-outline-danger btn-sm" href="<?= e(url('sectores/' . $sector['id'] . '/eliminar')) ?>">Eliminar</a>
-                </div>
+                <span class="sector__codigo" title="Código de su etiqueta">
+                    <span class="visually-hidden">Código del sector:</span><?= e($sector['codigo']) ?>
+                </span>
+                <span class="sector__acciones">
+                    <a class="boton-fila" href="<?= e(url('sectores/' . $sector['id'] . '/editar')) ?>"><?= icon('edit') ?>Editar</a>
+                    <a class="boton-fila boton-fila--peligro" href="<?= e(url('sectores/' . $sector['id'] . '/eliminar')) ?>"><?= icon('close') ?>Eliminar</a>
+                </span>
             </li>
         <?php endforeach; ?>
     </ul>
-    <p class="nota-info">
+    <p class="nota-sutil">
         <?= icon('info') ?>
         <span>
-            El código de cada sector es el de su etiqueta impresa. Si un sector quedó con un código que no es el de su
-            etiqueta (por ejemplo SEC001), tócalo en «Editar» y escanea su etiqueta.
+            El código de cada sector es el de su etiqueta impresa. Si uno quedó con otro código (por ejemplo SEC001),
+            tócalo en «Editar» y escanea su etiqueta.
         </span>
     </p>
 <?php endif; ?>
