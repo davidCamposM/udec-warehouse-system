@@ -11,10 +11,20 @@
 !/storage/**/.gitkeep
 !/storage/.htaccess
 
-# Dependencias de desarrollo (no se usan en producción)
+# Solo desarrollo: el repositorio lleva únicamente lo que necesita el servidor (Apache + PHP + MySQL).
+# Quedan en el computador de desarrollo: dependencias, herramientas, pruebas (PHPUnit y E2E) y el entorno Docker.
 /vendor/
 /node_modules/
-/tools/*.phar
+/tools/
+/tests/
+/e2e/
+/phpunit.xml.dist
+/docker/
+/docker-compose.yml
+/.env.example
+/.editorconfig
+# Reinicia la base de pruebas (borra todas las tablas): solo la usan tests/ y e2e/, nunca el servidor
+/app/Support/BaseDePruebas.php
 
 # Sistema operativo
 .DS_Store
