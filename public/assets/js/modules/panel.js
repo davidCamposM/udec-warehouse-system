@@ -6,6 +6,12 @@
    Las peticiones van marcadas como "en segundo plano": no cuentan
    como actividad, así la sesión igual se cierra por inactividad.
    ========================================================== */
+import { ApiError, goToLogin, request } from "../core/api.js";
+
+const MIN_INTERVAL_SECONDS = 10;
+const DEFAULT_INTERVAL_SECONDS = 30;
+const MAX_BADGE = 99;
+
 (() => {
   "use strict";
 
@@ -13,7 +19,7 @@
   if (!panel) return;
 
   const url = panel.dataset.panelUrl;
-  const seconds = Math.max(10, Number(panel.dataset.panelInterval) || 30);
+  const seconds = Math.max(MIN_INTERVAL_SECONDS, Number(panel.dataset.panelInterval) || DEFAULT_INTERVAL_SECONDS);
   // Cada bloque que se mantiene al día: los avisos (con la URL del panel) y, en el inicio del docente, el estado de las
   // herramientas (con su propia data-panel-url).
   const contents = Array.from(panel.querySelectorAll("[data-panel-content]"));
@@ -31,28 +37,17 @@
     status.dataset.state = state;
   };
 
-  /** Pide un bloque y lo cambia solo si llegó algo distinto (así el gráfico no vuelve a animarse sin motivo). */
+  /**
+   * Pide un bloque ({"html": …}) y lo cambia solo si llegó algo distinto (así el gráfico no vuelve a animarse sin
+   * motivo). El HTML nuevo se arma en un <template> fuera de la página y entra de una sola vez (un solo repintado).
+   */
   const actualizar = async (content) => {
-    const response = await fetch(content.dataset.panelUrl || url, {
-      headers: { "X-Bodega-Background": "1", "X-Requested-With": "XMLHttpRequest" },
-      credentials: "same-origin",
-      cache: "no-store",
-    });
-
-    // La sesión se cerró (inactividad o cuenta desactivada): al login, donde se explica.
-    if (response.status === 401) {
-      if (saliendo) return false;
-      const data = await response.json().catch(() => ({}));
-      window.location.assign(data.login || window.location.href);
-      return false;
-    }
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const { html } = await request(content.dataset.panelUrl || url, { background: true });
 
     const nuevo = document.createElement("template");
-    nuevo.innerHTML = await response.text();
-    if (nuevo.innerHTML !== content.innerHTML) content.innerHTML = nuevo.innerHTML;
+    nuevo.innerHTML = html;
+    if (nuevo.innerHTML !== content.innerHTML) content.replaceChildren(nuevo.content);
     contar(content);
-    return true;
   };
 
   /** El número de la campana del docente: lo que dice la lista recién llegada (data-cuenta); con 0, no se muestra. */
@@ -61,28 +56,23 @@
     const cuenta = panel.querySelector("[data-panel-cuenta]");
     if (!lista || !cuenta) return;
     const n = Number(lista.dataset.cuenta) || 0;
-    cuenta.textContent = n > 99 ? "99+" : String(n);
+    cuenta.textContent = n > MAX_BADGE ? `${MAX_BADGE}+` : String(n);
     cuenta.hidden = n === 0;
   };
 
   // La campana del docente: al abrirla, sus notificaciones quedan vistas. El número desaparece de inmediato y se avisa
-  // al servidor (así no vuelve a aparecer hasta que llegue algo nuevo, como en un chat).
-  const token = document.querySelector('meta[name="csrf-token"]')?.content ?? "";
-  for (const campana of panel.querySelectorAll("details[data-vistas-url]")) {
-    campana.addEventListener("toggle", () => {
-      const cuenta = campana.querySelector("[data-panel-cuenta]");
-      if (!campana.open || !cuenta || cuenta.hidden) return;
-      cuenta.hidden = true;
-      fetch(campana.dataset.vistasUrl, {
-        method: "POST",
-        headers: { "X-CSRF-Token": token, "X-Requested-With": "XMLHttpRequest" },
-        credentials: "same-origin",
-        cache: "no-store",
-      }).catch(() => {
-        /* Sin conexión: el número vuelve en la próxima actualización y se intenta al abrirla otra vez. */
-      });
+  // al servidor (así no vuelve a aparecer hasta que llegue algo nuevo, como en un chat). «toggle» no sube por el
+  // documento: se escucha en captura, así sirve para cualquier campana sin engancharse a cada una.
+  panel.addEventListener("toggle", (event) => {
+    const campana = event.target;
+    if (!campana.matches?.("details[data-vistas-url]")) return;
+    const cuenta = campana.querySelector("[data-panel-cuenta]");
+    if (!campana.open || !cuenta || cuenta.hidden) return;
+    cuenta.hidden = true;
+    request(campana.dataset.vistasUrl, { method: "POST" }).catch(() => {
+      /* Sin conexión: el número vuelve en la próxima actualización y se intenta al abrirla otra vez. */
     });
-  }
+  }, { capture: true });
 
   // Los paneles que se despliegan (la campana): se cierran al tocar fuera o con Escape.
   document.addEventListener("click", (evento) => {
@@ -104,10 +94,16 @@
 
     try {
       for (const content of contents) {
-        if (!(await actualizar(content))) return;
+        await actualizar(content);
       }
       setStatus(`Actualizado a las ${now()}`, "ok");
-    } catch {
+    } catch (error) {
+      // La sesión se cerró (inactividad o cuenta desactivada): al login, donde se explica. Si la página ya se estaba
+      // yendo, no: así no se pierde el aviso «Tu sesión se cerró por inactividad».
+      if (error instanceof ApiError && error.isUnauthenticated) {
+        if (!saliendo) goToLogin(error);
+        return;
+      }
       setStatus("Sin conexión. Reintentando…", "error");
     } finally {
       loading = false;

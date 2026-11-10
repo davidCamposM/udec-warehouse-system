@@ -5,6 +5,10 @@
      «Sí, sigo aquí» avisa al servidor y cierra la ventana; «No», o que la cuenta llegue a 0, cierra la sesión.
    - Las pestañas comparten el último uso (localStorage): una pestaña quieta no cierra la sesión si en otra se trabaja.
    - Si el computador estuvo suspendido más que todo ese tiempo, al volver la sesión se cierra de inmediato. */
+import { ApiError, goToLogin, request } from "./api.js";
+
+const HTTP_FORBIDDEN = 403;
+
 (() => {
   "use strict";
 
@@ -20,7 +24,6 @@
   const motivo = ventana.querySelector("[data-sesion-motivo]");
   const segundos = ventana.querySelector("[data-sesion-segundos]");
   const sigo = ventana.querySelector("[data-sesion-sigo]");
-  const token = document.querySelector('meta[name="csrf-token"]')?.content ?? "";
 
   let ultimoUso = Date.now();
   let ultimoAvisoAlServidor = Date.now(); // cargar la página ya renovó la sesión
@@ -45,19 +48,11 @@
   const avisarAlServidor = async () => {
     ultimoAvisoAlServidor = Date.now();
     try {
-      const respuesta = await fetch(ventana.dataset.seguirUrl, {
-        method: "POST",
-        headers: { "X-CSRF-Token": token, "X-Requested-With": "XMLHttpRequest", Accept: "application/json" },
-        credentials: "same-origin",
-        cache: "no-store",
-      });
-      // La sesión ya se había cerrado (por ejemplo, otra pestaña dijo «No»): al login, donde se ve el aviso.
-      if (respuesta.status === 401 || respuesta.status === 403) {
-        const datos = await respuesta.json().catch(() => ({}));
-        window.location.assign(datos.login ?? window.location.href);
-      }
-    } catch {
-      /* Sin conexión: se intenta de nuevo con el próximo uso. */
+      await request(ventana.dataset.seguirUrl, { method: "POST" });
+    } catch (error) {
+      // La sesión ya se había cerrado (por ejemplo, otra pestaña dijo «No») o el formulario venció: al login, donde se
+      // ve el aviso. Sin conexión (no es ApiError): se intenta de nuevo con el próximo uso.
+      if (error instanceof ApiError && (error.isUnauthenticated || error.status === HTTP_FORBIDDEN)) goToLogin(error);
     }
   };
 

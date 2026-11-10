@@ -140,7 +140,7 @@
 
 .tema-azul .ventana .listo__icono,
 .tema-azul .ventana .boleta__check {
-  box-shadow: 0 0 0 4px rgba(46, 125, 79, 0.2);
+  box-shadow: 0 0 0 4px rgba(34, 60, 106, 0.18);
 }
 
 .tema-azul .ventana .ventana__caja {
@@ -282,3 +282,192 @@
 .tema-azul .solicitudes { border: 1px solid var(--color-border); }
 .tema-azul .solicitudes > li + li { border-top: 1px solid #eef0f3; }
 .tema-azul .solicitud-fila:focus-visible { outline: 3px solid var(--color-brand-200); }
+
+/* ==========================================================
+   Plano de verdad: los íconos de encabezados, ventanas y acciones, sin degradado ni sombra de color
+   ========================================================== */
+.tema-azul .encabezado__icono,
+.tema-azul .ventana .ventana__icono,
+.tema-azul .ventana .escaneo-foco__icono,
+.tema-azul .accion__icono,
+.tema-azul .accion:hover .accion__icono {
+  background: var(--color-brand-800);
+  box-shadow: none;
+}
+
+.tema-azul .accion:hover,
+.tema-azul .btn--tarea:hover {
+  box-shadow: none;
+}
+
+.tema-azul .pagination { background: var(--color-surface); }
+
+/* «Bien» sigue en verde aunque el sistema sea azul: «Con stock» y lo que entra. Texto #1d5234 sobre #dff0e5:
+   contraste 8:1. El visto bueno de «¡Listo!» (al terminar una tarea) va en el azul del sistema. */
+.tema-azul .status--ok {
+  background: #dff0e5;
+  color: #1d5234;
+}
+
+.tema-azul .movimientos__cantidad--mas { color: #22603c; }
+.tema-azul .mov--entrada { --m: var(--estado-bien); }
+
+.tema-azul .ventana .listo__icono,
+.tema-azul .ventana .boleta__check {
+  background: var(--color-brand-800);
+}
+
+/* «Agregar …»: un botón como los demás (8 px, plano), no una píldora con sombra */
+.tema-azul .boton-nuevo,
+.tema-azul .boton-nuevo:hover {
+  border-radius: var(--radius-md);
+  box-shadow: none;
+}
+
+/* El número de la campana: 12 px, el mínimo legible */
+.tema-azul .notificaciones__cuenta { font-size: var(--text-xs); }
+
+/* Las dos tortas del inicio, del mismo alto */
+.tema-azul .graficos__lista { align-items: stretch; }
+.tema-azul .graficos__columna > .torta { height: 100%; }
+
+/* Las pestañas (períodos, tipos, grupos) se desplazan dentro de su caja: nunca ensanchan la página */
+.tema-azul .segmento { max-width: 100%; }
+.tema-azul .difusion__barra > * { min-width: 0; }
+
+/* ==========================================================
+   Uso con el dedo (celulares y tabletas)
+   - Todo lo que se toca mide al menos 44 px de alto.
+   - Los campos escriben a 16 px: con menos, el iPhone agranda la página al tocarlos.
+   ========================================================== */
+@media (pointer: coarse), (max-width: 48em) {
+  .tema-azul :is(.btn, .back-link, .boton-nuevo, .boton-fila, .descargas__boton, .segmento__opcion, .inventario__categoria,
+    .page-link, .nav-link, .guardar__otro, .stepper__button, .form-control, .input, select) {
+    min-height: 2.75rem;
+  }
+
+  .tema-azul :is(.back-link, .boton-nuevo, .boton-fila, .descargas__boton, .segmento__opcion, .inventario__categoria) {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .tema-azul .inicio-cabecera__buscar > .btn:first-child,
+  .tema-azul .stepper__button {
+    min-width: 2.75rem;
+  }
+
+  .tema-azul .stepper__input { min-height: 2.75rem; }
+
+  .tema-azul :is(input, select, textarea) { font-size: 1rem !important; }
+
+  /* Las casillas, más grandes; su etiqueta completa también se toca */
+  .tema-azul .form-check-input {
+    width: 1.375rem;
+    height: 1.375rem;
+  }
+}
+
+/* ==========================================================
+   En el celular
+   ========================================================== */
+@media (max-width: 40em) {
+  /* Inicio: el título a la izquierda y los botones en dos columnas parejas; la campana, sin su línea */
+  .tema-azul .graficos__cabecera {
+    align-items: stretch;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .tema-azul .graficos__acciones {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-2);
+  }
+
+  .tema-azul .graficos__cabecera a.graficos__boton { justify-content: center; }
+
+  .tema-azul .graficos__cabecera a.graficos__campana {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .tema-azul .graficos__cabecera a.graficos__campana::before { content: none; }
+
+  .tema-azul .torta { padding: var(--space-4); gap: var(--space-4); }
+
+  /* Las tablas se apilan: cada fila es una ficha con el nombre arriba y, debajo, cada dato con su etiqueta. Así no
+     hay que desplazar de lado para ver la cantidad o el estado. */
+  .table.tabla-apilada { min-width: 0; }
+
+  .table.tabla-apilada thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+
+  .table.tabla-apilada,
+  .table.tabla-apilada tbody {
+    display: block;
+  }
+
+  .table.tabla-apilada tbody tr {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .table.tabla-apilada tbody tr:last-child { border-bottom: 0; }
+
+  .table.tabla-apilada tbody td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding: 0;
+    border: 0;
+    text-align: right;
+    white-space: normal;
+  }
+
+  .table.tabla-apilada tbody td[data-label]::before {
+    content: attr(data-label);
+    flex: none;
+    color: var(--color-text-muted);
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    font-weight: 400;
+    text-align: left;
+  }
+
+  .table.tabla-apilada tbody td.tabla-apilada__titulo {
+    order: -1;
+    justify-content: flex-start;
+    padding-bottom: var(--space-1);
+    text-align: left;
+  }
+
+  /* El título de una ficha puede tener dos líneas (nombre y correo) */
+  .table.tabla-apilada tbody td.tabla-apilada__titulo:has(> strong) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+  }
+
+  /* Las acciones de la fila, al final y a todo el ancho */
+  .table.tabla-apilada tbody td.tabla-apilada__acciones {
+    justify-content: flex-start;
+    padding-top: var(--space-2);
+  }
+
+  .table.tabla-apilada tbody td.tabla-apilada__acciones > * { flex-wrap: wrap; }
+
+  /* La campana del inicio ocupa la fila entera bajo los botones */
+  .tema-azul .graficos__cabecera a.graficos__campana { grid-column: 1 / -1; }
+
+  .tema-azul .pagination { justify-content: center; }
+  .tema-azul .pagination .page-info { order: -1; width: 100%; text-align: center; }
+}

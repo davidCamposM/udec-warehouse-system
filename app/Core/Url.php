@@ -62,4 +62,46 @@ final class Url
 
         return self::base() . '/assets/' . $ruta . $version;
     }
+
+    /**
+     * Un script del sistema, que se carga como módulo ES (<script type="module">), con la versión en la ruta:
+     * /assets/v1731283200/js/core/ui.js (public/.htaccess la quita).
+     *
+     * Por qué en la ruta y no como «?v=»: un módulo importa a otro con una ruta relativa (import "../core/api.js"), que
+     * hereda la carpeta pero no la consulta. Con «?v=» solo en la etiqueta, el mismo archivo tendría dos URL y el
+     * navegador lo ejecutaría dos veces; y el importado, sin versión, podría quedar viejo en caché. Con la versión en
+     * la ruta, todos los módulos comparten una sola, que cambia apenas cambia cualquiera de ellos.
+     * Sin reescritura de URLs (url_mode = query) no hay quien quite la versión: va la ruta real.
+     */
+    public static function modulo(string $ruta): string
+    {
+        $ruta = ltrim($ruta, '/');
+        if (Config::get('app.url_mode', 'rewrite') === 'query') {
+            return self::base() . '/assets/' . $ruta;
+        }
+
+        return self::base() . '/assets/v' . self::versionDeModulos() . '/' . $ruta;
+    }
+
+    /** La fecha del script más reciente de public/assets/js: cambia cada vez que se actualiza cualquiera. */
+    private static function versionDeModulos(): int
+    {
+        static $version = null;
+        if ($version !== null) {
+            return $version;
+        }
+
+        $version = 0;
+        $archivos = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator(
+            APP_ROOT . '/public/assets/js',
+            \FilesystemIterator::SKIP_DOTS
+        ));
+        foreach ($archivos as $archivo) {
+            if ($archivo->getExtension() === 'js') {
+                $version = max($version, $archivo->getMTime());
+            }
+        }
+
+        return $version;
+    }
 }

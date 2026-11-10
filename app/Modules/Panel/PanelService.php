@@ -45,9 +45,9 @@ final class PanelService
     }
 
     /**
-     * Los dos estados del inicio (Panel::grafico): los insumos de consumo y las herramientas, cada uno partido en lo que
-     * está en bodega y lo que no, con unos datos más debajo. La primera parte es la cifra principal (su porcentaje va en
-     * grande, con la frase). Cada parte: [clave, nombre, explicación, ícono, cantidad, enlace].
+     * Los dos estados del inicio (las tortas, Panel::torta): los insumos de consumo y las herramientas, cada uno partido
+     * en lo que está en bodega y lo que no. Cada parte: [clave, nombre, explicación, ícono, cantidad, enlace]. La torta
+     * muestra el título, las partes y el total; 'frase', 'icono' y 'datos' quedan disponibles para otras vistas.
      *
      * @return list<array{titulo: string, icono: string, unidad: array{0: string, 1: string}, frase: string,
      *     partes: list<array{0: string, 1: string, 2: string, 3: string, 4: int, 5: ?string}>, datos: list<array{0: string, 1: string}>}>
@@ -82,7 +82,7 @@ final class PanelService
     }
 
     /**
-     * El estado de las herramientas (Panel::grafico). Con $completo, los datos de la bodega (solicitudes por entregar,
+     * El estado de las herramientas (Panel::torta). Con $completo, los datos de la bodega (solicitudes por entregar,
      * dañadas o perdidas); sin él (el docente, al abrir su inicio), solo cuántas hay, en bodega y prestadas.
      *
      * @return array{titulo: string, icono: string, unidad: array{0: string, 1: string}, frase: string,

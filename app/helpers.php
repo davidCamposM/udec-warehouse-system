@@ -32,6 +32,12 @@ function url(string $ruta = '', array $parametros = []): string
     return Url::to($ruta, $parametros);
 }
 
+/** <script type="module"> de un script del sistema (public/assets): script_modulo('js/core/ui.js'). Ver Url::modulo. */
+function script_modulo(string $ruta): string
+{
+    return '<script type="module" src="' . e(Url::modulo($ruta)) . '"></script>';
+}
+
 /** URL de un archivo de public/assets: asset('css/main.css'). */
 function asset(string $ruta): string
 {

@@ -17,6 +17,18 @@ defined('APP_ROOT') || exit;
  */
 final class App
 {
+    /** El código estable de cada estado HTTP en las respuestas de error de la API (Response::error). */
+    private const CODIGOS_HTTP = [
+        400 => 'bad_request',
+        403 => 'forbidden',
+        404 => 'not_found',
+        405 => 'method_not_allowed',
+        419 => 'session_expired',
+        429 => 'too_many_requests',
+        500 => 'server_error',
+        503 => 'service_unavailable',
+    ];
+
     public function __construct(private readonly Router $router)
     {
     }
@@ -83,7 +95,7 @@ final class App
     private function respuestaValidacion(ValidationException $e, Request $request): Response
     {
         if ($request->wantsJson()) {
-            return Response::json(['error' => $e->getMessage(), 'errores' => $e->errors()], 422);
+            return Response::error('validation_failed', $e->getMessage(), 422, ['fields' => $e->errors()]);
         }
 
         Session::flash('_errores', $e->errors());
@@ -100,8 +112,9 @@ final class App
     private function formularioVencido(Request $request): Response
     {
         if ($request->wantsJson()) {
-            return Response::json(
-                ['error' => 'El formulario venció o no es válido. Recarga la página e inténtalo de nuevo.'],
+            return Response::error(
+                'csrf_invalid',
+                'El formulario venció o no es válido. Recarga la página e inténtalo de nuevo.',
                 403
             );
         }
@@ -132,7 +145,7 @@ final class App
             // Una petición de JavaScript (como la actualización del panel) recibe la dirección del
             // login para llevar ahí al usuario, donde verá el aviso.
             if ($request->wantsJson()) {
-                return Response::json(['error' => $e->getMessage(), 'login' => Url::to('login')], 401);
+                return Response::error('unauthenticated', $e->getMessage(), 401, ['login' => Url::to('login')]);
             }
 
             if ($request->method() === 'GET') {
@@ -143,7 +156,7 @@ final class App
         }
 
         if ($request->wantsJson()) {
-            return Response::json(['error' => $e->getMessage()], $estado);
+            return Response::error(self::CODIGOS_HTTP[$estado] ?? 'http_error', $e->getMessage(), $estado);
         }
 
         try {

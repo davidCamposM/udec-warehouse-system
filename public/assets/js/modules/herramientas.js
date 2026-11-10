@@ -3,7 +3,10 @@
      tildes ni mayúsculas) y las pastillas muestran una categoría, todas o, al solicitar, solo las elegidas. Los grupos
      sin herramientas visibles se ocultan. Sin JavaScript el buscador no aparece y se ven todas.
    - Al solicitar: la ficha de cada herramienta con unidades se marca como elegida, y la pastilla «Elegidas» dice
-     cuántas lleva. */
+     cuántas lleva.
+   Los eventos se escuchan una vez en el contenedor (delegación), no en cada pastilla ni en cada ficha: hay decenas. */
+import { onContentReady } from "../core/ui.js";
+
 (() => {
   "use strict";
 
@@ -57,7 +60,10 @@
 
     if (buscador) {
       buscador.hidden = false;
-      pastillas.forEach((pastilla) => pastilla.addEventListener("click", () => elegirGrupo(pastilla.dataset.verGrupo)));
+      buscador.addEventListener("click", (event) => {
+        const pastilla = event.target.closest("[data-ver-grupo]");
+        if (pastilla) elegirGrupo(pastilla.dataset.verGrupo);
+      });
       // Al escribir se busca en todas las categorías.
       campo?.addEventListener("input", () => {
         if (grupoElegido !== "todas") elegirGrupo("todas");
@@ -87,16 +93,18 @@
       if (grupoElegido === "elegidas") filtrar();
     };
 
-    fichas.forEach((ficha) => {
-      const input = ficha.querySelector("input");
-      input?.addEventListener("input", actualizar);
-      input?.addEventListener("change", actualizar);
-    });
+    // Las unidades de cualquier ficha: un solo oyente en el formulario que las contiene.
+    const alCambiarUnidades = (event) => {
+      if (event.target.closest?.("[data-herramienta]")) actualizar();
+    };
+    const contenedor = fichas[0].closest("form") ?? root;
+    contenedor.addEventListener("input", alCambiarUnidades);
+    contenedor.addEventListener("change", alCambiarUnidades);
 
     actualizar();
   };
 
   iniciar(document);
   // También cuando la ventana vuelve con errores sin recargar la página (ventana.js).
-  window.Bodega?.alIniciar(iniciar);
+  onContentReady(iniciar);
 })();

@@ -40,6 +40,7 @@ defined('APP_ROOT') || exit;
     </div>
 
     <script src="<?= e(asset('js/vendor/JsBarcode.code128.min.js')) ?>"></script>
-    <script src="<?= e(asset('js/modules/etiqueta.js')) ?>"></script>
+    <?php // La librería del código de barras es un script clásico (define window.JsBarcode); el nuestro, un módulo. ?>
+    <?= script_modulo('js/modules/etiqueta.js') ?>
 </body>
 </html>

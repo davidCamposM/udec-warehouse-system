@@ -9,6 +9,9 @@
    que escribe el código y manda Enter). Esc la cierra.
    Sin JavaScript, la barra igual busca al enviar.
    ========================================================== */
+import { request } from "../core/api.js";
+import { onContentReady } from "../core/ui.js";
+
 (() => {
   "use strict";
 
@@ -140,26 +143,23 @@
 
       let html;
       try {
-        const respuesta = await fetch(url, {
-          headers: { "X-Requested-With": "XMLHttpRequest" },
-          credentials: "same-origin",
-          signal: pedido.signal,
-        });
-        // La sesión se cerró: la barra sigue funcionando al enviar, y el sistema lleva al login.
-        if (!respuesta.ok) throw new Error(`HTTP ${respuesta.status}`);
-        html = await respuesta.text();
+        ({ html } = await request(url, { signal: pedido.signal }));
       } catch (error) {
+        // La sesión se cerró o no hay conexión: la barra sigue funcionando al enviar, y el sistema lleva al login.
         if (error.name !== "AbortError") vaciar();
         return;
       }
 
-      panel.innerHTML = html;
-      mostrado = texto;
+      // La lista se arma fuera de la página (resaltado e ids incluidos) y entra de una sola vez: un solo repintado.
+      const nueva = document.createElement("template");
+      nueva.innerHTML = html;
       const buscadas = palabras(texto);
-      panel.querySelectorAll("[data-resaltar]").forEach((elemento) => resaltar(elemento, buscadas));
-      opciones().forEach((opcion, i) => {
+      nueva.content.querySelectorAll("[data-resaltar]").forEach((elemento) => resaltar(elemento, buscadas));
+      nueva.content.querySelectorAll("[role=option]").forEach((opcion, i) => {
         opcion.id = `${panel.id}-${i}`;
       });
+      panel.replaceChildren(nueva.content);
+      mostrado = texto;
       marcar(-1);
       aviso.textContent = panel.querySelector("[data-anuncio]")?.dataset.anuncio ?? "";
       if (document.activeElement === input) abrir();
@@ -225,5 +225,5 @@
   const iniciarEn = (root) => root.querySelectorAll("[data-sugerencias]").forEach((input) => iniciar(input, numero++));
   iniciarEn(document);
   // También en la ventana nueva cuando cambia la etapa sin recargar (ventana.js).
-  window.Bodega?.alIniciar(iniciarEn);
+  onContentReady(iniciarEn);
 })();

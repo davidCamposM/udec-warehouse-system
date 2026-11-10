@@ -114,7 +114,7 @@ final class Inicio
     /** El estado de las herramientas del docente (la torta simple, Panel::torta; sin los datos internos de la bodega). */
     public static function stockHerramientas(): string
     {
-        return View::render('Panel::torta',(new PanelService())->graficoHerramientas(false) + ['id' => 'grafico-herramientas'], null);
+        return View::render('Panel::torta', (new PanelService())->graficoHerramientas(false) + ['id' => 'grafico-herramientas'], null);
     }
 
     public static function avisos(): string

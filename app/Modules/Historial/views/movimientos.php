@@ -69,7 +69,7 @@ $descargas = '<div class="descargas"><span class="descargas__titulo">Descargar</
             <span class="text-muted movimientos__total"><?= e($total) ?> <?= $total === 1 ? 'producto movido' : 'productos movidos' ?></span>
         </div>
         <div class="table-responsive">
-            <table class="table table-hover movimientos__tabla" aria-labelledby="titulo-movimientos">
+            <table class="table table-hover tabla-apilada movimientos__tabla" aria-labelledby="titulo-movimientos">
                 <thead>
                     <tr>
                         <th scope="col">Fecha</th>
@@ -85,9 +85,9 @@ $descargas = '<div class="descargas"><span class="descargas__titulo">Descargar</
                     <?php foreach ($movimientos as $fila) : ?>
                         <?php $cantidad = (int) $fila['cantidad']; ?>
                         <tr>
-                            <td class="movimientos__fecha"><?= e(Fecha::mostrar($fila['fecha'])) ?></td>
-                            <td><span class="tipo-mov tipo-mov--<?= e($fila['tipo']) ?>"><?= e(rtrim(MovimientoService::TIPOS[$fila['tipo']], 's')) ?></span></td>
-                            <td>
+                            <td class="movimientos__fecha" data-label="Fecha"><?= e(Fecha::mostrar($fila['fecha'])) ?></td>
+                            <td data-label="Tipo"><span class="tipo-mov tipo-mov--<?= e($fila['tipo']) ?>"><?= e(rtrim(MovimientoService::TIPOS[$fila['tipo']], 's')) ?></span></td>
+                            <td class="tabla-apilada__titulo">
                                 <?php if ((int) $fila['insumo_activo'] === 1) : ?>
                                     <a class="movimientos__producto" href="<?= e(url('insumos/' . $fila['insumo_id'])) ?>"><?= e($fila['nombre']) ?></a>
                                 <?php else : ?>
@@ -95,10 +95,10 @@ $descargas = '<div class="descargas"><span class="descargas__titulo">Descargar</
                                     <span class="movimientos__producto"><?= e($fila['nombre']) ?></span>
                                 <?php endif; ?>
                             </td>
-                            <td class="text-end movimientos__cantidad movimientos__cantidad--<?= $cantidad > 0 ? 'mas' : 'menos' ?>"><?= e(($cantidad > 0 ? '+' : '−') . abs($cantidad)) ?></td>
-                            <td class="text-end movimientos__numero"><?= e($fila['stock_resultante']) ?></td>
-                            <td><?= e($fila['quien'] ?? '—') ?></td>
-                            <td class="text-muted"><?= e($fila['sector'] ?? $fila['motivo'] ?? ($fila['reserva'] !== null ? 'Reserva ' . $fila['reserva'] : '—')) ?></td>
+                            <td class="text-end movimientos__cantidad movimientos__cantidad--<?= $cantidad > 0 ? 'mas' : 'menos' ?>" data-label="Cantidad"><?= e(($cantidad > 0 ? '+' : '−') . abs($cantidad)) ?></td>
+                            <td class="text-end movimientos__numero" data-label="Quedaron"><?= e($fila['stock_resultante']) ?></td>
+                            <td data-label="Quién"><?= e($fila['quien'] ?? '—') ?></td>
+                            <td class="text-muted" data-label="Detalle"><?= e($fila['sector'] ?? $fila['motivo'] ?? ($fila['reserva'] !== null ? 'Reserva ' . $fila['reserva'] : '—')) ?></td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>

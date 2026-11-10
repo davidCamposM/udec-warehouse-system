@@ -27,12 +27,13 @@ $temaAzul = true;
 <html lang="es"<?= $temaAzul ? ' class="tema-azul"' : '' ?>>
 <head>
     <?= partial('head', ['titulo' => $titulo ?? null, 'estilos' => $hojas] + ($temaAzul ? ['temaColor' => '#223c6a'] : [])) ?>
-    <script src="<?= e(asset('js/core/ui.js')) ?>" defer></script>
-    <script src="<?= e(asset('js/core/sesion.js')) ?>" defer></script>
-    <script src="<?= e(asset('js/core/ventana.js')) ?>" defer></script>
-    <script src="<?= e(asset('js/core/posicion.js')) ?>" defer></script>
+    <?php // Módulos ES: se ejecutan en orden, después de leer la página (como defer), sin variables globales. ?>
+    <?= script_modulo('js/core/ui.js') ?>
+    <?= script_modulo('js/core/sesion.js') ?>
+    <?= script_modulo('js/core/ventana.js') ?>
+    <?= script_modulo('js/core/posicion.js') ?>
     <?php foreach ($scripts ?? [] as $script) : ?>
-    <script src="<?= e(asset($script)) ?>" defer></script>
+    <?= script_modulo($script) ?>
     <?php endforeach; ?>
 </head>
 <body<?= $conVentana ? ' class="con-ventana"' : '' ?>>

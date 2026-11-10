@@ -39,7 +39,7 @@ defined('APP_ROOT') || exit;
 <?php else : ?>
     <div class="card">
         <div class="table-responsive">
-            <table class="table usuarios__tabla">
+            <table class="table tabla-apilada usuarios__tabla">
                 <thead>
                     <tr>
                         <th scope="col">Persona</th>
@@ -52,20 +52,20 @@ defined('APP_ROOT') || exit;
                 <tbody>
                     <?php foreach ($cuentas as $cuenta) : ?>
                         <tr>
-                            <td>
+                            <td class="tabla-apilada__titulo">
                                 <strong class="usuarios__nombre"><?= e($cuenta['nombre']) ?></strong>
                                 <span class="usuarios__email"><?= e($cuenta['email']) ?></span>
                             </td>
-                            <td><?= e(CuentaService::PERFILES[$cuenta['perfil']] ?? $cuenta['perfil']) ?></td>
-                            <td>
+                            <td data-label="Perfil"><?= e(CuentaService::PERFILES[$cuenta['perfil']] ?? $cuenta['perfil']) ?></td>
+                            <td data-label="Contraseña">
                                 <?php if ((bool) $cuenta['con_clave']) : ?>
                                     <span class="status status--ok"><?= icon('check') ?>Creada</span>
                                 <?php else : ?>
                                     <span class="status status--low"><?= icon('clock') ?>Falta crearla</span>
                                 <?php endif; ?>
                             </td>
-                            <td class="text-muted usuarios__fecha"><?= e($cuenta['ultimo_acceso'] !== null ? Fecha::mostrar($cuenta['ultimo_acceso']) : 'Nunca') ?></td>
-                            <td>
+                            <td class="text-muted usuarios__fecha" data-label="Último ingreso"><?= e($cuenta['ultimo_acceso'] !== null ? Fecha::mostrar($cuenta['ultimo_acceso']) : 'Nunca') ?></td>
+                            <td class="tabla-apilada__acciones">
                                 <div class="usuarios__acciones">
                                     <form method="post" action="<?= e(url('usuarios/' . $cuenta['id'] . '/enlace')) ?>" data-submit-once>
                                         <?= csrf_field() ?>

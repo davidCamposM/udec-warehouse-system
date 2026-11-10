@@ -2,6 +2,11 @@
 # Sin mod_rewrite el sistema sigue funcionando con url_mode = query (index.php?r=...).
 <IfModule mod_rewrite.c>
     RewriteEngine On
+
+    # Los scripts del sistema (módulos ES) se piden con la versión en la ruta: assets/v1731283200/js/core/ui.js es
+    # assets/js/core/ui.js. Ver Url::modulo.
+    RewriteRule ^assets/v[0-9]+/(js/.+\.js)$ assets/$1 [L]
+
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule ^ index.php [L]

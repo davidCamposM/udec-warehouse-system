@@ -1,6 +1,8 @@
 /* Difusión, minimalista: selector de grupos; cada grupo, un título chico y filas delgadas. */
 .difusion {
   display: grid;
+  /* minmax(0, …): el selector de grupos se desplaza dentro de su caja y no ensancha la página en el celular */
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-5);
 }
 

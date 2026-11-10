@@ -10,6 +10,7 @@ use App\Core\Request;
 use App\Core\Response;
 use App\Core\Session;
 use App\Core\Url;
+use App\Core\View;
 
 defined('APP_ROOT') || exit;
 
@@ -61,7 +62,7 @@ final class InsumoController
     {
         $texto = trim((string) $request->query('q', ''));
         if ($texto === '') {
-            return Response::html('');
+            return Response::ok(['html' => '']);
         }
 
         $para = $request->query('para');
@@ -74,11 +75,12 @@ final class InsumoController
             default => null,
         };
 
-        return Response::view('Insumos::partials/sugerencias', $this->insumos->sugerencias($texto, self::SUGERENCIAS) + [
+        // JSON con el mismo sobre que el resto de la API; el HTML de la lista va dentro, dibujado por su vista.
+        return Response::ok(['html' => View::render('Insumos::partials/sugerencias', $this->insumos->sugerencias($texto, self::SUGERENCIAS) + [
             'texto' => $texto,
             'para' => $para,
             'agregar' => Permission::can('insumos.crear') ? $agregar : null,
-        ], null);
+        ], null)]);
     }
 
     public function show(Request $request): Response

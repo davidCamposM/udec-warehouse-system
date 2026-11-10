@@ -38,7 +38,7 @@ return [
     [
         'clave' => 'guardar-en-bodega',
         'texto' => 'Ingresar productos',
-        'descripcion' => 'Lo que llega: un producto que ya existe, uno nuevo o un abastecimiento SAP',
+        'descripcion' => 'Lo que llega: un producto que ya existe o uno nuevo',
         'ruta' => '/guardar',
         'icono' => 'box',
         'color' => 'verde',

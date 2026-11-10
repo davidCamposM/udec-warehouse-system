@@ -2,11 +2,11 @@
 
 defined('APP_ROOT') || exit;
 
-// Un estado de la bodega (insumos o herramientas) en el modelo nuevo de la interfaz (azul marino): una tarjeta blanca
-// con la torta a la izquierda (un anillo liso, con el total al centro) y, a la derecha, el título y una fila por parte:
-// su punto de color, su nombre y su cantidad. Si la parte tiene enlace, la fila lleva a su lista.
-// Recibe lo mismo que Panel::grafico (PanelService::graficos()): $titulo, $unidad, $partes y $id; y $corto (opcional),
-// un título más breve para esta tarjeta.
+// Un estado de la bodega (insumos o herramientas): una tarjeta blanca con la torta a la izquierda (un anillo liso, con
+// el total al centro) y, a la derecha, el título y una fila por parte: su punto de color, su nombre y su cantidad. Si
+// la parte tiene enlace, la fila lleva a su lista.
+// Recibe lo de PanelService::graficos(): $titulo, $unidad, $partes y $id; y $corto (opcional), un título más breve
+// para esta tarjeta.
 // El anillo: cada círculo mide 100 de largo (pathLength), así el largo de cada arco es su porcentaje; entre arcos queda
 // una separación fina.
 

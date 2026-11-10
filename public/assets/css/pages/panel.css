@@ -1420,8 +1420,10 @@ a.aviso-fila:hover .aviso-fila__ver .icon {
 .inicio-operaciones--tarjetas .inicio-operaciones__cabecera p { display: none; }
 
 .inicio-operaciones--tarjetas .inicio-operaciones__lista {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(13.5rem, 1fr));
+  /* Flexible y no una grilla: cada fila reparte todo el ancho entre sus tarjetas, así ninguna deja un hueco al final
+     (con 5 tarjetas en 3 columnas, la segunda fila son 2 tarjetas anchas, no 2 tarjetas y un espacio vacío). */
+  display: flex;
+  flex-wrap: wrap;
   gap: var(--space-3);
   overflow: visible;
   border: 0;
@@ -1429,6 +1431,7 @@ a.aviso-fila:hover .aviso-fila__ver .icon {
   background: transparent;
 }
 
+.inicio-operaciones--tarjetas .inicio-operaciones__lista li { flex: 1 1 13.5rem; min-width: 0; }
 .inicio-operaciones--tarjetas .inicio-operaciones__lista li + li { border-top: 0; }
 
 .inicio-operaciones--tarjetas .inicio-operacion {

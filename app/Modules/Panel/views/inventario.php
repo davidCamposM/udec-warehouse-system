@@ -27,7 +27,7 @@ $enlace = static fn (?int $id, int $numero = 1): string => url('inventario', arr
             <span class="text-muted inventario__total"><?= e($total) ?> <?= $total === 1 ? 'producto' : 'productos' ?></span>
         </div>
         <div class="table-responsive">
-            <table class="table table-hover inventario__tabla" aria-labelledby="titulo-inventario">
+            <table class="table table-hover tabla-apilada inventario__tabla" aria-labelledby="titulo-inventario">
                 <thead>
                     <tr>
                         <th scope="col">Código UdeC</th>
@@ -41,10 +41,10 @@ $enlace = static fn (?int $id, int $numero = 1): string => url('inventario', arr
                 <tbody>
                     <?php foreach ($productos as $insumo) : ?>
                         <tr id="inventario-insumo-<?= e($insumo['id']) ?>">
-                            <td class="inventario__codigo"><?= e($insumo['codigo_udec'] ?? '—') ?></td>
+                            <td class="inventario__codigo" data-label="Código UdeC"><?= e($insumo['codigo_udec'] ?? '—') ?></td>
                             <?php // La foto del producto (la misma de «Buscar producto»); sin foto, el ícono de la caja. ?>
                             <?php $foto = foto_producto($insumo['codigo_udec'] ?? null, $insumo['codigo'] ?? null); ?>
-                            <td>
+                            <td class="tabla-apilada__titulo">
                                 <span class="inventario__producto">
                                     <span class="inventario__foto">
                                         <?php if ($foto !== null) : ?>
@@ -56,10 +56,10 @@ $enlace = static fn (?int $id, int $numero = 1): string => url('inventario', arr
                                     <a class="inventario__nombre" href="<?= e(url('insumos/' . $insumo['id'])) ?>"><?= e($insumo['nombre']) ?></a>
                                 </span>
                             </td>
-                            <td class="text-muted"><?= e($insumo['categoria'] ?? 'Sin categoría') ?></td>
-                            <td class="inventario__numero text-end"><?= e(explode(' ', unidades($insumo['stock_actual']), 2)[0]) ?></td>
-                            <td class="text-muted"><?= e($insumo['sector'] ?? 'Sin ubicación') ?></td>
-                            <td><?= partial('Insumos::partials/estado', ['insumo' => $insumo]) ?></td>
+                            <td class="text-muted" data-label="Categoría"><?= e($insumo['categoria'] ?? 'Sin categoría') ?></td>
+                            <td class="inventario__numero text-end" data-label="Cantidad"><?= e(explode(' ', unidades($insumo['stock_actual']), 2)[0]) ?></td>
+                            <td class="text-muted" data-label="Ubicación"><?= e($insumo['sector'] ?? 'Sin ubicación') ?></td>
+                            <td data-label="Estado"><?= partial('Insumos::partials/estado', ['insumo' => $insumo]) ?></td>
                         </tr>
                     <?php endforeach; ?>
                     <?php if ($productos === []) : ?>

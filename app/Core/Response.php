@@ -30,7 +30,28 @@ final class Response
         return self::html(View::render($plantilla, $datos, $layout), $estado);
     }
 
-    public static function json(mixed $datos, int $estado = 200): self
+    /**
+     * Respuesta exitosa de la API, siempre con el mismo sobre: {"ok": true, "data": …}. Así el JavaScript (core/api.js)
+     * lee todas las respuestas igual, sin conocer cada endpoint.
+     */
+    public static function ok(mixed $datos = null, int $estado = 200): self
+    {
+        return self::json(['ok' => true, 'data' => $datos], $estado);
+    }
+
+    /**
+     * Respuesta de error de la API, con el mismo sobre: {"ok": false, "error": {"code", "message", …}}. El código es
+     * estable y en inglés (para el programa); el mensaje, en español y para la persona. $detalles agrega datos al error,
+     * como la dirección del login o los campos con errores.
+     *
+     * @param array<string, mixed> $detalles
+     */
+    public static function error(string $codigo, string $mensaje, int $estado, array $detalles = []): self
+    {
+        return self::json(['ok' => false, 'error' => ['code' => $codigo, 'message' => $mensaje] + $detalles], $estado);
+    }
+
+    private static function json(mixed $datos, int $estado): self
     {
         $json = json_encode($datos, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
 

@@ -4,7 +4,7 @@
 <html lang="es" class="tema-azul">
 <head>
     <?= partial('head', ['titulo' => $titulo ?? null, 'estilos' => ['css/layout/auth.css'], 'temaColor' => '#223c6a']) ?>
-    <script src="<?= e(asset('js/core/ui.js')) ?>" defer></script>
+    <?= script_modulo('js/core/ui.js') ?>
 </head>
 <body class="auth">
     <main class="auth__main">

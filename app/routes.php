@@ -26,5 +26,7 @@ $router->get('/estado', static function (): Response {
         $bd = 'error';
     }
 
-    return Response::json(['php' => 'ok', 'bd' => $bd], $bd === 'ok' ? 200 : 503);
+    return $bd === 'ok'
+        ? Response::ok(['php' => 'ok', 'bd' => 'ok'])
+        : Response::error('service_unavailable', 'La base de datos no responde.', 503, ['php' => 'ok', 'bd' => 'error']);
 }, Permission::PUBLICO);

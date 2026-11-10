@@ -32,18 +32,14 @@ if ($perfil === 'docente') {
 }
 ?>
 <?php
-// Las tareas del día a día (Operaciones) y las de administración (Gestión del sistema). Con los gráficos de la bodega,
-// Operaciones va bajo los insumos (compacta, sin la descripción a la vista) y Gestión, como botones junto a «Imprimir
-// estado»; sin gráficos (el docente), en su lugar de siempre, más abajo.
-// El modelo nuevo (azul marino), en todos los perfiles: Operaciones va bajo los gráficos, a todo el ancho, como tarjetas
-// blancas compactas con el ícono y el nombre (.inicio-operaciones--tarjetas, panel.css), y los gráficos son la torta
-// simple (Panel::torta).
-$tarjetas = true;
+// Las tareas del día a día (Operaciones) van bajo los gráficos, a todo el ancho, como tarjetas blancas compactas con el
+// ícono y el nombre (.inicio-operaciones--tarjetas, panel.css). Las de administración (sectores, usuarios) van como
+// botones junto a «Imprimir estado».
 $navOperaciones = '';
 if ($grupos['Tareas'] !== []) :
     ob_start();
     ?>
-    <nav class="inicio-operaciones<?= $tarjetas ? ' inicio-operaciones--tarjetas' : '' ?>" aria-labelledby="titulo-tareas">
+    <nav class="inicio-operaciones inicio-operaciones--tarjetas" aria-labelledby="titulo-tareas">
         <div class="inicio-operaciones__cabecera">
             <h2 id="titulo-tareas"><?= $perfil === 'docente' ? 'Tus herramientas' : 'Operaciones' ?></h2>
             <p><?= $perfil === 'docente' ? 'Consulta el catálogo y el estado de tus solicitudes.' : 'Accede directamente a la tarea que necesitas realizar.' ?></p>
@@ -65,21 +61,6 @@ if ($grupos['Tareas'] !== []) :
     </nav>
     <?php
     $navOperaciones = (string) ob_get_clean();
-endif;
-$navGestion = '';
-if ($grupos['Administración'] !== []) :
-    ob_start();
-    ?>
-    <nav class="inicio-gestion" aria-labelledby="titulo-administracion">
-        <h2 id="titulo-administracion">Gestión del sistema</h2>
-        <ul>
-            <?php foreach ($grupos['Administración'] as $tarea) : ?>
-                <li><a href="<?= e($tarea['url']) ?>"><?= icon($tarea['icono']) ?><span><?= e($tarea['texto']) ?></span><?= icon('arrow-right') ?></a></li>
-            <?php endforeach; ?>
-        </ul>
-    </nav>
-    <?php
-    $navGestion = (string) ob_get_clean();
 endif;
 ?>
 <?php // Solo con avisos o con la campana se activa su actualización automática (panel.js). ?>
@@ -162,7 +143,7 @@ endif;
             <?php endif; ?>
         </header>
         <?php if ($bodega !== null) : ?>
-            <?php // Cómo está la bodega: un estado para los insumos y otro para las herramientas (Panel::grafico). ?>
+            <?php // Cómo está la bodega: una torta para los insumos y otra para las herramientas (Panel::torta). ?>
             <section class="graficos" aria-labelledby="titulo-graficos">
                 <div class="graficos__cabecera">
                     <h2 id="titulo-graficos">¿Cómo está la bodega?</h2>
@@ -199,54 +180,16 @@ endif;
                     </div>
                 </div>
                 <div class="graficos__lista">
-                    <?php // Izquierda: los insumos y, debajo, Operaciones. Derecha: las herramientas. ?>
+                    <?php // Izquierda: los insumos. Derecha: las herramientas. Debajo, Operaciones. ?>
                     <?php foreach ($bodega['graficos'] as $i => $grafico) : ?>
                         <div class="graficos__columna">
-                            <?php // En el modelo nuevo, la torta simple (Panel::torta): el anillo, el título y una fila por parte. ?>
-                            <?= partial($tarjetas ? 'Panel::torta' : 'Panel::grafico', $grafico + ['id' => 'grafico-' . $i]) ?>
-                            <?= $i === 0 && !$tarjetas ? $navOperaciones : '' ?>
+                            <?= partial('Panel::torta', $grafico + ['id' => 'grafico-' . $i]) ?>
                         </div>
                     <?php endforeach; ?>
                 </div>
-                <?= $tarjetas ? $navOperaciones : '' ?>
+                <?= $navOperaciones ?>
             </section>
         <?php endif; ?>
-    <?php endif; ?>
-
-    <?php
-    // Con el stock de herramientas arriba (el docente), sus avisos y sus accesos ya van ahí; abajo queda solo la búsqueda
-    // de productos, si la tiene.
-    $arriba = $stockHerramientas !== null;
-    $avisosAbajo = $avisos !== null && !$arriba;
-    ?>
-    <?php if ($arriba ? ($perfil === 'docente' && $buscar) : ($bodega === null || $avisosAbajo)) : ?>
-    <div class="inicio-trabajo">
-        <div class="inicio-trabajo__principal">
-            <?= $bodega === null && !$arriba ? $navOperaciones : '' ?>
-            <?php if ($perfil === 'docente' && $buscar) : ?>
-                <form class="inicio-docente__busqueda sugerencias" method="get" action="<?= e(url('insumos')) ?>" role="search">
-                    <label for="buscar">¿Buscas un producto de bodega?</label>
-                    <div class="input-group">
-                        <input class="form-control" id="buscar" name="q" type="search" placeholder="Nombre o código" autocomplete="off"
-                            data-sugerencias="<?= e(url('insumos/sugerencias')) ?>">
-                        <button class="btn btn-primary" type="submit"><?= icon('search') ?>Buscar</button>
-                    </div>
-                </form>
-            <?php endif; ?>
-        </div>
-        <aside class="inicio-trabajo__lateral">
-            <?php if ($avisosAbajo) : ?>
-                <section class="inicio-avisos" aria-labelledby="titulo-avisos">
-                    <div class="inicio-avisos__cabecera">
-                        <h2 id="titulo-avisos">Estado de tus solicitudes</h2>
-                        <p class="inicio__estado" data-panel-status>Actualizado a las <?= e(date('H:i')) ?></p>
-                    </div>
-                    <div data-panel-content><?= $avisos ?></div>
-                </section>
-            <?php endif; ?>
-            <?= $bodega === null ? $navGestion : '' ?>
-        </aside>
-    </div>
     <?php endif; ?>
 
     <?php if ($tareas === [] && !$buscar) : ?>

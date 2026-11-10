@@ -80,6 +80,6 @@ final class LoginController
      */
     public function seguir(Request $request): Response
     {
-        return Response::json(['ok' => true]);
+        return Response::ok();
     }
 }

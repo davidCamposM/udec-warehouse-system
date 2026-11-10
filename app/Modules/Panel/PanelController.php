@@ -53,16 +53,22 @@ final class PanelController
         );
     }
 
+    /*
+     * Los bloques que panel.js mantiene al día responden JSON con el mismo sobre que el resto de la API
+     * ({"ok": true, "data": {"html": …}}): el HTML del bloque va dentro, ya renderizado por el servidor, para que la vista
+     * siga siendo la única que sabe cómo se dibuja.
+     */
+
     /** Solo los avisos, sin la página: los pide panel.js cada cierto tiempo para mantenerlos al día. */
     public function actualizar(Request $request): Response
     {
-        return Response::html(Inicio::avisos());
+        return Response::ok(['html' => Inicio::avisos()]);
     }
 
     /** Solo el número de la campana del encargado y del operador: lo pide panel.js cada cierto tiempo. */
     public function campana(Request $request): Response
     {
-        return Response::html(Inicio::campana());
+        return Response::ok(['html' => Inicio::campana()]);
     }
 
     /**
@@ -83,12 +89,12 @@ final class PanelController
     {
         (new PanelRepository())->marcarNotificacionesVistas((int) Auth::id());
 
-        return Response::html('');
+        return Response::ok();
     }
 
     /** Solo el estado de las herramientas (el inicio del docente): lo pide panel.js cada cierto tiempo. */
     public function herramientas(Request $request): Response
     {
-        return Response::html(Inicio::stockHerramientas());
+        return Response::ok(['html' => Inicio::stockHerramientas()]);
     }
 }

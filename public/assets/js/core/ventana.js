@@ -8,7 +8,10 @@
    - Con sonido, para trabajar sin mirar la pantalla: un bip corto al avanzar, tres notas que suben al terminar
      (aparece la boleta «¡Listo!») y un tono grave si algo quedó marcado como error.
    Sin JavaScript todo funciona igual, recargando la página en cada etapa.
+   Las etapas son páginas HTML completas (no la API JSON): así cada una funciona también abierta directamente.
    ========================================================== */
+import { refreshContent } from "./ui.js";
+
 (() => {
   "use strict";
 
@@ -119,7 +122,7 @@
     }
 
     const ventana = actual();
-    window.Bodega?.reiniciar(ventana);
+    refreshContent(ventana);
     sonar(sonidoDe(ventana));
     ocupado = false;
   };
