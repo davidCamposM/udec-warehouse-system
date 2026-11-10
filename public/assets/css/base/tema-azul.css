@@ -1,0 +1,69 @@
+/* ==========================================================
+   Tema azul — el modelo nuevo de la interfaz (10/11/2026)
+   Minimalista y plano: un solo color (el azul #223C6A, elegido por el usuario) para la estructura y las acciones, grises
+   para lo demás y verde / amarillo / rojo solo para los estados. Sin degradados ni sombras teñidas; una sola forma
+   (8 px).
+
+   Rige donde <html> lleva la clase «tema-azul»: hoy, todo el sistema (layouts/acceso.php, app.php e invitado.php).
+   Solo redefine tokens: los componentes los leen y cambian solos. Los colores que las hojas tienen escritos a mano se
+   corrigen en components/tema-azul-ajustes.css, y los ajustes de cada pantalla, en su hoja, bajo «.tema-azul».
+   Para cambiar el azul del sistema, se cambia aquí (la escala --color-brand-* y los --tarea-*).
+   ========================================================== */
+:root.tema-azul {
+  /* La escala del color del sistema, en azul (mismos nombres que en tokens.css). Blanco sobre 800: 10,6:1 */
+  --color-brand-950: #101d35;
+  --color-brand-900: #182c50; /* «pasar encima» del principal */
+  --color-brand-800: #223c6a; /* principal: barra superior, botones, íconos y títulos */
+  --color-brand-700: #2e4d83; /* enlaces y textos en azul */
+  --color-brand-600: #3d5f9a; /* detalles, bordes y foco */
+  --color-brand-500: #6d87b5;
+  --color-brand-200: #cbd5e6;
+  --color-brand-100: #e5eaf3;
+  --color-brand-50: #f2f5f9;
+  /* Neutros sin tinte */
+  --color-bg: #f5f6f8;
+  --color-border: #e2e4e9;
+  --color-border-strong: #cdd1e0;
+  --color-hover: #f0f1f4;
+  --color-hover-fuerte: #e6e8ee;
+  --color-text: #1f2330;
+  --color-text-muted: #5b6270;
+  --color-text-subtle: #5b6270;
+  --color-info: #223c6a;
+  --color-info-bg: #f2f5f9;
+  --color-info-border: #cbd5e6;
+  /* Un solo color para todas las tareas: su tarjeta, su encabezado y su ventana van en el azul del sistema */
+  --tarea-verde: #223c6a;
+  --tarea-verde-texto: #223c6a;
+  --tarea-naranja: #223c6a;
+  --tarea-naranja-texto: #223c6a;
+  --tarea-turquesa: #223c6a;
+  --tarea-turquesa-texto: #223c6a;
+  --tarea-azul: #223c6a;
+  --tarea-azul-texto: #223c6a;
+  --tarea-grafito: #223c6a;
+  --tarea-grafito-texto: #223c6a;
+  --tarea-ocre: #223c6a;
+  --tarea-ocre-texto: #223c6a;
+  --tarea-pizarra: #223c6a;
+  --tarea-pizarra-texto: #223c6a;
+  /* Estados: el verde queda solo para «bien» */
+  --estado-bien: #2e7d4f;
+  --estado-atencion: #e0a526;
+  --estado-grave: #b3261e;
+  --estado-fuera: #8fb0de;
+  --color-si: #223c6a;
+  --color-accent: #cbd5e6;
+  /* Plano: los «degradados» son un solo color */
+  --gradiente-marca: linear-gradient(#223c6a, #223c6a);
+  --gradiente-boton: linear-gradient(#223c6a, #223c6a);
+  --gradiente-boton-hover: linear-gradient(#182c50, #182c50);
+  --gradiente-suave: linear-gradient(#ffffff, #ffffff);
+  --sombra-verde: 0 1px 2px rgba(16, 29, 53, 0.12);
+  --focus-ring: 0 0 0 0.25rem rgba(61, 95, 154, 0.3);
+  /* Una sola forma */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 8px;
+  --radius-xl: 8px;
+}

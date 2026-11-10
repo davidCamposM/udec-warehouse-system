@@ -2,8 +2,8 @@
    - Buscador (parcial Herramientas::partials/buscador): el campo filtra por nombre mientras se escribe (sin importar
      tildes ni mayúsculas) y las pastillas muestran una categoría, todas o, al solicitar, solo las elegidas. Los grupos
      sin herramientas visibles se ocultan. Sin JavaScript el buscador no aparece y se ven todas.
-   - Al solicitar: la ficha de cada herramienta con unidades se marca como elegida, y bajo las fichas se resume lo que
-     se lleva («Llevas 3 herramientas · 12 unidades»). */
+   - Al solicitar: la ficha de cada herramienta con unidades se marca como elegida, y la pastilla «Elegidas» dice
+     cuántas lleva. */
 (() => {
   "use strict";
 
@@ -49,7 +49,7 @@
       grupoElegido = clave;
       pastillas.forEach((pastilla) => {
         const activa = pastilla.dataset.verGrupo === clave;
-        pastilla.classList.toggle("active", activa);
+        pastilla.classList.toggle("is-activa", activa);
         pastilla.setAttribute("aria-pressed", String(activa));
       });
       filtrar();
@@ -70,28 +70,20 @@
     }
 
     // ---------- Lo que se lleva (solo al solicitar) ----------
-    const total = root.querySelector("[data-total]");
+    // La pastilla «Elegidas» solo está en el formulario de la solicitud.
     const cuentaElegidas = root.querySelector("[data-cuenta-elegidas]");
-    if (!total) return;
+    if (!cuentaElegidas) return;
 
     const actualizar = () => {
       let herramientas = 0;
-      let unidades = 0;
 
       fichas.forEach((ficha) => {
         const cuantas = unidadesDe(ficha);
         ficha.classList.toggle("is-elegida", cuantas > 0);
-        if (cuantas > 0) {
-          herramientas += 1;
-          unidades += cuantas;
-        }
+        if (cuantas > 0) herramientas += 1;
       });
 
-      total.textContent = herramientas === 0
-        ? "Todavía no eliges herramientas."
-        : `Llevas ${herramientas} ${herramientas === 1 ? "herramienta" : "herramientas"} · `
-          + `${unidades} ${unidades === 1 ? "unidad" : "unidades"}.`;
-      if (cuentaElegidas) cuentaElegidas.textContent = String(herramientas);
+      cuentaElegidas.textContent = String(herramientas);
       if (grupoElegido === "elegidas") filtrar();
     };
 

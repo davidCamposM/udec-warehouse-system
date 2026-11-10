@@ -23,6 +23,8 @@
   --color-campo: #f8f9fa; /* campos rellenos de los formularios en ventana */
   --color-border: #dee2e6;
   --color-border-strong: #ced4da;
+  --color-hover: #f3f4f6; /* fondo al pasar el mouse: gris neutro, sin verde (filas, listas, botones claros) */
+  --color-hover-fuerte: #e9ebee; /* el mismo, un paso más marcado (botones chicos sobre fondo claro) */
   --color-text: #212529;
   --color-text-muted: #6c757d;
   --color-text-subtle: #6c757d; /* placeholders y notas; contraste AA sobre blanco */

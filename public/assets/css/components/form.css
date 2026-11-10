@@ -107,7 +107,7 @@
 }
 
 .field__action:hover {
-  background: var(--color-brand-50);
+  background: var(--color-hover);
   color: var(--color-brand-800);
 }
 

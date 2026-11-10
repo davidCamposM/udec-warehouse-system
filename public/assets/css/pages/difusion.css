@@ -1,0 +1,121 @@
+/* Difusión, minimalista: selector de grupos; cada grupo, un título chico y filas delgadas. */
+.difusion {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.difusion__resumen {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  white-space: nowrap;
+}
+
+.difusion__resumen strong {
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.difusion__barra {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.difusion__grupos {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.difusion__columna {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.difusion__grupo {
+  min-width: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  overflow: hidden;
+  scroll-margin-top: 6rem;
+}
+
+.difusion__grupo:target { border-color: var(--color-border-strong); }
+
+.difusion__titulo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  font-weight: 650;
+}
+
+.difusion__titulo .icon { width: 1rem; height: 1rem; color: var(--color-text-muted); }
+
+.difusion__lista {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.difusion__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+}
+
+.difusion__item + .difusion__item { border-top: 1px solid var(--color-border); }
+
+.difusion__item:hover { background: var(--color-hover); }
+.difusion__item:hover .difusion__valor--sin { background: var(--color-hover-fuerte); }
+
+.difusion__identidad {
+  display: grid;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+.difusion__identidad strong {
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.difusion__identidad span {
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  line-height: 1.4;
+}
+
+.difusion__valor {
+  flex: none;
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.difusion__valor--sin {
+  padding: 0.15rem 0.55rem;
+  border-radius: var(--radius-full);
+  background: var(--color-hover);
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  font-weight: 500;
+}
+
+@media (max-width: 56rem) {
+  .difusion__grupos { grid-template-columns: minmax(0, 1fr); }
+}

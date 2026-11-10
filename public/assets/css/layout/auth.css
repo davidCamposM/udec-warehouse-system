@@ -131,3 +131,14 @@
   color: rgba(255, 255, 255, 0.85);
   text-align: center;
 }
+
+/* ---------- Modelo nuevo (azul marino, base/tema-azul.css): fondo plano, sin degradado ni sombras teñidas ---------- */
+.tema-azul .auth { background: var(--color-brand-800); }
+
+.tema-azul .auth__card {
+  border-color: transparent;
+  box-shadow: 0 24px 48px rgba(11, 14, 29, 0.35);
+}
+
+.tema-azul .auth__logo { box-shadow: none; }
+.tema-azul .auth__name { color: var(--color-brand-800); }

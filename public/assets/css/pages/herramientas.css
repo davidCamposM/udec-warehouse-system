@@ -285,29 +285,85 @@
   .form-bs .col-md-6 { grid-column: span 6; }
 }
 
-/* ---------- «Solicitar herramientas»: en la ventana ancha ---------- */
+/* ---------- «Solicitar herramientas»: una ventana de trabajo contenida ---------- */
+.ventana--ancha {
+  padding: var(--space-4);
+}
+
+.ventana--ancha .ventana__caja {
+  max-width: 56rem;
+}
+
+.ventana--ancha .ventana__icono {
+  width: 2.375rem;
+  height: 2.375rem;
+}
+
+.ventana--ancha .ventana__titulo {
+  font-size: var(--text-xl);
+}
+
+.ventana--ancha .ventana__texto {
+  font-size: var(--text-sm);
+}
+
 .pedir .hoja {
   gap: var(--space-3);
 }
 
-.pedir .hoja__membrete {
-  font-size: var(--text-xs);
-}
-
-.pedir .hoja__facultad .icon {
-  width: 1.375rem;
-  height: 1.375rem;
-}
-
-.pedir .hoja__titulo {
-  margin-bottom: var(--space-1);
-  padding-bottom: var(--space-2);
+.pedir__solicitante {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-2);
+  color: var(--bs-muted);
   font-size: var(--text-sm);
+}
+
+.pedir__solicitante strong {
+  color: var(--bs-body);
+  font-weight: 700;
+}
+
+.pedir__datos {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: var(--space-3) var(--space-4);
+}
+
+.pedir__datos .form-group {
+  min-width: 0;
+  margin: 0;
+}
+
+.pedir__departamento { grid-column: span 5; }
+.pedir__actividad { grid-column: span 7; }
+.pedir__retiro,
+.pedir__recepcion { grid-column: span 3; }
+.pedir__autoriza { grid-column: span 6; }
+
+@media (max-width: 46em) {
+  .pedir__datos {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pedir__departamento,
+  .pedir__actividad,
+  .pedir__autoriza { grid-column: 1 / -1; }
+  .pedir__retiro,
+  .pedir__recepcion { grid-column: span 1; }
+
+}
+
+@media (max-width: 32em) {
+  .ventana--ancha { padding: var(--space-2); }
+  .pedir__datos { grid-template-columns: minmax(0, 1fr); }
+  .pedir__datos > * { grid-column: 1; }
 }
 
 .pedir__detalles {
   display: grid;
-  gap: var(--space-3);
+  gap: var(--space-2);
   min-width: 0;
   margin: 0;
   padding: var(--space-3) 0 0;
@@ -325,15 +381,19 @@
   font-weight: 700;
 }
 
-.pedir__instruccion {
-  color: var(--bs-muted);
-  font-size: var(--text-sm);
-  font-weight: 400;
-}
 
 .pedir__grupos {
   display: grid;
   gap: var(--space-3);
+  max-height: clamp(10rem, 22vh, 13rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--space-2);
+  border: 1px solid var(--bs-gray-200);
+  border-radius: var(--radius-sm);
+  background: var(--bs-gray-50);
+  scrollbar-color: var(--bs-gray-400) transparent;
+  scrollbar-width: thin;
 }
 
 .pedir__grupo {
@@ -351,7 +411,7 @@
 
 .pedir__herramientas {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-2);
   padding: 0;
   list-style: none;
@@ -371,7 +431,7 @@
 }
 
 .pedir__herramienta:hover {
-  border-color: #ced4da;
+  border-color: var(--color-border-strong);
 }
 
 .pedir__herramienta.is-elegida {
@@ -382,6 +442,7 @@
 .pedir__nombre {
   display: grid;
   min-width: 0;
+  overflow-wrap: anywhere;
   font-size: 0.9375rem;
   line-height: 1.25;
   cursor: pointer;
@@ -438,42 +499,27 @@
   text-align: center;
 }
 
-.pedir__pie {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: var(--space-1) var(--space-4);
-  font-size: var(--text-sm);
-}
-
-.pedir__total {
-  color: var(--color-brand-800);
-  font-weight: 700;
-}
-
 .pedir__acciones {
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: var(--space-2);
-  margin-top: var(--space-4);
-  padding-top: var(--space-4);
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
   border-top: 1px solid var(--bs-gray-200);
 }
 
 /* ---------- Buscador de herramientas (parcial Herramientas::partials/buscador) ----------
    El campo y las categorías en una misma franja, compactos. */
 .buscador-herramientas {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-2) var(--space-3);
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
 }
 
 .buscador-herramientas__campo {
   position: relative;
-  flex: 1 1 14rem;
-  max-width: 20rem;
+  width: 100%;
 }
 
 .buscador-herramientas__icono {
@@ -502,20 +548,20 @@
 }
 
 .buscador-herramientas__grupos {
-  flex-wrap: wrap;
-  gap: 0.375rem;
+  width: fit-content;
+  max-width: 100%;
+  scrollbar-width: thin;
 }
 
-.buscador-herramientas__grupos .nav-link {
-  min-height: 2rem;
-  padding: 0 0.75rem;
+.buscador-herramientas__grupos .segmento__opcion {
+  border: 0;
+  background: none;
+  font: inherit;
   font-size: var(--text-sm);
   cursor: pointer;
 }
 
-.buscador-herramientas__grupos .nav-count {
-  font-size: var(--text-xs);
-}
+.buscador-herramientas__grupos .segmento__opcion.is-activa { background: var(--color-surface); }
 
 .buscador-herramientas__vacio {
   margin-top: var(--space-2);
@@ -527,58 +573,63 @@
   text-align: center;
 }
 
-/* ---------- Catálogo: una tarjeta por categoría ---------- */
+/* ---------- Catálogo: una lista compacta por categoría ----------
+   Cada categoría con su título chico y sus herramientas en filas: nombre, estado (atrasadas, prestadas), cuántas hay en
+   bodega y «Editar». */
 .catalogo {
   display: grid;
-  gap: var(--space-4);
+  gap: var(--space-5);
   margin-top: var(--space-4);
 }
 
+.catalogo__grupo {
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: none;
+}
+
+.catalogo__grupo .card-header {
+  padding: var(--space-2) var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-bg);
+}
+
+.catalogo__grupo .card-title { font-size: var(--text-sm); font-weight: 700; }
+.catalogo__grupo .card-header .text-muted { font-size: var(--text-xs); }
+
 .catalogo__lista {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
-  gap: var(--space-2);
-  padding: var(--space-4);
+  margin: 0;
+  padding: 0;
   list-style: none;
 }
 
+.catalogo__lista li + li { border-top: 1px solid var(--color-border); }
+
 .catalogo__herramienta {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-2);
-  min-height: 2.75rem;
-  padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--bs-gray-200);
-  border-radius: var(--radius-md);
-  background: #fff;
+  gap: var(--space-2) var(--space-3);
+  padding: var(--space-2) var(--space-4);
+  min-height: 3rem;
 }
+
+.catalogo__herramienta:hover { background: var(--color-hover); }
 
 .catalogo__nombre {
-  flex: 1;
+  flex: 1 1 12rem;
   min-width: 0;
+  font-size: var(--text-sm);
   font-weight: 600;
-  overflow-wrap: anywhere;
+  line-height: 1.35;
 }
 
-.catalogo__editar {
-  display: grid;
-  flex: none;
-  place-items: center;
-  width: 2rem;
-  height: 2rem;
-  border-radius: var(--radius-sm);
-  color: var(--bs-muted);
-  transition: background-color var(--bs-transition), color var(--bs-transition);
-}
+.catalogo__herramienta .status { font-size: var(--text-xs); }
 
-.catalogo__editar:hover {
-  background: var(--bs-primary-subtle);
-  color: var(--bs-primary);
-}
-
-.catalogo__editar .icon {
-  width: 1.125rem;
-  height: 1.125rem;
+@media (max-width: 40em) {
+  .catalogo__nombre { flex-basis: 100%; }
 }
 
 .catalogo__eliminar {
@@ -790,6 +841,8 @@
 
 /* ---------- Listas de solicitudes ---------- */
 .prestamos__filtros {
+  width: fit-content;
+  max-width: 100%;
   margin-bottom: var(--space-5);
 }
 
@@ -891,7 +944,7 @@
 .catalogo__hay {
   flex: none;
   color: var(--bs-muted);
-  font-size: var(--text-xs);
+  font-size: var(--text-sm);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
@@ -903,6 +956,8 @@
 
 /* Los filtros por dónde están las herramientas, sobre el buscador */
 .catalogo__estados {
+  width: fit-content;
+  max-width: 100%;
   margin-bottom: var(--space-4);
 }
 
@@ -980,4 +1035,185 @@
 .invierno__fila--sin .invierno__hay span {
   color: color-mix(in srgb, var(--estado-atencion) 70%, #000);
   font-weight: 600;
+}
+
+@media (max-width: 40em) {
+  .pedir__herramientas { grid-template-columns: minmax(0, 1fr); }
+  .pedir__grupos { max-height: 13rem; }
+  .ventana--ancha .ventana__texto { display: none; }
+  .pedir .stepper__button,
+  .pedir .stepper__input { height: 2.25rem; min-height: 2.25rem; }
+  .pedir .stepper__button { width: 2.25rem; }
+}
+/* Solicitudes y catálogo de temporada usan la misma densidad que el resto del sistema. */
+.solicitud-fila { border-color: #dce5dc; border-radius: .875rem; }
+.solicitud-fila:hover,
+.solicitud-fila:focus-visible { border-color: var(--color-border-strong); background: var(--color-hover); }
+.pedir__herramienta { transition: background-color 180ms ease, border-color 180ms ease; }
+.pedir__herramienta.is-elegida { background: #edf6eb; }
+@media (prefers-reduced-motion: reduce) {
+  .pedir__herramienta { transition: none; }
+}
+/* Solicitud: datos en una banda y selector con resumen propio. */
+.pedir .hoja {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(13rem, .33fr);
+  align-items: start;
+  gap: 1rem;
+}
+.pedir__solicitante {
+  grid-column: 1 / -1;
+  padding: .7rem .9rem;
+  border-radius: .55rem;
+  background: #e9f2e7;
+  color: #46604b;
+}
+.pedir__datos {
+  grid-column: 1 / -1;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: .85rem 1rem;
+}
+.pedir__departamento { grid-column: span 2; }
+.pedir__actividad { grid-column: span 4; }
+.pedir__retiro,
+.pedir__recepcion,
+.pedir__autoriza { grid-column: span 2; }
+.pedir__detalles {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: .85rem 1rem;
+  padding-top: 1rem;
+}
+.pedir__titulo { grid-column: 1 / -1; }
+.pedir__detalles > .field__error,
+.pedir__detalles > .invalid-feedback { grid-column: 1 / -1; }
+.pedir__detalles .buscador-herramientas,
+.pedir__grupos { grid-column: 1; }
+.pedir__grupos {
+  max-height: clamp(15rem, 42vh, 24rem);
+  margin-top: 0;
+  padding: 0;
+  border: 1px solid #d9e5d8;
+  border-radius: .7rem;
+  background: #fff;
+}
+.pedir__grupo { gap: 0; }
+.pedir__categoria {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  margin: 0;
+  padding: .55rem .8rem;
+  background: #edf4ec;
+  color: #315840;
+}
+.pedir__herramientas { display: block; }
+.pedir__herramientas li + li { border-top: 1px solid #e7eee6; }
+.pedir__herramienta,
+.pedir__herramienta:hover,
+.pedir__herramienta.is-elegida {
+  min-height: 3.5rem;
+  padding: .4rem .7rem;
+  border: 0;
+  border-radius: 0;
+}
+.pedir__nombre { overflow-wrap: normal; word-break: normal; line-height: 1.35; }
+@media (max-width: 50em) {
+  .pedir .hoja,
+  .pedir__detalles { grid-template-columns: minmax(0, 1fr); }
+  .pedir__datos { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pedir__departamento,
+  .pedir__actividad,
+  .pedir__autoriza { grid-column: 1 / -1; }
+  .pedir__retiro,
+  .pedir__recepcion { grid-column: span 1; }
+}
+@media (max-width: 32em) {
+  .pedir__datos { grid-template-columns: minmax(0, 1fr); }
+  .pedir__datos > * { grid-column: 1; }
+}
+/* Práctica de Invierno: inventario agrupado de ancho completo. */
+.invierno { columns: auto; display: grid; gap: 1rem; }
+.invierno__grupo {
+  margin: 0;
+  overflow: hidden;
+  border-color: #d8e5d7;
+  border-radius: .8rem;
+  box-shadow: none;
+}
+.invierno__grupo .card-header { background: #edf4ec; }
+.invierno__fila { min-height: 3.65rem; padding: .65rem 1rem; }
+.invierno__nombre { overflow-wrap: normal; word-break: normal; }
+.invierno__hay strong { font-size: 1.05rem; }
+.invierno__hay span { font-size: .78rem; }
+@media (max-width: 40em) {
+  .invierno__fila { align-items: start; }
+  .invierno__hay { min-width: 5.5rem; }
+}
+/* Préstamos: bandeja continua para comparar estado, docente y fechas. */
+.solicitudes {
+  display: block;
+  overflow: hidden;
+  border: 1px solid #d8e5d7;
+  border-radius: .8rem;
+  background: #fff;
+}
+.solicitudes > li + li { border-top: 1px solid #e5ede4; }
+.solicitud-fila {
+  min-height: 4.3rem;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  transition: background-color 180ms ease;
+}
+.solicitud-fila:hover,
+.solicitud-fila:focus-visible {
+  border: 0;
+  background: var(--color-hover);
+  box-shadow: none;
+  transform: none;
+}
+.solicitud-fila:focus-visible { outline: 3px solid #79ad79; outline-offset: -3px; }
+@media (prefers-reduced-motion: reduce) {
+  .solicitud-fila { transition: none; }
+}
+
+/* ---------- «Próximamente» (Insumos Práctica de Invierno, en preparación): el ícono de la montaña y el aviso ---------- */
+.proximamente {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-2);
+  max-width: 34rem;
+  margin: var(--space-8) auto;
+  padding: var(--space-8) var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  text-align: center;
+}
+
+.proximamente__icono {
+  display: grid;
+  place-items: center;
+  width: 4.5rem;
+  height: 4.5rem;
+  margin-bottom: var(--space-2);
+  border-radius: 50%;
+  background: var(--color-brand-50);
+  color: var(--color-brand-800);
+}
+
+.proximamente__icono .icon { width: 2.25rem; height: 2.25rem; }
+
+.proximamente__titulo {
+  margin: 0;
+  font-size: var(--text-xl);
+  color: var(--color-brand-950);
+}
+
+.proximamente__texto {
+  margin: 0;
+  color: var(--color-text-muted);
 }

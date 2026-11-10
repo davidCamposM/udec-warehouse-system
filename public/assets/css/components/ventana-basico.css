@@ -63,7 +63,7 @@
 
 .ventana .ventana__cerrar:hover {
   border-color: var(--bs-gray-500);
-  background: var(--bs-gray-100);
+  background: var(--color-hover);
   color: var(--bs-body);
 }
 
@@ -122,8 +122,8 @@
 }
 
 .ventana .stepper__button:hover {
-  border-color: var(--tono);
-  background: color-mix(in srgb, var(--tono) 8%, #fff);
+  border-color: var(--color-border-strong);
+  background: var(--color-hover);
   color: var(--bs-body);
   filter: none;
 }
@@ -159,7 +159,7 @@
 }
 
 .ventana .campo__cambiar:hover {
-  border-color: var(--tono);
+  border-color: var(--color-border-strong);
   color: var(--tono-texto);
 }
 
@@ -178,7 +178,7 @@
 }
 
 .ventana .option:hover .option__box {
-  border-color: color-mix(in srgb, var(--tono) 55%, var(--bs-border));
+  border-color: var(--color-border-strong);
 }
 
 .ventana .option__input:checked + .option__box {
@@ -281,7 +281,7 @@
 
 .ventana .btn--secondary:hover {
   border-color: var(--bs-gray-500);
-  background: var(--bs-gray-100);
+  background: var(--color-hover);
   color: var(--bs-body);
 }
 
@@ -493,8 +493,8 @@
 }
 
 .ventana .cantidad-foco__boton:hover {
-  border-color: var(--tono);
-  background: color-mix(in srgb, var(--tono) 10%, #fff);
+  border-color: var(--color-border-strong);
+  background: var(--color-hover);
 }
 
 .ventana .cantidad-foco__boton:active {
@@ -559,8 +559,8 @@
 }
 
 .ventana .cantidad-foco__rapido:hover {
-  border-color: var(--tono);
-  background: color-mix(in srgb, var(--tono) 10%, #fff);
+  border-color: var(--color-border-strong);
+  background: var(--color-hover);
 }
 
 .ventana .cantidad-foco__sumada {
@@ -600,16 +600,6 @@
 }
 
 /* Motivos de «Actualizar cantidad»: opciones bajas, en columnas, para que la etapa quepa sin bajar */
-.ventana .options--motivos {
-  grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
-}
-
-.ventana .options--motivos .option__box {
-  min-height: 2.75rem;
-  padding: var(--space-2) var(--space-3);
-  font-size: var(--text-sm);
-}
-
 /* ---------- Escaneo en foco: el campo para la pistola, grande y al centro ---------- */
 .ventana .escaneo-foco {
   display: grid;
@@ -689,20 +679,6 @@
   font-family: var(--font-sans);
   font-size: var(--text-xs);
   font-weight: 700;
-}
-
-.ventana .escaneo-foco--compacto {
-  gap: var(--space-2);
-  padding: var(--space-4);
-}
-
-.ventana .escaneo-foco--compacto .escaneo-foco__icono {
-  width: 2.75rem;
-  height: 2.75rem;
-}
-
-.ventana .escaneo-foco--compacto .escaneo-foco__pregunta {
-  font-size: var(--text-lg);
 }
 
 /* ---------- Lista plegada: el plan B, para cuando no hay etiqueta ---------- */
@@ -830,27 +806,13 @@
   }
 }
 
-/* ---------- Que la ventana se vea completa en cualquier pantalla ----------
-   Si la ventana no cabe, se baja (se desplaza el fondo, no la ventana: así la lista de productos que aparece al
-   escribir no queda recortada), y los botones del final quedan pegados al borde de abajo de la pantalla, siempre a la
-   vista. bottom = el margen de la ventana con la pantalla; margin/padding-bottom = el relleno de abajo de la caja, para
-   que al final quede todo como antes. En pantallas bajas (laptops de 768 a 900 px de alto) todo se compacta, y en las
-   muy bajas se quita lo que solo ayuda. */
+/* La ventana completa se desplaza y las sugerencias pueden abrirse fuera del campo. */
+/* Las acciones ocupan su espacio al final del formulario; no cubren campos al desplazarse. */
 .ventana .formulario__acciones {
-  position: sticky;
-  bottom: calc(-1 * var(--space-3));
-  z-index: 2;
-  margin-bottom: calc(-1 * var(--space-5));
-  padding-bottom: var(--space-5);
+  position: static;
+  margin: 0;
+  padding-bottom: 0;
   background: #fff;
-}
-
-@media (min-width: 40em) {
-  .ventana .formulario__acciones {
-    bottom: calc(-1 * var(--space-8));
-    margin-bottom: calc(-1 * var(--space-8));
-    padding-bottom: var(--space-8);
-  }
 }
 
 @media (max-height: 56rem) {
@@ -858,16 +820,8 @@
     padding-block: var(--space-4);
   }
 
-  .ventana .ventana__caja {
-    padding-top: var(--space-4);
-    padding-bottom: var(--space-4);
-  }
-
   .ventana .formulario__acciones {
-    bottom: calc(-1 * var(--space-4));
-    margin-bottom: calc(-1 * var(--space-4));
     padding-top: var(--space-3);
-    padding-bottom: var(--space-4);
   }
 
   .ventana .ventana__cabecera {
@@ -949,34 +903,38 @@
   }
 }
 
-/* ---------- Ingresar abastecimiento: la reserva arriba; la fila para agregar (producto · cantidad · Agregar); la lista
-   de lo que llegó (producto · − cantidad + · quitar). Al final, «Ingresar a la bodega». ---------- */
+/* ---------- Ingresar abastecimiento («¿Qué llegó?») ----------
+   La reserva arriba; un panel gris claro para agregar (Material · Cantidad · Agregar, rotulados y alineados, con la
+   ayuda debajo); la lista de lo que llegó con el total a la derecha (producto · − cantidad + · quitar). Al final,
+   «Ingresar N productos a la bodega». */
 .ventana .abastecimiento {
   display: grid;
   gap: var(--space-4);
 }
 
+.ventana .abastecimiento__agregar-a {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg);
+}
+
 .ventana .abastecimiento__nueva {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 6.5rem auto;
-  gap: var(--space-2);
+  grid-template-columns: minmax(0, 1fr) 6rem auto;
+  gap: var(--space-3);
   align-items: end;
 }
 
-.ventana .abastecimiento__cuantas {
-  display: grid;
-  gap: var(--space-1);
-}
-
-.ventana .abastecimiento__etiqueta {
-  color: var(--bs-muted);
-  font-size: var(--text-sm);
-  font-weight: 600;
-}
+.ventana .abastecimiento__agregar-a .campo { gap: var(--space-1); }
+.ventana .abastecimiento__agregar-a .campo__etiqueta { font-size: var(--text-sm); font-weight: 600; }
+.ventana .abastecimiento__agregar-a .input--relleno { background: var(--color-surface); border-color: var(--color-border); }
 
 .ventana .abastecimiento__cuantas .input {
   text-align: center;
   font-weight: 700;
+  font-variant-numeric: tabular-nums;
 }
 
 .ventana .abastecimiento__cuantas.has-error .input {
@@ -984,32 +942,64 @@
 }
 
 .ventana .abastecimiento__agregar {
+  min-width: 0;
   min-height: var(--control-height, 3rem);
+  padding: 0 var(--space-4);
+}
+
+.ventana .abastecimiento__ayuda {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}
+
+.ventana .abastecimiento__ayuda .icon { flex: none; width: 0.875rem; height: 0.875rem; }
+
+.ventana .abastecimiento__cabecera {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
 }
 
 .ventana .abastecimiento__titulo {
-  margin-bottom: var(--space-2);
-  color: var(--bs-muted);
-  font-size: var(--text-xs);
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+  margin: 0;
+  font-size: var(--text-base);
+  font-weight: 700;
+}
+
+.ventana .abastecimiento__total {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
 }
 
 .ventana .abastecimiento__vacio {
-  padding: var(--space-4);
-  border: 1px dashed var(--bs-border);
-  border-radius: var(--bs-radius);
-  color: var(--bs-muted);
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-5) var(--space-4);
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
 }
+
+.ventana .abastecimiento__vacio .icon { width: 1.1rem; height: 1.1rem; }
 
 .ventana .abastecimiento__filas {
   display: grid;
   margin: 0;
   padding: 0;
   overflow: hidden;
-  border: 1px solid var(--bs-border);
-  border-radius: var(--bs-radius);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
   list-style: none;
 }
 
@@ -1017,11 +1007,11 @@
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  padding: var(--space-2) var(--space-3);
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
 }
 
 .ventana .abastecimiento__fila + .abastecimiento__fila {
-  border-top: 1px solid var(--bs-border);
+  border-top: 1px solid var(--color-border);
 }
 
 .ventana .abastecimiento__producto {
@@ -1031,8 +1021,10 @@
   line-height: 1.3;
 }
 
+.ventana .abastecimiento__producto strong { font-size: var(--text-sm); }
+
 .ventana .abastecimiento__producto span {
-  color: var(--bs-muted);
+  color: var(--color-text-muted);
   font-family: var(--font-mono);
   font-size: var(--text-xs);
 }
@@ -1051,8 +1043,8 @@
 .ventana .abastecimiento__paso {
   display: grid;
   place-items: center;
-  width: 2.25rem;
-  height: 2.5rem;
+  width: 2rem;
+  height: 2.25rem;
   border: 0;
   background: var(--bs-gray-50, #f8f9fa);
   color: var(--bs-body);
@@ -1060,7 +1052,7 @@
 }
 
 .ventana .abastecimiento__paso:hover {
-  background: color-mix(in srgb, var(--tono) 10%, #fff);
+  background: var(--color-hover);
 }
 
 .ventana .abastecimiento__paso .icon {
@@ -1069,11 +1061,11 @@
 }
 
 .ventana .abastecimiento__numero {
-  width: 3.5rem;
-  height: 2.5rem;
+  width: 3rem;
+  height: 2.25rem;
   border: 0;
   border-inline: 1px solid var(--bs-border);
-  font-size: var(--text-lg);
+  font-size: var(--text-base);
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   text-align: center;
@@ -1086,6 +1078,7 @@
 
 .ventana .abastecimiento__quitar {
   flex: none;
+  padding: 0.45rem;
 }
 
 /* Angosto (teléfono): producto arriba; cantidad y Agregar debajo */
@@ -1094,7 +1087,7 @@
     grid-template-columns: minmax(0, 1fr) auto;
   }
 
-  .ventana .abastecimiento__nueva > .campo {
+  .ventana .abastecimiento__nueva > .campo:first-child {
     grid-column: 1 / -1;
   }
 
@@ -1106,3 +1099,170 @@
     flex-basis: 100%;
   }
 }
+
+/* Marco único: la cabecera y el cuerpo permanecen dentro de la caja en todos los tamaños. */
+.ventana .ventana__fondo {
+  background: rgba(20, 37, 27, .52);
+  backdrop-filter: blur(3px);
+}
+.ventana .ventana__caja {
+  padding: 0;
+  border: 1px solid #cbdcca;
+  border-radius: .9rem;
+  box-shadow: 0 22px 55px rgba(17, 41, 23, .2);
+}
+.ventana .ventana__cabecera {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: .75rem;
+  margin: 0;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #d6e5d3;
+  border-radius: .85rem .85rem 0 0;
+  background: #edf5eb;
+}
+.ventana__cuerpo {
+  min-width: 0;
+  padding: 1.25rem;
+}
+.ventana .ventana__titulo {
+  color: #193b24;
+  letter-spacing: -.025em;
+  line-height: 1.25;
+  overflow-wrap: break-word;
+}
+.ventana .ventana__texto { line-height: 1.4; }
+.ventana .ventana__cerrar { min-height: 2.75rem; }
+.ventana .campo__fijo {
+  border-color: #cadfca;
+  background: #f0f6ee;
+}
+.ventana .formulario__acciones {
+  padding-top: .75rem;
+  border-top-color: #d6e5d3;
+}
+@media (max-width: 40em) {
+  .ventana .ventana__cabecera { padding: 1rem; gap: .625rem; }
+  .ventana__cuerpo { padding: 1rem; }
+  .ventana .ventana__titulo { font-size: 1.125rem; }
+  .ventana .ventana__texto { font-size: .875rem; }
+  .ventana .ventana__cerrar { width: 2.75rem; padding: 0; justify-content: center; }
+  .ventana__cerrar span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .ventana .campo__fijo {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+  }
+  .ventana .campo__cambiar { grid-column: 2; justify-self: start; }
+  .ventana .formulario__acciones { grid-template-columns: minmax(0, 1fr); }
+  .ventana .formulario__acciones .btn { min-height: 2.75rem; padding: .625rem .75rem; }
+}
+
+/* Las otras formas de ingresar productos («Agregar producto», «Reserva SAP»): bajo la búsqueda, a la vista, como dos
+   botones de contorno con su ícono; delante, una pregunta chica. */
+.ventana .guardar__otros {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+
+.ventana .guardar__otro {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0.3rem 0.9rem 0.3rem 0.3rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color .15s ease, border-color .15s ease;
+}
+
+.ventana .guardar__otro-icono {
+  display: grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  background: var(--color-brand-50);
+  color: var(--color-brand-800);
+}
+
+.ventana .guardar__otro-icono .icon { width: 0.95rem; height: 0.95rem; }
+.ventana .guardar__otro:hover { border-color: var(--color-border-strong); background: var(--color-hover); }
+.ventana .guardar__otro:focus-visible { outline: 2px solid var(--color-brand-700); outline-offset: 2px; }
+
+/* Barra de botones de todas las ventanas (registrar, agregar, reserva SAP, actualizar, retirar…): compacta, a la
+   derecha, cada botón de su ancho. El principal (verde) va siempre al final, aunque en el código esté antes: así Enter
+   sigue enviando ese. En el teléfono, los botones se reparten el ancho. */
+.ventana .formulario__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.ventana .formulario__acciones .btn {
+  min-width: 8.5rem;
+  min-height: 2.75rem;
+  padding: 0 var(--space-5);
+}
+
+.ventana .formulario__acciones .btn--si { order: 1; }
+
+@media (max-width: 30em) {
+  .ventana .formulario__acciones .btn { flex: 1 1 auto; min-width: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ventana .guardar__otro { transition: none; }
+}
+
+/* ---------- Código desconocido en «Ingresar productos»: el código leído, «Agregarlo como producto nuevo» (principal) y,
+   más discreto, «Es otro envase de un producto que ya existe» ---------- */
+.ventana .desconocido__codigo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  justify-self: start;
+  margin: 0;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.ventana .desconocido__codigo .icon { width: 1rem; height: 1rem; color: var(--color-text-muted); }
+
+.ventana .desconocido__opciones {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-3);
+}
+
+.ventana .desconocido__opciones .btn { min-height: 2.75rem; padding: 0 var(--space-5); }
+
+.ventana .desconocido__aviso {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.ventana .desconocido__aviso .icon { flex: none; width: 1rem; height: 1rem; }

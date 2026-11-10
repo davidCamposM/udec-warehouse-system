@@ -108,6 +108,17 @@
   color: var(--color-text-muted);
 }
 
+/* Arriba: «Volver» a la izquierda y, si hay, lo lateral a la derecha (baja a otra línea si no cabe). */
+.encabezado__arriba {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+}
+
+.encabezado__lateral { flex: none; }
+
 .encabezado__acciones {
   display: flex;
   flex-wrap: wrap;
@@ -148,8 +159,8 @@
 }
 
 .back-link:hover {
-  background: var(--color-brand-50);
-  border-color: var(--color-brand-600);
+  background: var(--color-hover);
+  border-color: var(--color-border-strong);
   color: var(--color-brand-900);
 }
 
@@ -200,20 +211,17 @@
 
 /* ---------- Pareja ✕ / ✓ al final de formularios y confirmaciones ----------
    Como en las máquinas de pago con tarjeta: a la izquierda «✕ Cancelar» en rojo, a la derecha «✓ Guardar»
-   en verde. En el teléfono queda fija abajo, siempre a mano.
+   en verde. Se colocan después de los campos, sin tapar el contenido.
    <div class="acciones"><a class="btn btn--lg btn--no">✕ Cancelar</a><button class="btn btn--lg btn--si">✓ Guardar */
 .acciones {
-  position: sticky;
-  bottom: 0;
-  z-index: 10;
+  position: static;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-3);
-  margin: var(--space-6) calc(-1 * var(--space-4)) 0;
-  padding: var(--space-3) var(--space-4) calc(var(--space-3) + env(safe-area-inset-bottom));
+  margin: var(--space-6) 0 0;
+  padding: var(--space-3) 0;
   border-top: 1px solid var(--color-border);
-  background: rgba(245, 248, 249, 0.96);
-  box-shadow: 0 -8px 20px -12px rgba(16, 24, 40, 0.3);
+  background: transparent;
 }
 
 .acciones .btn {
@@ -310,7 +318,7 @@
 
 .sugerencia:hover,
 .sugerencia[aria-selected="true"] {
-  background: color-mix(in srgb, var(--sug) 9%, var(--color-surface));
+  background: var(--color-hover);
   color: var(--color-text);
 }
 
@@ -399,7 +407,7 @@
 }
 
 .sugerencias__todos:hover {
-  background: color-mix(in srgb, var(--sug) 15%, var(--color-surface));
+  background: var(--color-hover-fuerte);
 }
 
 .sugerencias__vacio {
@@ -439,7 +447,7 @@
 }
 
 a.item-row:hover {
-  border-color: var(--color-brand-500);
+  border-color: var(--color-border-strong);
   box-shadow: var(--shadow-md);
   color: var(--color-text);
   transform: translateY(-1px);
@@ -536,11 +544,6 @@ a.item-row:hover {
   grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
 }
 
-.options__group {
-  margin-top: var(--space-3);
-  font-weight: 600;
-  color: var(--color-text-muted);
-}
 
 .option {
   position: relative;
@@ -570,7 +573,7 @@ a.item-row:hover {
 }
 
 .option:hover .option__box {
-  border-color: var(--color-brand-500);
+  border-color: var(--color-border-strong);
 }
 
 .option__input:checked + .option__box {
@@ -688,6 +691,115 @@ a.item-row:hover {
   box-shadow: var(--shadow-sm);
 }
 
+/* Formulario compacto (como el de sectores): sin tarjeta por pregunta, etiqueta normal, ancho acotado y los botones
+   a la derecha, de tamaño normal. */
+.form-simple--compacto {
+  gap: var(--space-5);
+  max-width: 34rem;
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.form-simple--compacto .question {
+  gap: var(--space-1);
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.form-simple--compacto .question.has-error { box-shadow: none; }
+.form-simple--compacto .question__label { min-height: 0; padding: 0; font-size: var(--text-base); font-weight: 600; }
+.form-simple--compacto .question__optional { font-size: var(--text-sm); }
+.form-simple--compacto .question__hint { font-size: var(--text-sm); }
+
+/* ---------- Pastillas para elegir una opción entre varias (como el tipo de producto) ----------
+   Agrupadas bajo un título chico en gris; cada opción, una pastilla de borde fino. La elegida: verde claro con ✓.
+   <div class="pastillas"> <p class="pastillas__grupo"> <div class="pastillas__lista"> <label class="pastilla">
+   <input class="pastilla__input" type="radio"> <span class="pastilla__texto"> */
+.pastillas {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.pastillas + .pastillas { margin-top: var(--space-3); }
+
+.pastillas__grupo {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.pastillas__lista {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.pastilla { position: relative; }
+
+.pastilla__input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.pastilla__texto {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 0.35rem 0.85rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.pastilla:hover .pastilla__texto { border-color: var(--color-border-strong); background: var(--color-hover); }
+
+.pastilla__input:checked + .pastilla__texto {
+  border-color: var(--color-brand-500);
+  background: var(--color-brand-50);
+  color: var(--color-brand-900);
+  font-weight: 600;
+}
+
+.pastilla__input:checked + .pastilla__texto::before {
+  content: "✓";
+  font-size: var(--text-xs);
+}
+
+.pastilla__input:focus-visible + .pastilla__texto { outline: 2px solid var(--color-brand-600); outline-offset: 2px; }
+.has-error .pastilla__texto { border-color: var(--color-danger); }
+
+@media (prefers-reduced-motion: reduce) {
+  .pastilla__texto { transition: none; }
+}
+
+/* Un formulario compacto con más contenido (como Editar producto, con los tipos): algo más ancho. */
+.form-simple--medio { max-width: 44rem; }
+
+/* Dos campos cortos lado a lado; en el teléfono, uno bajo el otro. */
+.form-simple__fila {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  gap: var(--space-5) var(--space-4);
+}
+
+.form-simple__acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
 .question.has-error {
   border-color: var(--color-danger);
   box-shadow: 0 0 0 1px var(--color-danger);
@@ -743,17 +855,17 @@ a.item-row:hover {
   letter-spacing: 0.04em;
 }
 
+/* El texto de ayuda dentro del campo, en la letra normal (el código escrito sí va en ancho fijo). */
+.input--code::placeholder {
+  font-family: var(--font-sans);
+  letter-spacing: normal;
+}
+
 .question .field__error {
   font-size: var(--text-base);
   font-weight: 600;
 }
 
-.form-simple__note {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  color: var(--color-text-muted);
-}
 
 /* ---------- Pantalla de confirmación (antes de una acción que cuesta deshacer) ---------- */
 .confirm {
@@ -874,14 +986,15 @@ body.con-ventana {
   backdrop-filter: blur(6px);
 }
 
-/* margin-block: auto la centra; si no cabe, empieza arriba y se puede bajar, con los botones del final siempre a la
-   vista, pegados al borde de abajo de la pantalla (.ventana .formulario__acciones, en ventana-basico.css) */
+/* margin-block: auto la centra; si no cabe, empieza arriba y se puede recorrer completa. */
 .ventana__caja {
   position: relative;
   width: 100%;
   max-width: 38rem;
+  min-width: 0;
+  flex-shrink: 0;
   margin-block: auto;
-  padding: var(--space-5) var(--space-4);
+  padding: 0;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   background: var(--color-surface);
@@ -945,7 +1058,7 @@ body.con-ventana {
 }
 
 .ventana__cerrar:hover {
-  background: var(--color-bg);
+  background: var(--color-hover);
   color: var(--color-text);
 }
 
@@ -958,10 +1071,6 @@ body.con-ventana {
 @media (min-width: 40em) {
   .ventana {
     padding: var(--space-8) var(--space-6);
-  }
-
-  .ventana__caja {
-    padding: var(--space-6) var(--space-8) var(--space-8);
   }
 
   .ventana__titulo {
@@ -1072,7 +1181,7 @@ fieldset.campo > .campo__etiqueta {
 
 /* La opción elegida toma el color de la tarea (verde al registrar, naranja al actualizar) */
 .ventana .option:hover .option__box {
-  border-color: color-mix(in srgb, var(--tono, var(--color-brand-500)) 60%, var(--color-border));
+  border-color: var(--color-border-strong);
 }
 
 .ventana .option__input:checked + .option__box {
@@ -1257,3 +1366,85 @@ fieldset.campo > .campo__etiqueta {
   margin: 0;
 }
 
+
+/* Jerarquía de los encabezados internos */
+.encabezado {
+  gap: .75rem;
+  margin-bottom: 1.75rem;
+}
+.encabezado__fila { align-items: flex-start; gap: 1rem; }
+.encabezado__icono,
+.accion__icono,
+.ajuste__icono {
+  box-shadow: none;
+}
+.encabezado__titulo {
+  font-size: clamp(1.6rem, 2.2vw, 2rem);
+  line-height: 1.2;
+  letter-spacing: -.025em;
+}
+.encabezado__texto { max-width: 64ch; line-height: 1.5; }
+.encabezado__acciones { margin-top: .25rem; }
+.back-link { background: transparent; border-color: #cad5ca; }
+
+/* Acción principal junto al título */
+/* A page action belongs beside its title on wide screens. */
+@media (min-width: 48.01em) {
+  .encabezado {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: 1.5rem;
+  }
+  .encabezado .back-link { grid-column: 1 / -1; }
+  .encabezado__fila { grid-column: 1; }
+  .encabezado__acciones {
+    grid-column: 2;
+    justify-content: flex-end;
+    align-self: center;
+    margin-top: 0;
+  }
+}
+/* Cabecera de trabajo compartida por todas las pantallas posteriores al acceso. */
+.encabezado {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: clamp(1rem, 2.3vw, 1.6rem);
+  border-radius: .95rem;
+  background: #e9f2e8;
+}
+.encabezado .back-link {
+  justify-self: start;
+  min-height: 2.35rem;
+  padding: .35rem .65rem;
+  border: 1px solid #c4d8c2;
+  border-radius: .5rem;
+  background: #fff;
+  color: #215731;
+  font-size: .88rem;
+  font-weight: 650;
+}
+.encabezado__fila { align-items: center; gap: .9rem; }
+.encabezado__icono {
+  width: 2.9rem;
+  height: 2.9rem;
+  border-radius: .7rem;
+}
+.encabezado__titulo {
+  color: #183a23;
+  font-size: clamp(1.65rem, 2.7vw, 2.3rem);
+  line-height: 1.12;
+  letter-spacing: -.03em;
+}
+.encabezado__texto { max-width: 65ch; margin-top: .3rem; color: #536a58; }
+.encabezado__acciones { display: flex; flex-wrap: wrap; gap: .55rem; }
+@media (min-width: 48.01em) {
+  .encabezado { grid-template-columns: minmax(0, 1fr) auto; }
+  .encabezado .back-link { grid-column: 1 / -1; }
+  .encabezado__fila { grid-column: 1; }
+  .encabezado__acciones { grid-column: 2; }
+}
+@media (max-width: 35em) {
+  .encabezado__fila { align-items: start; }
+  .encabezado__icono { width: 2.5rem; height: 2.5rem; }
+}

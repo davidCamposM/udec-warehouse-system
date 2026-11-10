@@ -225,3 +225,45 @@
     grid-template-columns: 1fr 1fr;
   }
 }
+
+/* Superficies y navegación interna */
+body {
+  background: #f5f7f4;
+  color: #203025;
+}
+
+.app {
+  padding-block: clamp(1.25rem, 2.4vw, 2.5rem) 4rem;
+}
+
+.topbar {
+  background: #477f48;
+  box-shadow: 0 2px 12px rgba(25, 52, 31, .13);
+}
+
+.topbar__inner { min-height: 4rem; }
+.topbar__btn { background: transparent; }
+.topbar__btn:hover { background: #fff; }
+
+/* Adaptación de pantallas internas */
+@media (max-width: 48em) {
+  .app { padding-inline: 1rem; }
+  .encabezado__fila { align-items: flex-start; }
+  .encabezado__acciones > .btn { max-width: 100%; }
+  .card-header, .card-body { padding-inline: 1rem; }
+  .table th, .table td { padding: .75rem; }
+  .ventana .ventana__caja { border-radius: .875rem; }
+}
+
+@media (max-width: 30em) {
+  .app { padding-inline: .75rem; }
+  .encabezado__icono { width: 2.5rem; height: 2.5rem; }
+  .encabezado__titulo { font-size: 1.5rem; }
+  .encabezado__acciones { display: grid; }
+  .formulario__acciones { align-items: stretch; }
+  .formulario__acciones .btn { width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .accion, .nav-link, .catalogo__herramienta { transition: none; }
+}

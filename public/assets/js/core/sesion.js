@@ -61,9 +61,14 @@
     }
   };
 
+  // Avisa a la página que la sesión se está cerrando (panel.js deja de pedir el resumen: si no, su respuesta «sin
+  // sesión» llevaría al login otra vez y se perdería el aviso «Tu sesión se cerró por inactividad»).
+  const avisarCierre = () => document.dispatchEvent(new CustomEvent("bodega:cerrando-sesion"));
+
   const cerrarSesion = (porInactividad) => {
     if (cerrando) return;
     cerrando = true;
+    avisarCierre();
     motivo.value = porInactividad ? "inactividad" : "";
     formulario.submit();
   };
@@ -108,6 +113,7 @@
 
   formulario.addEventListener("submit", () => {
     cerrando = true;
+    avisarCierre();
   });
 
   // Escape no cierra la ventana sin responder: la pregunta sigue en pie hasta que se conteste o venza.

@@ -495,3 +495,174 @@
   justify-content: space-between;
   gap: var(--space-3);
 }
+
+/* Búsqueda adaptable */
+/* Narrow screens keep search and account tables inside their own surfaces. */
+.buscar, .buscar .input-group { min-width: 0; }
+.buscar .input-group { width: 100%; }
+
+/* El componente compartido de búsqueda controla también sus dimensiones en móvil. */
+@media (max-width: 30em) {
+  .buscar__etiqueta { font-size: 1rem; }
+}
+
+/* Resultados como un índice legible: una superficie y filas separadas. */
+.resultados {
+  gap: 0;
+  overflow: hidden;
+  border: 1px solid #dce5dc;
+  border-radius: .875rem;
+  background: #fff;
+  box-shadow: 0 3px 14px rgba(30, 56, 35, .05);
+}
+.resultados > li + li { border-top: 1px solid #e5ebe4; }
+.resultado {
+  min-height: 6.25rem;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  transition: background-color 180ms ease, color 180ms ease;
+}
+.resultado:hover,
+.resultado:focus-visible {
+  background: var(--color-hover);
+  box-shadow: none;
+  transform: none;
+}
+.resultado__nombre { font-size: 1rem; }
+.resultado__foto { background: #f8faf7; }
+@media (max-width: 30em) {
+  .resultado { padding: .875rem; }
+  .resultado__datos { font-size: .8125rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .resultado { transition: none; }
+}
+/* Consulta: búsqueda y filtros forman una sola herramienta. */
+.consulta-productos {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 1.4rem;
+  padding: 1.2rem;
+  border: 1px solid #d1e0cf;
+  border-radius: .9rem;
+  background: #eaf3e8;
+}
+.consulta-productos .buscar {
+  max-width: 52rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.consulta-productos .buscar__etiqueta { font-size: 1rem; color: #21472d; }
+.consulta-productos .buscar__icono {
+  width: 1.8rem;
+  height: 1.8rem;
+  background: #d4e8d1;
+}
+.consulta-productos .buscar__barra {
+  margin: 0;
+  padding-top: .8rem;
+  border-top: 1px solid #cfdfcd;
+}
+.resultados__cabecera {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  margin-bottom: .65rem;
+}
+.resultados__cabecera h2 { margin: 0; color: #1d3d27; font-size: 1.2rem; }
+.resultados__cabecera span { color: #536b5a; font-size: .9rem; }
+.resultados {
+  display: block;
+  overflow: hidden;
+  border: 1px solid #d9e5d8;
+  border-radius: .85rem;
+  background: #fff;
+}
+.resultados > li + li { border-top: 1px solid #e6eee5; }
+.resultado {
+  grid-template-columns: 4.3rem minmax(0, 1fr) minmax(7rem, auto);
+  grid-template-areas: "foto texto stock";
+  gap: 1rem;
+  min-height: 5.4rem;
+  padding: .65rem 1rem;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  transition: background-color 180ms ease;
+}
+.resultado:hover,
+.resultado:focus-visible {
+  border: 0;
+  background: var(--color-hover);
+  box-shadow: none;
+  transform: none;
+}
+.resultado:focus-visible { outline: 3px solid #7aaf79; outline-offset: -3px; }
+.resultado__foto {
+  width: 4.3rem;
+  height: 4.3rem;
+  border: 0;
+  border-radius: .55rem;
+  background: #f4f8f3;
+}
+.resultado__nombre { color: #183923; font-size: 1.02rem; }
+.resultado__datos { gap: .15rem .7rem; }
+.resultado__stock { min-width: 7rem; }
+.producto {
+  grid-template-columns: minmax(12rem, .65fr) minmax(0, 1.35fr);
+  margin-bottom: 1.5rem;
+  border-color: #d5e2d4;
+  border-radius: .9rem;
+  box-shadow: none;
+}
+.producto__foto {
+  order: -1;
+  min-height: 17rem;
+  border: 0;
+  border-right: 1px solid #d9e5d8;
+  background: #edf4ec;
+}
+.producto__foto img { max-width: 19rem; }
+.producto__info { gap: 1rem; padding: 1.4rem; }
+.producto__cantidad {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .4rem 1rem;
+  padding: 0 0 1.1rem;
+}
+.producto__etiqueta { flex-basis: 100%; }
+.producto__numero { font-size: clamp(2.4rem, 4vw, 3.3rem); }
+.producto__minimo { flex-basis: 100%; }
+.producto__datos {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem 1.5rem;
+}
+@media (max-width: 40em) {
+  .consulta-productos { padding: .85rem; }
+  .consulta-productos .buscar__barra { align-items: stretch; }
+  .resultado {
+    grid-template-columns: 3.5rem minmax(0, 1fr);
+    grid-template-areas: "foto texto" "foto stock";
+    gap: .3rem .75rem;
+    padding: .75rem;
+  }
+  .resultado__foto { width: 3.5rem; height: 3.5rem; }
+  .resultado__stock { display: flex; align-items: center; justify-items: start; justify-content: flex-start; gap: .6rem; }
+  .resultado__cantidad { font-size: 1.1rem; }
+  .resultado__datos > span + span::before { display: none; }
+  .producto { grid-template-columns: minmax(0, 1fr); }
+  .producto__foto { min-height: 12rem; border-right: 0; border-bottom: 1px solid #d9e5d8; }
+  .producto__datos { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .resultado { transition: none; }
+}

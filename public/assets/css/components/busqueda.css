@@ -1,0 +1,121 @@
+/* Búsqueda interna: una superficie continua, con icono integrado y foco claro. */
+:is(.inicio-cabecera__buscar, .inicio-docente__busqueda .input-group, .consulta-productos .buscar .input-group, .buscador-herramientas__campo, .field__control--with-icon.sugerencias) {
+  min-width: 0;
+  border: 1px solid #cad9cc;
+  border-radius: .875rem;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(22, 63, 36, .045);
+  transition: border-color .18s ease, box-shadow .18s ease;
+}
+:is(.inicio-cabecera__buscar, .inicio-docente__busqueda .input-group, .consulta-productos .buscar .input-group, .buscador-herramientas__campo, .field__control--with-icon.sugerencias):hover {
+  border-color: var(--color-border-strong);
+}
+:is(.inicio-cabecera__buscar, .inicio-docente__busqueda .input-group, .consulta-productos .buscar .input-group, .buscador-herramientas__campo, .field__control--with-icon.sugerencias):focus-within {
+  outline: 2px solid transparent;
+  border-color: #438753;
+  box-shadow: 0 0 0 3px rgba(71, 137, 79, .15);
+}
+:is(.inicio-cabecera__buscar, .inicio-docente__busqueda .input-group, .consulta-productos .buscar .input-group) {
+  display: flex;
+  align-items: center;
+  gap: .25rem;
+  min-height: 3rem;
+  padding: .25rem;
+}
+:is(.inicio-cabecera__buscar, .inicio-docente__busqueda .input-group, .consulta-productos .buscar .input-group) > .form-control {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 2.375rem;
+  padding: 0 .75rem;
+  border: 0;
+  border-radius: .55rem;
+  background: transparent;
+  box-shadow: none;
+  font-size: .9375rem;
+}
+:is(.inicio-cabecera__buscar, .inicio-docente__busqueda .input-group, .consulta-productos .buscar .input-group) > .form-control:focus {
+  outline: 2px solid transparent;
+  border: 0;
+  box-shadow: none;
+}
+:is(.inicio-cabecera__buscar, .inicio-docente__busqueda .input-group, .consulta-productos .buscar .input-group) > .form-control::placeholder,
+:is(.buscador-herramientas__campo, .field__control--with-icon.sugerencias) > .input::placeholder {
+  color: #617267;
+  opacity: 1;
+}
+/* El enlace de la lupa conserva su destino sin verse como una baldosa. */
+.inicio-cabecera__buscar > .btn:first-child {
+  flex: 0 0 2.375rem;
+  width: 2.375rem;
+  height: 2.375rem;
+  min-height: 2.375rem;
+  padding: 0;
+  border: 0;
+  border-radius: .55rem;
+  background: transparent;
+  background-image: none;
+  box-shadow: none;
+  color: #397b48;
+}
+.inicio-cabecera__buscar > .btn:first-child:hover,
+.inicio-cabecera__buscar > .btn:first-child:focus-visible {
+  background: var(--color-hover);
+  background-image: none;
+  box-shadow: none;
+  color: #245f34;
+}
+.inicio-cabecera__buscar > .form-control { padding-left: .2rem; }
+:is(.inicio-docente__busqueda .input-group, .consulta-productos .buscar .input-group) > .btn {
+  flex: none;
+  width: auto;
+  min-height: 2.375rem;
+  height: 2.375rem;
+  padding: 0 .875rem;
+  border: 0;
+  border-radius: .6rem;
+  background: #e8f2e9;
+  background-image: none;
+  box-shadow: none;
+  color: #245f34;
+  font-size: .875rem;
+  font-weight: 700;
+}
+:is(.inicio-docente__busqueda .input-group, .consulta-productos .buscar .input-group) > .btn:hover,
+:is(.inicio-docente__busqueda .input-group, .consulta-productos .buscar .input-group) > .btn:focus-visible {
+  background: var(--color-hover-fuerte);
+  background-image: none;
+  box-shadow: none;
+  color: #174b27;
+}
+:is(.buscador-herramientas__campo, .field__control--with-icon.sugerencias) {
+  position: relative;
+  min-height: 3rem;
+}
+:is(.buscador-herramientas__icono, .field__control--with-icon.sugerencias > .field__icon) {
+  left: .875rem;
+  width: 1.125rem;
+  color: #397b48;
+}
+:is(.buscador-herramientas__campo, .field__control--with-icon.sugerencias) > .input {
+  width: 100%;
+  height: 2.875rem;
+  min-height: 2.875rem;
+  padding: 0 .875rem 0 2.65rem;
+  border: 0;
+  border-radius: .8rem;
+  background: transparent;
+  box-shadow: none;
+  font-size: .9375rem;
+}
+:is(.buscador-herramientas__campo, .field__control--with-icon.sugerencias) > .input:focus {
+  outline: 2px solid transparent;
+  border: 0;
+  box-shadow: none;
+}
+.field__control--with-icon.sugerencias:has(> .input[aria-invalid="true"]) { border-color: var(--color-danger, #b9332a); }
+@media (prefers-reduced-motion: reduce) {
+  :is(.inicio-cabecera__buscar, .inicio-docente__busqueda .input-group, .consulta-productos .buscar .input-group, .buscador-herramientas__campo, .field__control--with-icon.sugerencias) { transition: none; }
+}
+@media (forced-colors: active) {
+  :is(.inicio-cabecera__buscar, .inicio-docente__busqueda .input-group, .consulta-productos .buscar .input-group, .buscador-herramientas__campo, .field__control--with-icon.sugerencias):focus-within { outline: 2px solid Highlight; }
+}

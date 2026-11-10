@@ -11,278 +11,435 @@
   gap: var(--space-6);
 }
 
-/* ---------- Cabecera: el saludo y la búsqueda sobre una superficie clara ----------
-   Blanco que pasa a un verde muy suave, con un borde verde claro: un fondo tranquilo, propio de un buscador, donde lo
-   que destaca es la barra de búsqueda. Sin recorte: la lista de coincidencias se abre por debajo de la cabecera. */
-.inicio__hero {
+/* ---------- ¿Cómo está la bodega?: un estado para los insumos y otro para las herramientas (Panel::grafico) ----------
+   <section class="estado">: cabecera (ícono y título) · la torta con el total al centro y, al lado, la cifra principal ·
+   una tarjeta por parte · los datos de abajo. Colores de estado (validados para daltonismo): verde = en
+   bodega / bien, ámbar = atención, azul = fuera a tiempo, rojo = grave. El color nunca va solo: cada parte lleva su
+   ícono y su nombre, y el texto va siempre en los colores de texto. */
+.graficos {
+  --estado-c-bien: var(--estado-bien);
+  --estado-c-atencion: var(--estado-atencion);
+  --estado-c-fuera: var(--estado-fuera);
+  --estado-c-grave: var(--estado-grave);
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: var(--space-5);
-  padding: var(--space-6) var(--space-5);
-  border: 1px solid var(--color-brand-200);
-  border-radius: var(--radius-lg);
-  background: linear-gradient(135deg, #ffffff 0%, var(--color-brand-50) 100%);
-  box-shadow: var(--bs-shadow-sm);
-  color: var(--bs-body);
+  gap: var(--space-4);
 }
 
-.inicio__encabezado {
-  display: grid;
-  gap: 2px;
+.graficos__cabecera {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
 }
 
-.inicio__saludo {
-  font-size: var(--text-3xl);
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 1.15;
+.graficos__cabecera h2 {
+  margin: 0;
+  font-size: var(--text-xl);
   color: var(--color-brand-950);
 }
 
-.inicio__fecha {
-  color: var(--bs-muted);
-  font-size: var(--text-lg);
-}
-
-/* La búsqueda: una cápsula blanca con borde y un margen interior; adentro, la lupa como un botón verde (lleva a
-   «Buscar producto») y el campo sin borde propio. Al escribir, el borde se pone verde con un anillo verde claro. */
-.inicio__hero .input-group {
+.graficos__acciones {
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  gap: var(--space-2) var(--space-4);
+}
+
+/* Inventario, Sectores, Usuarios e «Imprimir estado»: botones chicos en el verde de los botones principales (el mismo
+   degradado de .btn-primary), con el texto y las líneas de los íconos en blanco; antes de la campana. */
+.graficos__cabecera a.graficos__boton {
   gap: var(--space-2);
-  max-width: 48rem;
-  padding: 0.375rem;
-  border: 1px solid var(--bs-border);
-  border-radius: var(--radius-lg);
-  background: #fff;
-  box-shadow: 0 4px 14px rgba(41, 72, 40, 0.08);
-  transition: border-color var(--bs-transition), box-shadow var(--bs-transition);
-}
-
-.inicio__hero .input-group:hover {
-  border-color: var(--color-brand-200);
-}
-
-.inicio__hero .input-group:focus-within {
-  border-color: var(--color-brand-600);
-  box-shadow: 0 0 0 4px var(--color-brand-100), 0 6px 18px rgba(41, 72, 40, 0.12);
-}
-
-/* La lupa, como un botón de verdad: el degradado verde de los botones, ícono blanco y una sombra que lo despega del
-   campo. Al pasar encima se oscurece y sube apenas; al pulsarlo se hunde. */
-.inicio__hero .input-group > .btn-primary {
-  width: 2.75rem;
-  height: 2.75rem;
-  min-height: 0;
-  border: 0;
-  border-radius: var(--radius-md);
-  background: var(--gradiente-boton);
-  box-shadow: 0 2px 6px rgba(41, 72, 40, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--bs-primary);
+  border-radius: var(--radius-full);
+  background-color: var(--bs-primary);
+  background-image: var(--gradiente-boton);
+  box-shadow: 0 1px 2px rgba(41, 72, 40, 0.2);
   color: #fff;
-  cursor: pointer;
-  transition: box-shadow var(--bs-transition), transform var(--bs-transition);
+  font-size: var(--text-sm);
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
 }
 
-.inicio__hero .input-group > .btn-primary:hover {
-  background: var(--gradiente-boton-hover);
-  box-shadow: 0 6px 14px rgba(41, 72, 40, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+.graficos__cabecera a.graficos__boton:hover {
+  border-color: var(--bs-primary-hover);
+  background-color: var(--bs-primary-hover);
+  background-image: var(--gradiente-boton-hover);
+  box-shadow: var(--sombra-verde);
   color: #fff;
-  transform: translateY(-1px);
+  text-decoration: none;
 }
 
-.inicio__hero .input-group > .btn-primary:active {
-  box-shadow: 0 1px 3px rgba(41, 72, 40, 0.35);
-  transform: translateY(0) scale(0.96);
+.graficos__cabecera a.graficos__boton .icon { color: #fff; }
+
+.graficos__cabecera a.graficos__boton:hover .icon { transform: none; }
+
+.graficos__cabecera a {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-weight: 600;
+  color: var(--color-brand-700);
+  text-decoration: none;
 }
 
-.inicio__hero .input-group > .btn-primary:focus-visible {
-  box-shadow: 0 0 0 3px var(--color-brand-200), 0 2px 6px rgba(41, 72, 40, 0.35);
-}
+.graficos__cabecera a:hover { text-decoration: underline; text-underline-offset: 0.2em; }
+.graficos__cabecera a .icon { width: 1rem; height: 1rem; transition: transform 0.15s ease; }
+.graficos__cabecera a:hover .icon { transform: translateX(2px); }
 
-.inicio__hero .input-group > .btn-primary .icon {
-  width: 1.375rem;
-  height: 1.375rem;
-}
-
-.inicio__hero .input-group > .form-control {
-  height: 2.75rem;
-  padding: 0 var(--space-2);
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  font-size: var(--text-lg);
-}
-
-.inicio__hero .input-group > .form-control::placeholder {
-  color: var(--bs-muted);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .inicio__hero .input-group > .btn-primary:hover,
-  .inicio__hero .input-group > .btn-primary:active {
-    transform: none;
-  }
-}
-
-@media (min-width: 48em) {
-  .inicio__hero {
-    padding: var(--space-8);
-  }
-}
-
-.inicio__bienvenida {
-  font-size: var(--text-base);
-}
-
-/* ---------- Tablero: a la izquierda las tareas (2/3), a la derecha los avisos y la administración (1/3) ----------
-   En el teléfono, una columna: primero los avisos (qué pasa), luego las tareas y al final la administración. */
-.tablero {
+/* La campana de solicitudes (encargado y operador), al final de los botones y separada de ellos por una línea vertical
+   fina. Es la misma campana del docente (.notificaciones__boton y .notificaciones__cuenta, más abajo); aquí solo se
+   anulan los estilos de los enlaces de esta fila. */
+.graficos__cabecera a.graficos__campana {
   display: grid;
-  grid-template-areas:
-    "avisos"
-    "tareas"
-    "admin";
-  grid-template-columns: minmax(0, 1fr);
-  gap: var(--space-5);
-  align-items: start;
+  margin-left: calc(var(--space-4) + 1px);
+  border-color: var(--bs-primary);
+  background-color: var(--bs-primary);
+  background-image: var(--gradiente-boton);
+  box-shadow: 0 1px 2px rgba(41, 72, 40, 0.2);
+  color: #fff;
+  text-decoration: none;
 }
 
-.tablero__tareas { grid-area: tareas; }
-.tablero__avisos {
-  display: grid;
-  grid-area: avisos;
-  gap: var(--space-3);
-  align-content: start;
+/* La campana, del mismo verde que los botones de su fila */
+.graficos__cabecera a.graficos__campana:hover {
+  border-color: var(--bs-primary-hover);
+  background-color: var(--bs-primary-hover);
+  background-image: var(--gradiente-boton-hover);
+  box-shadow: var(--sombra-verde);
+  color: #fff;
+  text-decoration: none;
 }
 
-/* «Imprimir estado de bodega», sobre los avisos y a lo ancho de su columna */
-.tablero__imprimir {
-  justify-content: center;
-}
-.tablero__admin { grid-area: admin; }
-
-@media (min-width: 64em) {
-  .tablero {
-    grid-template-areas:
-      "tareas avisos"
-      "tareas admin";
-    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
-    grid-template-rows: auto 1fr;
-  }
-
-  /* Sin tareas: avisos y administración, uno al lado del otro */
-  .tablero--una-columna {
-    grid-template-areas: "avisos admin";
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    grid-template-rows: auto;
-  }
+.graficos__cabecera a.graficos__campana::before {
+  content: "";
+  position: absolute;
+  left: calc(-1 * var(--space-4) - 1px);
+  top: 50%;
+  width: 1px;
+  height: 1.25rem;
+  background: var(--color-border);
+  transform: translateY(-50%);
 }
 
-/* La columna de las tareas lleva debajo los gráficos de la bodega */
-.tablero__tareas {
-  display: grid;
-  gap: var(--space-6);
-  min-width: 0;
-}
-
-/* ---------- ¿Cómo está la bodega?: un gráfico de torta (anillo) para los insumos y otro para las herramientas ----------
-   <section class="card grafico"> card-header · <div class="grafico__cuerpo"> <figure class="grafico__anillo"> svg +
-   centro · <ul class="grafico__leyenda"> · <dl class="grafico__datos">. Colores de estado (validados para daltonismo):
-   verde = en bodega / bien, ámbar = atención, azul = fuera a tiempo, rojo = grave. El color nunca va solo: cada parte
-   lleva su ícono, su nombre y su número en la leyenda. */
-.graficos {
-  --grafico-bien: var(--estado-bien);
-  --grafico-atencion: var(--estado-atencion);
-  --grafico-grave: var(--estado-grave);
-  --grafico-fuera: var(--estado-fuera);
-}
+.graficos__cabecera a.graficos__campana .icon { width: 1.2rem; height: 1.2rem; transition: none; }
+.graficos__cabecera a.graficos__campana:hover .icon { transform: none; }
 
 .graficos__lista {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr));
+  align-items: start;
   gap: var(--space-4);
 }
 
-.grafico {
+/* Cada columna: su gráfico y, debajo, Operaciones (izquierda) o Gestión del sistema (derecha). */
+.graficos__columna {
+  display: grid;
+  align-content: start;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+/* Operaciones bajo el gráfico: compactas, en dos columnas, con el ícono y el nombre (la descripción queda para los
+   lectores de pantalla). Siempre dos columnas (una si el espacio es angosto), nunca «las que quepan»: con un número
+   variable de columnas (3 en una pantalla grande, 4 en un 4K) las filas quedan incompletas y se ve un hueco. El ancho
+   que manda es el de la propia lista (container query), no el de la pantalla. */
+.graficos__columna .inicio-operaciones { container-type: inline-size; }
+.graficos__columna .inicio-operaciones__cabecera { margin-bottom: var(--space-2); }
+.graficos__columna .inicio-operaciones__cabecera p { display: none; }
+.graficos__columna .inicio-operaciones h2 { font-size: var(--text-base); }
+
+.graficos__columna .inicio-operaciones__lista {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  border-radius: var(--radius-xl);
+  background: var(--color-border);
+}
+
+/* Las celdas, en blanco: el espacio de 1 px entre ellas dibuja la línea. */
+.graficos__columna .inicio-operaciones__lista li { border: 0; background: var(--color-surface); }
+/* Con un número impar de tareas, la última ocupa la fila entera (sin dejar un hueco de color al lado). */
+.graficos__columna .inicio-operaciones__lista li:last-child:nth-child(odd) { grid-column: 1 / -1; }
+
+/* Angosta (un celular, o una columna estrecha): una sola columna. */
+@container (max-width: 26rem) {
+  .graficos__columna .inicio-operaciones__lista { grid-template-columns: minmax(0, 1fr); }
+}
+
+.graficos__columna .inicio-operacion {
+  grid-template-columns: 2rem minmax(0, 1fr) 1rem;
+  gap: var(--space-3);
+  min-height: 3.25rem;
+  height: 100%;
+  padding: var(--space-2) var(--space-4);
+}
+
+.graficos__columna .inicio-operacion:hover,
+.graficos__columna .inicio-operacion:focus-visible { padding-left: var(--space-4); }
+
+.graficos__columna .inicio-operacion__icono {
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-md);
+}
+
+.graficos__columna .inicio-operacion__icono .icon { width: 1rem; height: 1rem; }
+.graficos__columna .inicio-operacion__texto strong { font-size: var(--text-sm); line-height: var(--leading-tight); }
+
+.graficos__columna .inicio-operacion__detalle {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+
+.estado {
   display: flex;
   flex-direction: column;
-}
-
-.grafico__texto {
-  color: var(--bs-muted);
-  font-size: var(--text-sm);
-}
-
-.grafico__cuerpo {
-  display: grid;
-  grid-template-columns: 9.5rem minmax(0, 1fr);
   gap: var(--space-4);
+  padding: var(--space-5);
+  border: 1px solid var(--color-brand-100);
+  border-radius: var(--radius-xl);
+  background: var(--color-surface);
+  container-type: inline-size;
+}
+
+/* Cabecera: el ícono en su placa verde y el título con su explicación corta. */
+.estado__cabecera {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
-  padding: var(--space-4);
+  gap: var(--space-3);
 }
 
-.grafico__anillo {
-  position: relative;
+.estado__icono {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--radius-md);
+  background: var(--color-brand-50);
+  color: var(--color-brand-800);
+}
+
+.estado__icono .icon { width: 1.15rem; height: 1.15rem; }
+
+.estado__titulo {
   margin: 0;
+  font-size: var(--text-base);
+  line-height: var(--leading-tight);
+  color: var(--color-text);
 }
 
-.grafico__anillo svg {
+.estado__texto {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+
+/* La vista rápida: la torta a la izquierda y, a su lado, la cifra principal y una fila por parte. */
+.estado__vista {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-5);
+}
+
+.estado__lado {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+/* La torta: arcos de colores lisos con las puntas redondeadas y un espacio entre ellos, sobre una pista suave; afuera,
+   una graduación fina (más marcada en cada cuarto), y al centro un disco con un borde finísimo. */
+.estado__torta {
+  position: relative;
+  width: clamp(7.5rem, 11vw, 9.25rem);
+  margin: 0;
+  aspect-ratio: 1;
+}
+
+.estado__torta svg {
   display: block;
   width: 100%;
-  height: auto;
+  height: 100%;
+  overflow: visible;
 }
 
-.grafico__fondo,
-.grafico__parte {
+.estado__graduacion line {
+  stroke: var(--color-border);
+  stroke-width: 0.22;
+  stroke-linecap: round;
+}
+
+.estado__graduacion .estado__cuarto {
+  stroke: var(--color-border-strong);
+  stroke-width: 0.32;
+}
+
+.estado__disco {
+  fill: var(--color-brand-50);
+  stroke: var(--color-brand-100);
+  stroke-width: 0.2;
+}
+
+.estado__pista,
+.estado__tramo {
   fill: none;
-  stroke-width: 5.5;
+  stroke-width: 3.2;
 }
 
-.grafico__fondo {
-  stroke: var(--bs-gray-200);
+.estado__pista { stroke: var(--color-bg); }
+
+.estado__tramo {
+  stroke: var(--c);
+  stroke-linecap: round;
+  cursor: pointer;
+  transition: opacity 0.2s ease, stroke-width 0.2s ease;
 }
 
-.grafico__parte {
-  stroke-linecap: butt;
-  transition: opacity var(--bs-transition), stroke-width var(--bs-transition);
+.estado__tramo--entero { stroke-linecap: butt; }
+
+/* Al cargar, los arcos entran girando y apareciendo, una sola vez. */
+.estado__arcos {
+  transform-box: view-box;
+  transform-origin: 50% 50%;
+  animation: estado-entrar 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-/* Al pasar sobre una parte, las demás se apagan un poco (el número exacto sale en el globo del navegador) */
-.grafico__anillo svg:hover .grafico__parte {
-  opacity: 0.45;
+@keyframes estado-entrar {
+  from { opacity: 0; transform: rotate(-40deg); }
+  to { opacity: 1; transform: none; }
 }
 
-.grafico__anillo svg .grafico__parte:hover {
-  opacity: 1;
-  stroke-width: 6.5;
-}
-
-.grafico__parte--bien { stroke: var(--grafico-bien); }
-.grafico__parte--atencion { stroke: var(--grafico-atencion); }
-.grafico__parte--fuera { stroke: var(--grafico-fuera); }
-.grafico__parte--grave { stroke: var(--grafico-grave); }
-
-.grafico__centro {
+.estado__centro {
   position: absolute;
   inset: 0;
   display: grid;
-  place-content: center;
+  place-items: center;
   text-align: center;
   pointer-events: none;
 }
 
-.grafico__centro strong {
-  font-size: var(--text-2xl);
+/* Las lecturas del centro van una sobre otra; se ve el total, o la de la parte resaltada. */
+.estado__lectura {
+  grid-area: 1 / 1;
+  display: grid;
+  justify-items: center;
+  opacity: 0;
+  transform: scale(0.92);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.estado__lectura--total { opacity: 1; transform: none; }
+
+.estado__lectura strong {
+  font-size: clamp(1.25rem, 2vw, 1.625rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--color-brand-950);
+  font-variant-numeric: tabular-nums;
+}
+
+.estado__lectura small {
+  font-size: 0.55em;
   font-weight: 700;
-  line-height: 1.1;
-  color: var(--bs-body);
+  color: var(--color-text-muted);
 }
 
-.grafico__centro span {
-  color: var(--bs-muted);
+.estado__lectura > span {
+  max-width: 5.5rem;
+  margin-top: 0.125rem;
   font-size: var(--text-xs);
+  font-weight: 600;
+  line-height: var(--leading-tight);
+  color: var(--color-text-muted);
 }
 
-.grafico__leyenda {
+/* La cifra principal en una línea: el porcentaje grande y su frase al lado. */
+.estado__cifra {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--space-2);
+  margin: 0 0 var(--space-1);
+}
+
+.estado__cifra strong {
+  font-size: clamp(1.75rem, 2.6vw, 2.25rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--color-brand-950);
+  font-variant-numeric: tabular-nums;
+}
+
+.estado__cifra small {
+  margin-left: 0.1em;
+  font-size: 0.5em;
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.estado__cifra span {
+  font-size: var(--text-sm);
+  line-height: var(--leading-tight);
+  color: var(--color-text-muted);
+}
+
+.estado__vacio {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.estado__tramo--bien, .estado__parte--bien { --c: var(--estado-c-bien); }
+.estado__tramo--atencion, .estado__parte--atencion { --c: var(--estado-c-atencion); }
+.estado__tramo--fuera, .estado__parte--fuera { --c: var(--estado-c-fuera); }
+.estado__tramo--grave, .estado__parte--grave { --c: var(--estado-c-grave); }
+
+/* Al pasar sobre un arco o su fila: ese arco se engrosa, los demás se apagan, el centro muestra su porcentaje y su
+   fila toma el borde de su color. */
+.estado:has(.estado__parte:is(:hover, :focus-visible), .estado__tramo:hover) .estado__tramo { opacity: 0.2; }
+.estado:has(.estado__parte:is(:hover, :focus-visible), .estado__tramo:hover) .estado__lectura--total {
+  opacity: 0;
+  transform: scale(0.92);
+}
+
+.estado:has(.estado__parte--bien:is(:hover, :focus-visible), .estado__tramo--bien:hover) .estado__tramo--bien,
+.estado:has(.estado__parte--atencion:is(:hover, :focus-visible), .estado__tramo--atencion:hover) .estado__tramo--atencion,
+.estado:has(.estado__parte--fuera:is(:hover, :focus-visible), .estado__tramo--fuera:hover) .estado__tramo--fuera,
+.estado:has(.estado__parte--grave:is(:hover, :focus-visible), .estado__tramo--grave:hover) .estado__tramo--grave {
+  opacity: 1;
+  stroke-width: 3.8;
+}
+
+.estado:has(.estado__parte--bien:is(:hover, :focus-visible), .estado__tramo--bien:hover) .estado__lectura--bien,
+.estado:has(.estado__parte--atencion:is(:hover, :focus-visible), .estado__tramo--atencion:hover) .estado__lectura--atencion,
+.estado:has(.estado__parte--fuera:is(:hover, :focus-visible), .estado__tramo--fuera:hover) .estado__lectura--fuera,
+.estado:has(.estado__parte--grave:is(:hover, :focus-visible), .estado__tramo--grave:hover) .estado__lectura--grave {
+  opacity: 1;
+  transform: none;
+}
+
+.estado:has(.estado__tramo--bien:hover) a.estado__parte--bien,
+.estado:has(.estado__tramo--atencion:hover) a.estado__parte--atencion,
+.estado:has(.estado__tramo--fuera:hover) a.estado__parte--fuera,
+.estado:has(.estado__tramo--grave:hover) a.estado__parte--grave,
+.estado:has(.estado__tramo--bien:hover) div.estado__parte--bien,
+.estado:has(.estado__tramo--atencion:hover) div.estado__parte--atencion,
+.estado:has(.estado__tramo--fuera:hover) div.estado__parte--fuera,
+.estado:has(.estado__tramo--grave:hover) div.estado__parte--grave {
+  border-color: var(--color-border-strong);
+}
+
+/* Una fila por parte (la leyenda de la torta): el ícono en su color, el nombre, una barra con lo que pesa en el total,
+   la cantidad y la flecha. */
+.estado__partes {
   display: grid;
   gap: var(--space-1);
   margin: 0;
@@ -290,112 +447,157 @@
   list-style: none;
 }
 
-.grafico__item {
-  --c: var(--grafico-bien);
-  display: flex;
+.estado__parte {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) minmax(2.5rem, 5rem) 2.5rem 1rem;
+  grid-template-areas: "marca nombre barra cantidad ir";
   align-items: center;
   gap: var(--space-3);
-  padding: var(--space-2);
-  border-radius: var(--bs-radius);
-  color: var(--bs-body);
+  padding: 0.3125rem var(--space-2);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  color: var(--color-text);
   text-decoration: none;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
 }
 
-a.grafico__item:hover {
-  background: color-mix(in srgb, var(--c) 8%, #fff);
+a.estado__parte:hover,
+a.estado__parte:focus-visible {
+  border-color: var(--color-border-strong);
+  background: var(--color-hover);
 }
 
-.grafico__item--atencion { --c: var(--grafico-atencion); }
-.grafico__item--fuera { --c: var(--grafico-fuera); }
-.grafico__item--grave { --c: var(--grafico-grave); }
+a.estado__parte:focus-visible {
+  outline: 3px solid var(--color-brand-200);
+  outline-offset: 1px;
+}
 
-.grafico__marca {
+.estado__marca {
+  grid-area: marca;
   display: grid;
-  flex: none;
   place-items: center;
-  width: 2rem;
-  height: 2rem;
-  border-radius: 50%;
-  background: var(--c);
-  color: #fff;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--c) 12%, var(--color-surface));
+  color: color-mix(in srgb, var(--c) 75%, #000);
 }
 
-.grafico__marca .icon {
-  width: 1rem;
-  height: 1rem;
-}
+.estado__marca .icon { width: 0.95rem; height: 0.95rem; }
 
-.grafico__nombre {
-  display: grid;
-  flex: 1;
-  min-width: 0;
-  line-height: 1.3;
-}
-
-.grafico__nombre span,
-.grafico__cantidad span {
-  color: var(--bs-muted);
-  font-size: var(--text-xs);
-}
-
-.grafico__cantidad {
-  display: grid;
-  flex: none;
-  justify-items: end;
-  line-height: 1.2;
-}
-
-.grafico__cantidad strong {
+.estado__cantidad {
+  grid-area: cantidad;
   font-size: var(--text-lg);
+  font-weight: 800;
+  line-height: 1;
+  text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-.grafico__datos {
+.estado__nombre {
+  grid-area: nombre;
+  overflow: hidden;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Lo que pesa la parte en el total: una barra fina, del color de la parte, sobre una pista suave. */
+.estado__proporcion {
+  grid-area: barra;
+  height: 4px;
+  border-radius: var(--radius-full);
+  background: var(--color-bg);
+  overflow: hidden;
+}
+
+.estado__proporcion span {
+  display: block;
+  height: 100%;
+  min-width: 4px;
+  border-radius: inherit;
+  background: var(--c);
+  transform-origin: left;
+  animation: estado-llenar 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.estado__parte--cero .estado__proporcion span { min-width: 0; }
+
+@keyframes estado-llenar {
+  from { transform: scaleX(0); }
+}
+
+.estado__ir {
+  grid-area: ir;
+  color: var(--color-text-subtle);
+  transition: color 0.15s ease, transform 0.15s ease;
+}
+
+.estado__ir .icon { width: 1rem; height: 1rem; }
+a.estado__parte:hover .estado__ir { color: var(--color-brand-700); transform: translateX(2px); }
+
+/* En 0: la fila queda tranquila (sigue llevando a su lista). */
+.estado__parte--cero .estado__cantidad,
+.estado__parte--cero .estado__nombre { color: var(--color-text-subtle); }
+.estado__parte--cero .estado__marca { background: var(--color-bg); color: var(--color-text-subtle); }
+
+/* Los datos de abajo: una franja delgada, todos en una fila (en una tarjeta angosta, de a dos). */
+.estado__datos {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  margin: auto 0 0;
-  border-top: 1px solid var(--bs-border);
-}
-
-.grafico__datos > div {
-  padding: var(--space-3) var(--space-4);
-}
-
-.grafico__datos > div + div {
-  border-left: 1px solid var(--bs-border);
-}
-
-.grafico__datos dt {
-  color: var(--bs-muted);
-  font-size: var(--text-xs);
-  line-height: 1.3;
-}
-
-.grafico__datos dd {
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: var(--space-2) var(--space-4);
   margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg);
+}
+
+.estado__datos div { min-width: 0; }
+
+.estado__datos dt {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  line-height: var(--leading-tight);
+  color: var(--color-text-muted);
+}
+
+.estado__datos dd {
+  margin: 0.125rem 0 0;
+  font-size: var(--text-base);
   font-weight: 700;
+  color: var(--color-text);
   font-variant-numeric: tabular-nums;
 }
 
-/* Angosto (teléfono): el anillo arriba, centrado, y la leyenda debajo */
-@media (max-width: 30em) {
-  .grafico__cuerpo {
-    grid-template-columns: minmax(0, 1fr);
-  }
+/* Teléfono: menos relleno. Tarjeta angosta: la torta arriba, centrada, y las filas debajo. */
+@media (max-width: 40em) {
+  .estado { padding: var(--space-4); }
+  .graficos__cabecera { flex-direction: column; gap: var(--space-1); }
+}
 
-  .grafico__anillo {
-    width: 9.5rem;
-    margin-inline: auto;
-  }
+@container (max-width: 30rem) {
+  .estado__datos { grid-auto-flow: row; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .estado__vista { grid-template-columns: minmax(0, 1fr); justify-items: center; }
+  .estado__lado { justify-self: stretch; }
+  .estado__cifra { justify-content: center; }
+}
 
-  .grafico__datos {
-    grid-template-columns: minmax(0, 1fr);
-  }
+@media (prefers-reduced-motion: reduce) {
+  .estado__tramo,
+  .estado__lectura,
+  .estado__parte,
+  .estado__ir,
+  .graficos__cabecera a .icon { transition: none; }
 
-  .grafico__datos > div + div {
-    border-top: 1px solid var(--bs-border);
-    border-left: 0;
-  }
+  .estado__arcos,
+  .estado__proporcion span { animation: none; }
+
+  a.estado__parte:hover,
+  a.estado__parte:focus-visible,
+  a.estado__parte:hover .estado__ir,
+  .graficos__cabecera a:hover .icon { transform: none; }
 }
 
 /* «Actualizado a las 12:40»: punto verde mientras se actualiza solo, rojo si falla (panel.js) */
@@ -457,7 +659,7 @@ a.grafico__item:hover {
 .aviso-fila--info { --r: var(--bs-blue); --r-bg: var(--bs-blue-subtle); }
 
 a.aviso-fila:hover {
-  background: var(--bs-gray-100);
+  background: var(--color-hover);
   color: var(--bs-body);
 }
 
@@ -523,64 +725,6 @@ a.aviso-fila:focus-visible {
 }
 
 a.aviso-fila:hover .aviso-fila__ver .icon {
-  transform: translateX(3px);
-}
-
-/* ---------- Administración: una lista simple (se usa poco), cada tarea con su ícono relleno en su color
-   (--c, de .accion--…); al pasar encima, el ícono crece apenas y la flecha avanza ---------- */
-.ajuste__icono {
-  display: grid;
-  flex: none;
-  place-items: center;
-  width: 2.25rem;
-  height: 2.25rem;
-  border-radius: var(--bs-radius);
-  background: linear-gradient(135deg, color-mix(in srgb, var(--c) 82%, #fff) 0%, var(--c) 50%,
-    color-mix(in srgb, var(--c) 82%, #000) 100%);
-  box-shadow: 0 2px 6px color-mix(in srgb, var(--c) 28%, transparent);
-  color: #fff;
-  transition: transform var(--bs-transition), box-shadow var(--bs-transition);
-}
-
-.ajuste__icono .icon {
-  width: 1.125rem;
-  height: 1.125rem;
-}
-
-.ajuste:hover .ajuste__icono {
-  box-shadow: 0 4px 10px color-mix(in srgb, var(--c) 36%, transparent);
-  transform: scale(1.05);
-}
-
-.ajuste__texto {
-  flex: 1;
-  display: grid;
-  min-width: 0;
-  line-height: 1.3;
-}
-
-.ajuste__texto strong {
-  font-weight: 600;
-}
-
-.ajuste__detalle {
-  font-size: var(--text-sm);
-  color: var(--bs-muted);
-  font-weight: 400;
-}
-
-.ajuste__flecha {
-  flex: none;
-  color: color-mix(in srgb, var(--c) 80%, #000);
-  transition: transform var(--bs-transition), color var(--bs-transition);
-}
-
-.ajuste__flecha .icon {
-  width: 1rem;
-  height: 1rem;
-}
-
-.ajuste:hover .ajuste__flecha {
   transform: translateX(3px);
 }
 
@@ -668,4 +812,843 @@ a.aviso-fila:hover .aviso-fila__ver .icon {
   a.aviso-fila:hover .aviso-fila__ver .icon {
     transform: none;
   }
+}
+
+/* Inicio, métricas e inventario */
+.inicio { gap: 1.5rem; }
+.inicio__hero {
+  padding: clamp(1.25rem, 2.2vw, 1.75rem);
+  background: #f9fbf8;
+  box-shadow: none;
+}
+.tablero { gap: 1rem; }
+.tablero__avisos { gap: .75rem; }
+.inventario__tabla tr:focus-within { background: var(--color-hover); }
+/* Nuevo lenguaje del inicio: lectura de estado primero, acciones como escritorio de trabajo. */
+.tablero .titulo-seccion {
+  font-size: clamp(1.125rem, 1.6vw, 1.4rem);
+  letter-spacing: -.025em;
+}
+.tablero__tareas .lista-acciones { gap: .75rem; }
+.tablero__tareas .accion {
+  min-height: 5.5rem;
+  border-color: #dde7dd;
+  box-shadow: 0 2px 9px rgba(28, 58, 37, .045);
+}
+.tablero__tareas .accion:hover {
+  border-color: var(--color-border-strong);
+  box-shadow: 0 9px 22px rgba(28, 58, 37, .11);
+}
+.inventario__nombre { text-underline-offset: .2em; }
+.inventario__tabla tbody tr:hover,
+.inventario__tabla tbody tr:focus-within { background: var(--color-hover); }
+/* Puesto de trabajo: composiciones propias de cada perfil. */
+.inicio {
+  gap: 2rem;
+}
+.inicio-cabecera {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: .25rem 0 .5rem;
+}
+.inicio-cabecera h1 {
+  margin: 0;
+  color: #173622;
+  font-size: clamp(1.9rem, 3.1vw, 2.8rem);
+  line-height: 1.08;
+  letter-spacing: -.03em;
+}
+.inicio-cabecera__textos p {
+  margin: .55rem 0 0;
+  color: #536b5a;
+}
+/* A la derecha de la cabecera: el aviso de ingreso (una línea chica) y, debajo, la búsqueda. */
+.inicio-cabecera__lado {
+  display: grid;
+  justify-items: end;
+  gap: var(--space-2);
+  flex: 0 1 34rem;
+  min-width: 0;
+}
+
+.inicio-cabecera__ingreso {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin: 0;
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.inicio-cabecera__ingreso .icon { flex: none; width: 0.875rem; height: 0.875rem; }
+.inicio-cabecera__lado .inicio-cabecera__buscar { width: min(100%, 23rem); }
+
+.inicio-cabecera__buscar {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  flex: 0 1 23rem;
+  align-items: center;
+  min-width: 0;
+  padding: .25rem;
+  border: 1px solid #c9d8c9;
+  border-radius: .8rem;
+  background: #fff;
+}
+.inicio-cabecera__buscar:focus-within { outline: 3px solid #b9d9b4; }
+.inicio-cabecera__buscar .btn {
+  width: 2.5rem;
+  min-height: 2.5rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #276638;
+}
+.inicio-cabecera__buscar .form-control {
+  min-width: 0;
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+}
+.inicio-operaciones__cabecera,
+.inicio-avisos__cabecera {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.inicio-operaciones h2,
+.inicio-avisos h2,
+.inicio-gestion h2 {
+  margin: 0;
+  color: #173622;
+  font-size: 1.22rem;
+  letter-spacing: -.02em;
+}
+.inicio-trabajo {
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(18rem, .85fr);
+  align-items: start;
+  gap: 1.5rem;
+}
+.inicio-trabajo__principal,
+.inicio-trabajo__lateral { display: grid; gap: 1.25rem; min-width: 0; }
+.inicio-operaciones__cabecera { margin-bottom: .8rem; }
+.inicio-operaciones__cabecera p,
+.inicio-avisos__cabecera p {
+  margin: 0;
+  color: #617363;
+  font-size: .9rem;
+}
+.inicio-operaciones__lista,
+.inicio-gestion ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.inicio-operaciones__lista {
+  overflow: hidden;
+  border: 1px solid #d6e2d4;
+  border-radius: .9rem;
+  background: #fff;
+}
+.inicio-operaciones__lista li + li { border-top: 1px solid #e7eee6; }
+.inicio-operacion {
+  display: grid;
+  grid-template-columns: 2.6rem minmax(0, 1fr) 1.3rem;
+  align-items: center;
+  gap: 1rem;
+  min-height: 4.6rem;
+  padding: .7rem 1rem;
+  color: #172b1d;
+  text-decoration: none;
+  transition: background-color 180ms ease;
+}
+.inicio-operacion:hover,
+.inicio-operacion:focus-visible {
+  padding-left: 1.3rem;
+  background: var(--color-hover);
+  color: #173622;
+}
+.inicio-operacion:focus-visible { outline: 3px solid #6ba56c; outline-offset: -3px; }
+.inicio-operacion__icono {
+  display: grid;
+  place-items: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: .65rem;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--c) 82%, #fff) 0%, var(--c) 50%, color-mix(in srgb, var(--c) 82%, #000) 100%);
+  box-shadow: 0 3px 8px color-mix(in srgb, var(--c) 30%, transparent);
+  color: #fff;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+.inicio-operacion:hover .inicio-operacion__icono {
+  box-shadow: 0 5px 12px color-mix(in srgb, var(--c) 38%, transparent);
+  transform: scale(1.05);
+}
+.inicio-operacion__icono .icon { width: 1.25rem; height: 1.25rem; }
+.inicio-operacion__texto { display: grid; gap: .1rem; min-width: 0; }
+.inicio-operacion__texto strong { font-size: 1rem; }
+.inicio-operacion__texto span { color: #526556; font-size: .86rem; }
+.inicio-operacion__flecha { color: #3c7149; }
+.inicio-operacion__flecha .icon { width: 1rem; height: 1rem; }
+.inicio-avisos {
+  overflow: hidden;
+  border: 1px solid #d6e2d4;
+  border-radius: .9rem;
+  background: #fff;
+}
+.inicio-avisos__cabecera {
+  display: grid;
+  gap: .2rem;
+  padding: 1rem 1.1rem;
+  border-bottom: 1px solid #e7eee6;
+}
+.inicio-avisos [data-panel-content] { padding: .35rem; }
+.inicio-gestion {
+  padding: 1rem 1.1rem .5rem;
+  border-top: 1px solid #397649;
+  border-radius: .35rem .35rem .8rem .8rem;
+  background: #edf3eb;
+}
+.inicio-gestion h2 { margin-bottom: .6rem; }
+.inicio-gestion li + li { border-top: 1px solid #d8e5d5; }
+.inicio-gestion a {
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+  min-height: 2.8rem;
+  color: #254a2f;
+  text-decoration: none;
+}
+.inicio-gestion a span { flex: 1; }
+.inicio-gestion a .icon { width: 1rem; height: 1rem; }
+.inicio-gestion a:hover { color: #102e1b; text-decoration: underline; }
+
+.inicio--docente .inicio-trabajo {
+  grid-template-columns: minmax(0, 1fr) minmax(18rem, .85fr);
+}
+.inicio-docente__busqueda {
+  display: grid;
+  gap: .55rem;
+  padding: 1rem 1.2rem;
+  border: 1px solid #d5e3d3;
+  border-radius: .9rem;
+  background: #f0f6ef;
+}
+.inicio-docente__busqueda label { color: #284a30; font-weight: 700; }
+.inicio-docente__busqueda .input-group { display: flex; }
+.inicio-docente__busqueda .form-control { min-width: 0; }
+
+/* ---------- Inicio del docente ----------
+   Cabecera: el saludo a la izquierda; a la derecha, la campana y «Solicitar herramientas». Debajo, el stock de
+   herramientas (más ancho) y, a su lado, sus accesos uno bajo el otro, con su descripción. */
+.inicio-cabecera__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* Tres columnas parejas a los lados: los accesos a la izquierda, el stock al medio y la derecha libre (así el stock
+   queda centrado en la pantalla). Los accesos parten a la altura del título del stock. */
+.inicio-docente-vista {
+  display: grid;
+  grid-template-columns: minmax(15rem, 1fr) minmax(0, 46rem) minmax(0, 1fr);
+  align-items: start;
+  gap: var(--space-5);
+}
+
+.inicio-docente-vista__stock { grid-column: 2; }
+.inicio-docente-vista > .graficos__columna--accesos { grid-column: 1; grid-row: 1; padding-top: 0.25rem; }
+
+.graficos__columna--accesos .inicio-operaciones__lista { grid-template-columns: minmax(0, 1fr); }
+.graficos__columna--accesos .inicio-operacion { min-height: 4rem; padding-block: var(--space-3); }
+.graficos__columna--accesos .inicio-operacion__detalle {
+  position: static;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+}
+
+/* La campana: un círculo de borde fino; el número, en rojo (destaca sobre todo lo demás), arriba a la derecha. */
+.notificaciones { position: relative; }
+
+.notificaciones__boton {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: var(--color-surface);
+  color: var(--color-brand-700);
+  cursor: pointer;
+  list-style: none;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.notificaciones__boton::-webkit-details-marker { display: none; }
+.notificaciones__boton .icon { width: 1.2rem; height: 1.2rem; }
+
+.notificaciones__boton:hover,
+.notificaciones[open] .notificaciones__boton {
+  border-color: var(--color-border-strong);
+  background: var(--color-hover);
+}
+
+.notificaciones__boton:focus-visible { outline: 2px solid var(--color-brand-600); outline-offset: 2px; }
+
+.notificaciones__cuenta {
+  position: absolute;
+  top: -0.3rem;
+  right: -0.3rem;
+  display: grid;
+  place-items: center;
+  min-width: 1.3rem;
+  height: 1.3rem;
+  padding: 0 0.3rem;
+  border: 2px solid var(--color-bg);
+  border-radius: var(--radius-full);
+  background: var(--estado-grave);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.notificaciones__cuenta[hidden] { display: none; }
+
+/* El panel que se abre bajo la campana, alineado a su derecha. */
+.notificaciones__panel {
+  position: absolute;
+  top: calc(100% + var(--space-2));
+  right: 0;
+  z-index: 50;
+  width: min(24rem, calc(100vw - 2rem));
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  box-shadow: 0 12px 32px rgba(16, 24, 40, 0.12);
+}
+
+.notificaciones__cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.notificaciones__cabecera h2 { margin: 0; font-size: var(--text-base); }
+.notificaciones__cabecera .inicio__estado { font-size: var(--text-xs); }
+
+.notificaciones__contenido { max-height: 22rem; overflow-y: auto; }
+
+.notificaciones__lista { margin: 0; padding: 0; list-style: none; }
+.notificaciones__lista > li + li { border-top: 1px solid var(--color-border); }
+
+.notificaciones__vacio {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+}
+
+.notificaciones__vacio .icon { width: 1rem; height: 1rem; color: var(--estado-bien); }
+
+/* Cada notificación: el ícono en un cuadro suave del color de su estado; qué es, lo pedido y la fecha que importa. */
+.notificacion {
+  --n: var(--estado-fuera);
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr);
+  align-items: start;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.notificacion:hover { background: var(--color-hover); }
+.notificacion:focus-visible { outline: 2px solid var(--color-brand-600); outline-offset: -2px; }
+
+.notificacion--grave { --n: var(--estado-grave); }
+.notificacion--atencion { --n: var(--estado-atencion); }
+.notificacion--fuera { --n: var(--estado-fuera); }
+.notificacion--bien { --n: var(--estado-bien); }
+
+/* Una notificación nueva (llegó desde la última vez que se abrió la campana): un fondo suave y un punto rojo a la
+   derecha, como un mensaje sin leer. */
+.notificacion--nueva {
+  position: relative;
+  padding-right: calc(var(--space-4) + 0.75rem);
+  background: color-mix(in srgb, var(--estado-grave) 5%, var(--color-surface));
+}
+
+.notificacion--nueva::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: var(--space-4);
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: var(--radius-full);
+  background: var(--estado-grave);
+  transform: translateY(-50%);
+}
+
+.notificacion__icono {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--n) 12%, #fff);
+  color: var(--n);
+}
+
+.notificacion__icono .icon { width: 1rem; height: 1rem; }
+
+.notificacion__texto { display: grid; gap: 0.125rem; min-width: 0; }
+.notificacion__texto strong { font-size: var(--text-sm); }
+.notificacion__numero { color: var(--color-text-muted); font-weight: 500; }
+
+.notificacion__detalle,
+.notificacion__cuando {
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  overflow-wrap: anywhere;
+}
+
+.notificacion--grave .notificacion__cuando { color: var(--estado-grave); font-weight: 600; }
+
+.notificaciones__todas {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  border-top: 1px solid var(--color-border);
+  color: var(--color-brand-700);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.notificaciones__todas:hover { background: var(--color-hover); }
+.notificaciones__todas .icon { width: 1rem; height: 1rem; }
+
+/* Pantallas medianas: sin la columna libre (los accesos a la izquierda y el stock a su lado). Angostas: una columna,
+   primero el stock. */
+@media (max-width: 80rem) {
+  .inicio-docente-vista { grid-template-columns: minmax(15rem, 1fr) minmax(0, 2fr); }
+}
+
+@media (max-width: 56rem) {
+  .inicio-docente-vista { grid-template-columns: minmax(0, 1fr); }
+  .inicio-docente-vista__stock { grid-column: 1; grid-row: 1; }
+  .inicio-docente-vista > .graficos__columna--accesos { grid-row: 2; padding-top: 0; }
+}
+
+/* En el celular la cabecera va en columna y la campana queda a la izquierda: el panel se abre hacia la derecha. */
+@media (max-width: 40em) {
+  .notificaciones__panel { right: auto; left: 0; }
+}
+
+@media (max-width: 54em) {
+  .inicio-trabajo,
+  .inicio--docente .inicio-trabajo { grid-template-columns: minmax(0, 1fr); }
+  .inicio-trabajo__lateral { grid-row: 1; }
+  .inicio--docente .inicio-trabajo__lateral { grid-row: auto; }
+}
+@media (max-width: 40em) {
+  .inicio-cabecera { align-items: stretch; flex-direction: column; }
+  .inicio-cabecera__buscar { flex: none; width: 100%; }
+  .inicio-cabecera__lado { flex: none; justify-items: stretch; }
+  .inicio-cabecera__lado .inicio-cabecera__buscar { width: 100%; }
+  .inicio-operaciones__cabecera { align-items: start; flex-direction: column; gap: .2rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .inicio-operacion { transition: none; }
+}
+/* Inventario del inicio: filtros horizontales antes de la tabla. */
+.inventario {
+  grid-template-columns: minmax(0, 1fr);
+  gap: .8rem;
+}
+.inventario > .card {
+  overflow: hidden;
+  border-color: #d7e5d5;
+  box-shadow: none;
+}
+@media (min-width: 56em) {
+  .inventario { grid-template-columns: minmax(0, 1fr); }
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+  .inicio-operacion__icono { transition: none; }
+  .inicio-operacion:hover .inicio-operacion__icono { transform: none; }
+}
+
+/* Categorías dentro de la cabecera del inventario: pestañas chicas entre el título y el total; la elegida, en blanco
+   con borde verde. En pantallas angostas se desplazan de lado. */
+.inventario__cabecera {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+}
+
+.inventario__categorias {
+  display: flex;
+  flex: 1 1 auto;
+  gap: var(--space-1);
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.inventario__categoria {
+  flex: none;
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid transparent;
+  border-radius: var(--radius-full);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.inventario__categoria:hover { background: var(--color-hover); color: var(--color-text); }
+
+.inventario__categoria.is-activa {
+  border-color: var(--color-brand-200);
+  background: var(--color-surface);
+  font-weight: 600;
+  color: var(--color-brand-800);
+}
+
+.inventario__cabecera .inventario__total { flex: none; margin-left: auto; }
+
+@media (prefers-reduced-motion: reduce) {
+  .inventario__categoria { transition: none; }
+}
+
+/* ---------- Inventario: la foto del producto junto a su nombre (la misma de «Buscar producto») ---------- */
+.inventario__producto {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.inventario__foto {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: #fff;
+  color: var(--color-text-muted);
+}
+
+.inventario__foto img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.inventario__foto .icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+/* ==========================================================
+   Modelo nuevo (azul marino, base/tema-azul.css): el inicio. Rige donde <html> lleva «tema-azul».
+   Plano y de un solo color; los títulos de sección, chicos y en mayúsculas; Operaciones, como tarjetas.
+   ========================================================== */
+.tema-azul .inicio-cabecera h1 { color: var(--color-brand-800); }
+
+.tema-azul .inicio-cabecera__buscar:focus-within { outline-color: var(--color-brand-200); }
+.tema-azul .inicio-cabecera__buscar .btn { color: var(--color-brand-800); }
+
+.tema-azul .graficos__cabecera { align-items: center; flex-wrap: wrap; }
+
+.tema-azul .graficos__cabecera h2,
+.tema-azul .inicio-operaciones--tarjetas h2 {
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Inventario, Sectores, Usuarios, «Imprimir estado» y la campana: azul marino plano, con el ícono en blanco */
+.tema-azul .graficos__cabecera a.graficos__boton,
+.tema-azul .graficos__cabecera a.graficos__campana {
+  border-radius: var(--radius-md);
+  box-shadow: none;
+}
+
+.tema-azul .graficos__cabecera a.graficos__boton {
+  min-height: 2.75rem;
+  padding: 0 var(--space-4);
+}
+
+.tema-azul .graficos__cabecera a.graficos__boton:hover,
+.tema-azul .graficos__cabecera a.graficos__campana:hover { box-shadow: none; }
+
+/* Operaciones: tarjetas blancas de borde fino, con el ícono de líneas arriba y el nombre debajo */
+.inicio-operaciones--tarjetas { margin-top: var(--space-4); }
+.inicio-operaciones--tarjetas .inicio-operaciones__cabecera p { display: none; }
+
+.inicio-operaciones--tarjetas .inicio-operaciones__lista {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13.5rem, 1fr));
+  gap: var(--space-3);
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.inicio-operaciones--tarjetas .inicio-operaciones__lista li + li { border-top: 0; }
+
+.inicio-operaciones--tarjetas .inicio-operacion {
+  /* Compactas: el ícono a la izquierda y el nombre al lado, en una sola línea de 3,5 rem de alto */
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  height: 100%;
+  min-height: 3.5rem;
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-brand-800);
+  text-align: left;
+}
+
+.inicio-operaciones--tarjetas .inicio-operacion:hover,
+.inicio-operaciones--tarjetas .inicio-operacion:focus-visible {
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-hover);
+  color: var(--color-brand-800);
+}
+
+.inicio-operaciones--tarjetas .inicio-operacion:focus-visible {
+  outline: 3px solid var(--color-brand-200);
+  outline-offset: 2px;
+}
+
+/* El ícono, solo sus líneas: sin recuadro, sin sombra y sin movimiento */
+.inicio-operaciones--tarjetas .inicio-operacion__icono,
+.inicio-operaciones--tarjetas .inicio-operacion:hover .inicio-operacion__icono {
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  color: inherit;
+  transform: none;
+}
+
+.inicio-operaciones--tarjetas .inicio-operacion__icono .icon {
+  width: 1.375rem;
+  height: 1.375rem;
+  stroke-width: 1.6;
+}
+
+.inicio-operaciones--tarjetas .inicio-operacion__icono { flex: none; }
+
+.inicio-operaciones--tarjetas .inicio-operacion__texto strong {
+  font-size: var(--text-base);
+  font-weight: 600;
+  line-height: var(--leading-tight);
+}
+
+/* La descripción queda para los lectores de pantalla; la flecha no va */
+.inicio-operaciones--tarjetas .inicio-operacion__detalle {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.inicio-operaciones--tarjetas .inicio-operacion__flecha { display: none; }
+
+/* El inventario, sin tinte verde */
+.tema-azul .inventario > .card { border-color: var(--color-border); }
+.tema-azul .inventario__categoria { border-radius: var(--radius-md); }
+
+/* El inicio del docente: su torta y sus dos tarjetas no se estiran a todo el ancho de la página */
+.inicio-docente-stock > [data-panel-content],
+.inicio-docente-stock > .inicio-operaciones--tarjetas {
+  max-width: 40rem;
+}
+
+/* La campana del docente, como la de los demás perfiles: azul marino con el ícono en blanco */
+.tema-azul .notificaciones__boton {
+  border-color: var(--color-brand-800);
+  border-radius: var(--radius-md);
+  background: var(--color-brand-800);
+  color: #fff;
+}
+
+.tema-azul .notificaciones__boton:hover,
+.tema-azul .notificaciones[open] .notificaciones__boton {
+  border-color: var(--color-brand-900);
+  background: var(--color-brand-900);
+}
+
+/* ---------- La torta simple (Panel::torta): el anillo liso con el total al centro y, al lado, el título y una fila por
+   parte (punto de color, nombre y cantidad). Los colores, los de los estados (--estado-c-*, de .graficos). ---------- */
+.torta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-6) var(--space-8);
+  padding: var(--space-6);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.torta__anillo {
+  position: relative;
+  flex: none;
+  width: 9.25rem;
+  height: 9.25rem;
+}
+
+.torta__anillo svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.torta__tramo {
+  fill: none;
+  stroke-width: 14;
+}
+
+.torta__tramo--bien { stroke: var(--estado-c-bien); }
+.torta__tramo--atencion { stroke: var(--estado-c-atencion); }
+.torta__tramo--fuera { stroke: var(--estado-c-fuera); }
+.torta__tramo--grave { stroke: var(--estado-c-grave); }
+
+.torta__centro {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  margin: 0;
+}
+
+.torta__centro strong {
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--color-brand-800);
+  font-variant-numeric: tabular-nums;
+}
+
+.torta__centro span {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+.torta__lado {
+  display: flex;
+  flex: 1 1 11rem;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.torta__titulo {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--color-brand-800);
+}
+
+.torta__vacio {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.torta__partes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.torta__parte {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 2.5rem;
+  margin-inline: calc(-1 * var(--space-2));
+  padding-inline: var(--space-2);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+a.torta__parte:hover {
+  background: var(--color-hover);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+a.torta__parte:focus-visible {
+  outline: 2px solid var(--color-brand-600);
+  outline-offset: -2px;
+}
+
+.torta__punto {
+  flex: none;
+  width: 0.625rem;
+  height: 0.625rem;
+  border-radius: var(--radius-full);
+}
+
+.torta__punto--bien { background: var(--estado-c-bien); }
+.torta__punto--atencion { background: var(--estado-c-atencion); }
+.torta__punto--fuera { background: var(--estado-c-fuera); }
+.torta__punto--grave { background: var(--estado-c-grave); }
+
+.torta__nombre { flex: 1 1 auto; min-width: 0; }
+
+.torta__cantidad {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
 }

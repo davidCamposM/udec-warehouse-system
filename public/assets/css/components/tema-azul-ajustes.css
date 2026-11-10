@@ -1,0 +1,284 @@
+/* ==========================================================
+   Tema azul marino — ajustes de los componentes y las pantallas
+   Las hojas del sistema tienen colores verdes escritos a mano (bordes, fondos suaves, textos, sombras) que los tokens de
+   base/tema-azul.css no alcanzan. Aquí va cada uno, con el mismo selector de su hoja de origen bajo «.tema-azul», en
+   azul marino o gris neutro. Rige solo donde <html> lleva «tema-azul»; el verde de los demás perfiles no cambia.
+   Al pasar un perfil al tema, no hay que tocar nada aquí. Orden: el de las hojas de origen.
+   ========================================================== */
+
+/* ---------- layout/app.css ---------- */
+.tema-azul body {
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.tema-azul .topbar {
+  background: var(--color-brand-800);
+  box-shadow: none;
+}
+
+.tema-azul .sesion::backdrop { background: rgba(11, 14, 29, 0.45); }
+
+/* ---------- components/busqueda.css: las barras de búsqueda ---------- */
+.tema-azul :is(.inicio-cabecera__buscar, .inicio-docente__busqueda .input-group, .consulta-productos .buscar .input-group, .buscador-herramientas__campo, .field__control--with-icon.sugerencias) {
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  box-shadow: none;
+}
+
+.tema-azul :is(.inicio-cabecera__buscar, .inicio-docente__busqueda .input-group, .consulta-productos .buscar .input-group, .buscador-herramientas__campo, .field__control--with-icon.sugerencias):focus-within {
+  border-color: var(--color-brand-800);
+  box-shadow: 0 0 0 3px rgba(61, 95, 154, 0.18);
+}
+
+.tema-azul :is(.inicio-cabecera__buscar, .inicio-docente__busqueda .input-group, .consulta-productos .buscar .input-group) > .form-control::placeholder,
+.tema-azul :is(.buscador-herramientas__campo, .field__control--with-icon.sugerencias) > .input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.tema-azul .inicio-cabecera__buscar > .btn:first-child,
+.tema-azul .inicio-cabecera__buscar > .btn:first-child:hover,
+.tema-azul .inicio-cabecera__buscar > .btn:first-child:focus-visible {
+  color: var(--color-brand-800);
+}
+
+.tema-azul :is(.inicio-docente__busqueda .input-group, .consulta-productos .buscar .input-group) > .btn {
+  background: var(--color-brand-50);
+  color: var(--color-brand-800);
+}
+
+.tema-azul :is(.inicio-docente__busqueda .input-group, .consulta-productos .buscar .input-group) > .btn:hover,
+.tema-azul :is(.inicio-docente__busqueda .input-group, .consulta-productos .buscar .input-group) > .btn:focus-visible {
+  color: var(--color-brand-900);
+}
+
+.tema-azul :is(.buscador-herramientas__icono, .field__control--with-icon.sugerencias > .field__icon) {
+  color: var(--color-brand-800);
+}
+
+/* ---------- components/simple.css: el encabezado de las pantallas internas ---------- */
+.tema-azul .ventana__fondo { background: rgba(11, 14, 29, 0.32); }
+.tema-azul .back-link { border-color: var(--color-border-strong); }
+
+.tema-azul .encabezado { background: var(--color-surface); }
+
+.tema-azul .encabezado .back-link {
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-brand-800);
+}
+
+.tema-azul .encabezado__titulo { color: var(--color-brand-800); }
+.tema-azul .encabezado__texto { color: var(--color-text-muted); }
+
+/* ---------- components/basico.css: botones, tarjetas, tablas y campos ---------- */
+.tema-azul .btn-primary,
+.tema-azul .btn-success,
+.tema-azul .nav-link.active,
+.tema-azul a.nav-link.active:hover {
+  box-shadow: none;
+}
+
+.tema-azul .card {
+  border-color: var(--color-border);
+  box-shadow: none;
+}
+
+.tema-azul .card-header {
+  background: var(--color-surface);
+  border-bottom-color: var(--color-border);
+}
+
+.tema-azul .titulo-seccion { color: var(--color-brand-800); }
+
+.tema-azul .accion {
+  border-color: var(--color-border);
+  box-shadow: none;
+}
+
+.tema-azul .accion:hover { box-shadow: none; }
+
+.tema-azul .list-group-item:focus-visible,
+.tema-azul .accion:focus-visible,
+.tema-azul .back-link:focus-visible,
+.tema-azul .nav-link:focus-visible,
+.tema-azul .catalogo__editar:focus-visible {
+  outline: 2px solid var(--color-brand-600);
+}
+
+.tema-azul .table-responsive { scrollbar-color: #9aa0b4 #eef0f3; }
+
+.tema-azul .table thead th {
+  color: var(--color-text-muted);
+  background: var(--color-surface);
+}
+
+.tema-azul .form-control,
+.tema-azul .input--relleno,
+.tema-azul .field__control,
+.tema-azul textarea,
+.tema-azul select {
+  accent-color: var(--color-brand-800);
+}
+
+.tema-azul .form-control:focus-visible,
+.tema-azul .input--relleno:focus-visible,
+.tema-azul .field__control:focus-visible,
+.tema-azul textarea:focus-visible,
+.tema-azul select:focus-visible {
+  outline: 2px solid var(--color-brand-600);
+}
+
+.tema-azul .catalogo__herramienta,
+.tema-azul .item-row {
+  border-color: var(--color-border);
+}
+
+/* ---------- components/ventana-basico.css: las ventanas por etapas ---------- */
+.tema-azul .ventana .ventana__fondo { background: rgba(11, 14, 29, 0.5); }
+
+.tema-azul .ventana .btn--si { box-shadow: none; }
+
+.tema-azul .ventana .listo__icono,
+.tema-azul .ventana .boleta__check {
+  box-shadow: 0 0 0 4px rgba(46, 125, 79, 0.2);
+}
+
+.tema-azul .ventana .ventana__caja {
+  border: 1px solid var(--color-border);
+  box-shadow: 0 24px 48px rgba(11, 14, 29, 0.22);
+}
+
+.tema-azul .ventana .ventana__cabecera {
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.tema-azul .ventana .ventana__titulo { color: var(--color-brand-800); }
+
+.tema-azul .ventana .campo__fijo {
+  border-color: var(--color-border);
+  background: var(--color-bg);
+}
+
+.tema-azul .ventana .formulario__acciones { border-top-color: var(--color-border); }
+
+/* ---------- pages/panel.css: el inicio ---------- */
+.tema-azul .inicio__hero { background: var(--color-surface); }
+
+.tema-azul .tablero__tareas .accion {
+  border-color: var(--color-border);
+  box-shadow: none;
+}
+
+.tema-azul .tablero__tareas .accion:hover { box-shadow: none; }
+
+.tema-azul .inicio-cabecera__textos p { color: var(--color-text-muted); }
+.tema-azul .inicio-cabecera__buscar { border: 1px solid var(--color-border-strong); }
+
+.tema-azul .inicio-operaciones h2,
+.tema-azul .inicio-avisos h2,
+.tema-azul .inicio-gestion h2 {
+  color: var(--color-brand-800);
+}
+
+.tema-azul .inicio-operaciones__cabecera p,
+.tema-azul .inicio-avisos__cabecera p {
+  color: var(--color-text-muted);
+}
+
+.tema-azul .inicio-operaciones__lista { border: 1px solid var(--color-border); }
+.tema-azul .inicio-operaciones--tarjetas .inicio-operaciones__lista { border: 0; }
+.tema-azul .inicio-operaciones__lista li + li { border-top: 1px solid #eef0f3; }
+.tema-azul .inicio-operaciones--tarjetas .inicio-operaciones__lista li + li { border-top: 0; }
+
+.tema-azul .inicio-operacion,
+.tema-azul .inicio-operacion:hover,
+.tema-azul .inicio-operacion:focus-visible {
+  color: var(--color-brand-800);
+}
+
+.tema-azul .inicio-operacion:focus-visible { outline: 3px solid var(--color-brand-200); }
+.tema-azul .inicio-operacion__texto span { color: var(--color-text-muted); }
+.tema-azul .inicio-operacion__flecha { color: var(--color-brand-800); }
+
+.tema-azul .inicio-avisos { border: 1px solid var(--color-border); }
+.tema-azul .inicio-avisos__cabecera { border-bottom: 1px solid #eef0f3; }
+
+.tema-azul .inicio-gestion {
+  border-top: 1px solid var(--color-brand-800);
+  background: var(--color-brand-50);
+}
+
+.tema-azul .inicio-gestion li + li { border-top: 1px solid var(--color-border); }
+.tema-azul .inicio-gestion a { color: var(--color-brand-800); }
+.tema-azul .inicio-gestion a:hover { color: var(--color-brand-900); }
+
+.tema-azul .inicio-docente__busqueda {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.tema-azul .inicio-docente__busqueda label { color: var(--color-brand-800); }
+
+/* ---------- pages/insumos.css: «Buscar producto» y la ficha ---------- */
+.tema-azul .resultados {
+  border: 1px solid var(--color-border);
+  box-shadow: none;
+}
+
+.tema-azul .resultados > li + li { border-top: 1px solid #eef0f3; }
+.tema-azul .resultado__foto { background: var(--color-surface); }
+
+.tema-azul .consulta-productos {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.tema-azul .consulta-productos .buscar__etiqueta { color: var(--color-brand-800); }
+.tema-azul .consulta-productos .buscar__icono { background: var(--color-brand-100); }
+.tema-azul .consulta-productos .buscar__barra { border-top: 1px solid var(--color-border); }
+
+.tema-azul .resultados__cabecera h2 { color: var(--color-brand-800); }
+.tema-azul .resultados__cabecera span { color: var(--color-text-muted); }
+
+.tema-azul .resultado:focus-visible { outline: 3px solid var(--color-brand-200); }
+.tema-azul .resultado__nombre { color: var(--color-brand-800); }
+
+.tema-azul .producto { border-color: var(--color-border); }
+
+.tema-azul .producto__foto {
+  border-right: 1px solid var(--color-border);
+  background: var(--color-bg);
+}
+
+@media (max-width: 40em) {
+  .tema-azul .producto__foto {
+    border-right: 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+}
+
+/* ---------- pages/herramientas.css: solicitudes, formulario y práctica de invierno ---------- */
+.tema-azul .solicitud-fila { border-color: var(--color-border); }
+.tema-azul .pedir__herramienta.is-elegida { background: var(--color-brand-50); }
+
+.tema-azul .pedir__solicitante {
+  background: var(--color-brand-50);
+  color: var(--color-brand-700);
+}
+
+.tema-azul .pedir__grupos { border: 1px solid var(--color-border); }
+
+.tema-azul .pedir__categoria {
+  background: var(--color-brand-50);
+  color: var(--color-brand-800);
+}
+
+.tema-azul .pedir__herramientas li + li { border-top: 1px solid #eef0f3; }
+
+.tema-azul .invierno__grupo { border-color: var(--color-border); }
+.tema-azul .invierno__grupo .card-header { background: var(--color-brand-50); }
+
+.tema-azul .solicitudes { border: 1px solid var(--color-border); }
+.tema-azul .solicitudes > li + li { border-top: 1px solid #eef0f3; }
+.tema-azul .solicitud-fila:focus-visible { outline: 3px solid var(--color-brand-200); }

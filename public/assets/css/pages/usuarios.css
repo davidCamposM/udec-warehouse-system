@@ -1,13 +1,17 @@
 /* ==========================================================
-   Usuarios: la lista de cuentas de docentes y administrativas.
+   Usuarios: la lista de cuentas de docentes, administrativas y operadores.
    Lo común (tarjeta, tabla, pastillas, estado) sale de components/basico.css.
    ========================================================== */
+/* Los filtros: el selector compacto (.segmento, en basico.css), del ancho de su contenido. */
 .usuarios__filtros {
+  width: fit-content;
+  max-width: 100%;
   margin-bottom: var(--space-4);
 }
 
 .usuarios__nombre {
   display: block;
+  line-height: 1.35;
 }
 
 .usuarios__email {
@@ -15,16 +19,29 @@
   font-size: var(--text-sm);
 }
 
+.usuarios__tabla { font-variant-numeric: tabular-nums; }
+
+/* Tabla compacta: filas más bajas, la fecha en una línea y los botones en una fila. */
+.usuarios__tabla th,
 .usuarios__tabla td {
+  padding-block: var(--space-3);
   vertical-align: middle;
 }
 
+.usuarios__tabla tbody tr + tr td { border-top: 1px solid var(--color-border); }
+.usuarios__tabla tbody tr:hover,
+.usuarios__tabla tbody tr:focus-within { background: var(--color-hover); }
+
+.usuarios__fecha { white-space: nowrap; font-size: var(--text-sm); }
+
 .usuarios__acciones {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   justify-content: flex-end;
-  gap: var(--space-2);
+  gap: var(--space-1);
 }
+
+.usuarios__acciones form { margin: 0; }
 
 /* ---------- El enlace para compartir: el enlace y, debajo, «Copiar enlace» ---------- */
 .enlace {
