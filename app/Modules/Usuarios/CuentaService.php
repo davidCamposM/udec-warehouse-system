@@ -231,19 +231,29 @@ final class CuentaService
     }
 
     /**
-     * Crea un enlace para la cuenta, con el correo que lo lleva. Sin contraseña todavía, o si lo pide el encargado
-     * ($largo, para compartirlo con calma), vence en días; si la persona lo pide desde el login para recuperar su
-     * contraseña, en minutos.
+     * Crea un enlace para la cuenta, con el correo que lo lleva.
+     * - El que da el administrador ($delAdministrador: «Dar enlace» o al agregar a la persona) es único y corto: los
+     *   anteriores de esa cuenta dejan de servir y este vence en auth.enlace_compartir_minutos (15). Lo entrega él
+     *   mismo a la persona indicada, así que no hace falta que dure más.
+     * - El que se pide desde el login (solo con correo configurado) vence en días la primera vez y en minutos para
+     *   recuperar la contraseña.
      *
      * @param array<string, mixed> $cuenta fila de usuarios
      * @return array{enlace: string, vence: DateTimeImmutable, primera_vez: bool, asunto: string, texto: string}
      */
-    private function crearEnlace(array $cuenta, bool $largo): array
+    private function crearEnlace(array $cuenta, bool $delAdministrador): array
     {
         $primeraVez = $cuenta['password_hash'] === null;
-        $vence = $primeraVez || $largo
-            ? new DateTimeImmutable('+' . max(1, (int) Config::get('auth.enlace_activar_dias', 7)) . ' days')
-            : new DateTimeImmutable('+' . max(5, (int) Config::get('auth.enlace_recuperar_minutos', 60)) . ' minutes');
+        $vence = match (true) {
+            $delAdministrador => new DateTimeImmutable('+' . max(1, (int) Config::get('auth.enlace_compartir_minutos', 15)) . ' minutes'),
+            $primeraVez => new DateTimeImmutable('+' . max(1, (int) Config::get('auth.enlace_activar_dias', 7)) . ' days'),
+            default => new DateTimeImmutable('+' . max(5, (int) Config::get('auth.enlace_recuperar_minutos', 60)) . ' minutes'),
+        };
+
+        if ($delAdministrador) {
+            // Único: el enlace nuevo reemplaza a cualquier otro que la cuenta tuviera sin usar.
+            $this->enlaces->usarTodos((int) $cuenta['id']);
+        }
 
         $codigo = bin2hex(random_bytes(32));
         $this->enlaces->crear((int) $cuenta['id'], hash('sha256', $codigo), $vence->format('Y-m-d H:i:s'));

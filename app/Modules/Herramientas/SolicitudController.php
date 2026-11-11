@@ -10,8 +10,6 @@ use App\Core\Request;
 use App\Core\Response;
 use App\Core\Session;
 use App\Core\Url;
-use App\Core\View;
-use App\Modules\Panel\Inicio;
 
 defined('APP_ROOT') || exit;
 
@@ -33,10 +31,10 @@ final class SolicitudController
     {
         $enviada = Session::getFlash('solicitud_enviada');
         if (is_int($enviada) && ($ficha = $this->solicitudes->ficha($enviada)) !== null) {
-            return $this->ventana('listo', $ficha);
+            return $this->pagina('listo', $ficha);
         }
 
-        return $this->ventana('formulario', [
+        return $this->pagina('formulario', [
             // Solo las que tiene la bodega: de las sin unidades no hay nada que pedir.
             'grupos' => (new HerramientaService())->porCategoria(soloConUnidades: true),
             'nombre' => (string) (Auth::user()['nombre'] ?? ''),
@@ -82,17 +80,21 @@ final class SolicitudController
 
     // ---------- Apoyo ----------
 
-    /** @param array<string, mixed> $datos los de la vista Herramientas::solicitar/{$vista} */
-    private function ventana(string $vista, array $datos): Response
+    /**
+     * «Solicitar herramientas» es una página propia, no una ventana sobre el inicio: el formulario es largo (decenas
+     * de herramientas) y en una ventana quedaba con un desplazamiento dentro de otro. Así se desplaza solo la página.
+     *
+     * @param array<string, mixed> $datos los de la vista Herramientas::solicitar/{$vista}
+     */
+    private function pagina(string $vista, array $datos): Response
     {
-        return Inicio::conVentana(
-            'solicitar-herramientas',
-            'Indica la actividad, las fechas y las herramientas.',
-            View::render("Herramientas::solicitar/{$vista}", $datos, null),
-            ['css/pages/herramientas.css'],
-            ['js/modules/herramientas.js'],
-            ancha: true,
-        );
+        return Response::view("Herramientas::solicitar/{$vista}", $datos + [
+            'titulo' => 'Solicitar herramientas',
+            // Más ancha que las demás páginas: caben cuatro columnas de herramientas y la lista queda en una plana.
+            'amplia' => true,
+            'estilos' => ['css/pages/herramientas.css'],
+            'scripts' => ['js/modules/herramientas.js'],
+        ]);
     }
 
     /**

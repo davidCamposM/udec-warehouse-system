@@ -1217,3 +1217,144 @@
   margin: 0;
   color: var(--color-text-muted);
 }
+
+/* ---------- «Solicitar herramientas» como página (no en una ventana) ----------
+   Un solo desplazamiento, el de la página: la lista de herramientas va completa (sin caja con su propia barra) y las
+   categorías bajan de línea en vez de desplazarse de lado. Los botones quedan pegados abajo mientras se recorre. */
+.pedir--pagina {
+  display: block;
+  padding: var(--space-5);
+  /* visible: con «hidden» (el de .card) los botones no podrían quedar pegados abajo */
+  overflow: visible;
+}
+
+/* La hoja ya va dentro de la tarjeta de la página: sin un segundo recuadro */
+.pedir--pagina .hoja--formulario {
+  padding: 0;
+  border: 0;
+  box-shadow: none;
+  background: none;
+}
+
+.pedir--pagina .pedir__grupos {
+  max-height: none;
+  overflow: visible;
+}
+
+.pedir--pagina .buscador-herramientas__grupos {
+  flex-wrap: wrap;
+  overflow: visible;
+  border-radius: var(--radius-md);
+}
+
+/* ---------- Todo en una plana ----------
+   Se ve una categoría a la vez (herramientas.js), y sus herramientas van en varias columnas: la más larga (25) ocupa
+   9 filas en un computador, en vez de 57 filas una bajo otra. Los datos de la solicitud, en una sola fila. */
+@media (min-width: 75em) {
+  /* «Autoriza el retiro a (opcional)» es la etiqueta más larga: su columna es más ancha que las de las fechas, así
+     la etiqueta y el texto de ejemplo caben sin salirse */
+  .pedir--pagina .pedir__datos { grid-template-columns: repeat(12, minmax(0, 1fr)); }
+  .pedir--pagina .pedir__departamento { grid-column: span 2; }
+  .pedir--pagina .pedir__actividad { grid-column: span 3; }
+  .pedir--pagina .pedir__retiro,
+  .pedir--pagina .pedir__recepcion { grid-column: span 2; }
+  .pedir--pagina .pedir__autoriza { grid-column: span 3; }
+
+  /* Con los datos en una fila, cada etiqueta va en una línea: los campos quedan alineados */
+  .pedir--pagina .pedir__datos .form-label { white-space: nowrap; }
+}
+
+@media (min-width: 64em) {
+
+  /* El buscador y las categorías, en la misma fila */
+  .pedir--pagina .buscador-herramientas {
+    grid-template-columns: minmax(14rem, 20rem) minmax(0, 1fr);
+    align-items: center;
+    gap: var(--space-4);
+  }
+}
+
+.pedir--pagina .pedir__herramientas {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+  column-gap: var(--space-5);
+}
+
+/* Filas bajas: el nombre y «N en bodega» en dos líneas cortas, con − 0 + a la derecha */
+.pedir--pagina .pedir__nombre { line-height: 1.25; }
+
+/* En columnas, la línea va bajo cada herramienta (entre filas), no sobre «la siguiente» */
+.pedir--pagina .pedir__herramientas li + li { border-top: 0; }
+.pedir--pagina .pedir__herramienta,
+.pedir--pagina .pedir__herramienta:hover,
+.pedir--pagina .pedir__herramienta.is-elegida {
+  min-height: 3rem;
+  /* Todas las de una fila miden lo mismo: sus líneas de abajo quedan alineadas */
+  height: 100%;
+  border-bottom: 1px solid #eef0f3;
+}
+
+/* Lo que se lleva se distingue de un vistazo: fondo suave y una marca del color del sistema a la izquierda */
+.pedir--pagina .pedir__herramienta.is-elegida { box-shadow: inset 3px 0 0 var(--color-brand-800); }
+
+/* En el celular, las categorías en una sola fila que se desliza con el dedo (sin barra a la vista) */
+@media (max-width: 40em) {
+  .pedir--pagina .buscador-herramientas__grupos {
+    flex-wrap: nowrap;
+    width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .pedir--pagina .buscador-herramientas__grupos::-webkit-scrollbar { display: none; }
+}
+
+.pedir--pagina .pedir__acciones {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  margin: var(--space-4) calc(-1 * var(--space-5)) calc(-1 * var(--space-5));
+  padding: var(--space-3) var(--space-5);
+  border-top: 1px solid var(--color-border);
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  background: var(--color-surface);
+}
+
+/* Cantidad: − y + como botones blancos con borde (como en las ventanas), no rellenos: con decenas de filas, una columna
+   de botones azules pesaría más que los nombres de las herramientas */
+.pedir--pagina .stepper__button {
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  box-shadow: none;
+  color: var(--color-text);
+}
+
+.pedir--pagina .stepper__button:hover {
+  background: var(--color-hover);
+  color: var(--color-text);
+  filter: none;
+}
+
+.pedir--pagina .stepper__input {
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+/* El aviso «Listo» fuera de una ventana, en los colores del sistema */
+.pedir--pagina .listo {
+  border-color: var(--color-brand-200);
+  background: var(--color-brand-50);
+}
+
+@media (max-width: 40em) {
+  .pedir--pagina { padding: var(--space-4); }
+
+  .pedir--pagina .pedir__acciones {
+    margin: var(--space-4) calc(-1 * var(--space-4)) calc(-1 * var(--space-4));
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .pedir--pagina .pedir__acciones .btn { flex: 1 1 auto; }
+}

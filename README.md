@@ -12,7 +12,7 @@ nombre del producto.
 
 ## Requisitos
 
-- PHP 8.4 o superior, con las extensiones `pdo_mysql`, `mbstring`, `zip` e `intl`
+- PHP 8.4 o superior, con las extensiones `pdo_mysql`, `mbstring`, `ctype` e `iconv`
 - MySQL 8 o MariaDB
 - Apache con `mod_rewrite` y `.htaccess` habilitados
 

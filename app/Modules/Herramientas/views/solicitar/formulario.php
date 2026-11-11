@@ -5,25 +5,30 @@ use App\Support\Fecha;
 
 defined('APP_ROOT') || exit;
 
-// «Solicitar herramientas»: datos esenciales en dos filas y catálogo acotado dentro de la ventana.
+// «Solicitar herramientas», una página propia (no una ventana): los datos esenciales arriba y el catálogo completo
+// debajo, que se desplaza con la página.
 // - Los datos: departamento, funcionario de la cuenta, actividad, fechas y quién retira.
-// - Los detalles: el buscador, las categorías y una línea por herramienta con sus unidades (− y +), varias por fila.
-//   La elegida se marca y abajo se ve el total que se lleva (herramientas.js). Las que quedan en 0 no se piden. Junto
-//   al nombre, cuántas hay en bodega hoy; el + llega hasta las que tiene la bodega (pueden volver antes del retiro).
-//   «Estado en la recepción» lo anota la bodega al recibir.
+// - Los detalles: el buscador, las categorías y una línea por herramienta con sus unidades (− y +).
+//   La elegida se marca y la pastilla «Elegidas» dice cuántas lleva (herramientas.js). Las que quedan en 0 no se
+//   piden. Junto al nombre, cuántas hay en bodega hoy; el + llega hasta las que tiene la bodega (pueden volver antes
+//   del retiro). «Estado en la recepción» lo anota la bodega al recibir.
+// - Los botones quedan a la vista abajo mientras se recorre la lista (.pedir__acciones).
 $hoy = Fecha::hoy();
 $departamento = old('departamento');
 $invalido = static fn (string $campo): string => error_de($campo) !== null ? ' is-invalid' : '';
 ?>
-<form class="pedir form-bs" method="post" action="<?= e(url('herramientas/solicitar')) ?>" data-submit-once>
+<?= partial('encabezado', [
+    'volver' => [url(), 'Volver al inicio'],
+    'tarea' => 'solicitar-herramientas',
+    'titulo' => 'Solicitar herramientas',
+    // Quién solicita (el funcionario de la cuenta) va aquí, en una línea, para no gastar una fila del formulario.
+    'texto' => "Solicita: {$nombre}. Indica la actividad, las fechas y las herramientas.",
+]) ?>
+
+<form class="pedir pedir--pagina form-bs card card-body" method="post" action="<?= e(url('herramientas/solicitar')) ?>" data-submit-once>
     <?= csrf_field() ?>
 
     <div class="hoja hoja--formulario">
-        <p class="pedir__solicitante">
-            <span>Nombre del funcionario</span>
-            <strong><?= e($nombre) ?></strong>
-        </p>
-
         <div class="pedir__datos">
             <fieldset class="form-group pedir__departamento">
                 <legend class="form-label">Departamento <span class="form-requerido" aria-hidden="true">*</span></legend>
@@ -42,7 +47,7 @@ $invalido = static fn (string $campo): string => error_de($campo) !== null ? ' i
             <div class="form-group pedir__actividad">
                 <label class="form-label" for="tipo_actividad">Tipo de actividad <span class="form-requerido" aria-hidden="true">*</span></label>
                 <input class="form-control<?= $invalido('tipo_actividad') ?>" id="tipo_actividad" name="tipo_actividad" type="text"
-                    maxlength="255" autofocus aria-required="true" placeholder="Ejemplo: Terreno de ecología en la cantera"
+                    maxlength="255" autofocus aria-required="true" placeholder="Ejemplo: terreno de ecología"
                     value="<?= e(old('tipo_actividad')) ?>" <?= aria_error('tipo_actividad') ?>>
                 <?= mensaje_error('tipo_actividad') ?>
             </div>
@@ -77,7 +82,7 @@ $invalido = static fn (string $campo): string => error_de($campo) !== null ? ' i
             </legend>
             <?= mensaje_error('detalle') ?>
 
-            <?= partial('Herramientas::partials/buscador', ['grupos' => $grupos, 'conElegidas' => true]) ?>
+            <?= partial('Herramientas::partials/buscador', ['grupos' => $grupos, 'conElegidas' => true, 'porCategoria' => true]) ?>
 
             <div class="pedir__grupos">
                 <?php foreach (array_values($grupos) as $i => $herramientas) : ?>

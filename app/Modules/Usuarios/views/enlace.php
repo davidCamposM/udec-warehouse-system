@@ -21,7 +21,8 @@ defined('APP_ROOT') || exit;
     </button>
 
     <p class="enlace__nota">
-        <?= icon('clock') ?>Sirve una sola vez y vence el <?= e($enlace['vence']) ?>.
+        <?= icon('clock') ?>Sirve una sola vez y vence a los <?= e(max(1, (int) config('auth.enlace_compartir_minutos', 15))) ?> minutos
+        (<?= e($enlace['vence']) ?>). Si no alcanza a usarlo, dale uno nuevo: el anterior deja de servir.
     </p>
     <?php if ($enlace['enviado'] === true) : ?>
         <p class="enlace__nota"><?= icon('mail') ?>También se le envió por correo.</p>

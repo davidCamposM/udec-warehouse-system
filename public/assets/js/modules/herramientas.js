@@ -48,8 +48,14 @@ import { onContentReady } from "../core/ui.js";
       if (sinResultados) sinResultados.hidden = visibles > 0;
     };
 
+    // Al solicitar (data-por-categoria) se ve una categoría a la vez, para no recorrer decenas de herramientas: parte
+    // en la primera; al escribir se busca en todas y, al borrar lo escrito, vuelve a la categoría que se estaba viendo.
+    const porCategoria = buscador?.hasAttribute("data-por-categoria") ?? false;
+    let ultimaCategoria = pastillas[0]?.dataset.verGrupo ?? "todas";
+
     const elegirGrupo = (clave) => {
       grupoElegido = clave;
+      if (clave !== "todas") ultimaCategoria = clave;
       pastillas.forEach((pastilla) => {
         const activa = pastilla.dataset.verGrupo === clave;
         pastilla.classList.toggle("is-activa", activa);
@@ -62,13 +68,21 @@ import { onContentReady } from "../core/ui.js";
       buscador.hidden = false;
       buscador.addEventListener("click", (event) => {
         const pastilla = event.target.closest("[data-ver-grupo]");
-        if (pastilla) elegirGrupo(pastilla.dataset.verGrupo);
+        if (!pastilla) return;
+        // Tocar una categoría deja la búsqueda: si no, lo escrito seguiría filtrando y la categoría se vería vacía.
+        if (porCategoria && campo) campo.value = "";
+        elegirGrupo(pastilla.dataset.verGrupo);
       });
       // Al escribir se busca en todas las categorías.
       campo?.addEventListener("input", () => {
+        if (porCategoria && campo.value.trim() === "") {
+          elegirGrupo(ultimaCategoria);
+          return;
+        }
         if (grupoElegido !== "todas") elegirGrupo("todas");
         else filtrar();
       });
+      if (porCategoria) elegirGrupo(ultimaCategoria);
       // Enter en el buscador no envía el formulario de la solicitud.
       campo?.addEventListener("keydown", (event) => {
         if (event.key === "Enter") event.preventDefault();

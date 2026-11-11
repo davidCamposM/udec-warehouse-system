@@ -50,7 +50,8 @@ return [
         'bloqueo_minutos' => 15,                // ventana en que se cuentan los fallos
         'retencion_intentos_dias' => 90,        // el registro de accesos se borra pasado este plazo
         'dominios' => ['udec.cl', 'gmail.com'], // solo se agregan cuentas con correo de estos dominios ([]: cualquiera)
-        'enlace_activar_dias' => 7,             // el enlace para crear la contraseña la primera vez
+        'enlace_compartir_minutos' => 15,       // el enlace que da el administrador («Dar enlace»): único y corto
+        'enlace_activar_dias' => 7,             // el enlace para crear la contraseña la primera vez (pedido por correo)
         'enlace_recuperar_minutos' => 60,       // el enlace para recuperar una contraseña olvidada
         'enlaces_por_hora' => 3,                // enlaces que se pueden pedir por correo en una hora
     ],
