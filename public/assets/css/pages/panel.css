@@ -1344,6 +1344,9 @@ a.aviso-fila:hover .aviso-fila__ver .icon {
 
 .inventario__cabecera .inventario__total { flex: none; margin-left: auto; }
 
+/* «Stock referencial»: la nota gris sobre la lista (.nota-sutil), pegada a ella. */
+.inventario__nota { margin: 0 0 var(--space-3); }
+
 @media (prefers-reduced-motion: reduce) {
   .inventario__categoria { transition: none; }
 }

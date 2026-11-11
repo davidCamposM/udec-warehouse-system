@@ -16,16 +16,18 @@ final class Auth
 {
     public const CLAVE = '_usuario';
 
-    /** @var (Closure(int): ?array{id: int, nombre: string, email: string, perfil: string})|null */
+    /** @var (Closure(int): ?array{id: int, nombre: string, email: string, perfil: string, docente: bool, huella: string})|null */
     private static ?Closure $resolver = null;
 
     private static bool $revocada = false;
+
+    private static bool $claveCambiada = false;
 
     /**
      * Función que entrega los datos vigentes del usuario por su id, o null si ya no puede ingresar
      * (desactivado). La enlaza app/bootstrap.php, así el núcleo no depende del módulo Usuarios.
      *
-     * @param Closure(int): ?array{id: int, nombre: string, email: string, perfil: string} $resolver
+     * @param Closure(int): ?array{id: int, nombre: string, email: string, perfil: string, docente: bool, huella: string} $resolver
      */
     public static function resolveUsing(Closure $resolver): void
     {
@@ -33,8 +35,8 @@ final class Auth
     }
 
     /**
-     * Recarga al usuario de la sesión en cada petición: si lo desactivaron, su sesión se cierra en
-     * ese momento; si le cambiaron el perfil o el nombre, se aplica sin que tenga que volver a ingresar.
+     * Recarga al usuario de la sesión en cada petición: si lo desactivaron o le cambiaron la contraseña, su sesión se
+     * cierra en ese momento; si le cambiaron el perfil o el nombre, se aplica sin que tenga que volver a ingresar.
      */
     public static function refresh(): void
     {
@@ -53,6 +55,15 @@ final class Auth
             return;
         }
 
+        // Sesión iniciada con la contraseña anterior. Una sesión de antes de que existiera la huella no se cierra:
+        // solo la toma.
+        if (isset($usuario['huella']) && !hash_equals((string) $usuario['huella'], $vigente['huella'])) {
+            Session::reiniciar();
+            self::$claveCambiada = true;
+
+            return;
+        }
+
         if ($vigente !== $usuario) {
             Session::put(self::CLAVE, $vigente);
         }
@@ -64,10 +75,16 @@ final class Auth
         return self::$revocada;
     }
 
+    /** En esta petición se cerró la sesión porque la contraseña cambió desde que se inició. */
+    public static function passwordChanged(): bool
+    {
+        return self::$claveCambiada;
+    }
+
     /**
      * Cambia el id de sesión y el token CSRF para evitar la fijación de sesión.
      *
-     * @param array{id: int, nombre: string, email: string, perfil: string} $usuario
+     * @param array{id: int, nombre: string, email: string, perfil: string, docente: bool, huella: string} $usuario
      */
     public static function login(array $usuario): void
     {
@@ -78,6 +95,8 @@ final class Auth
             'nombre' => (string) $usuario['nombre'],
             'email' => (string) $usuario['email'],
             'perfil' => (string) $usuario['perfil'],
+            'docente' => (bool) $usuario['docente'],
+            'huella' => (string) $usuario['huella'],
         ]);
     }
 
@@ -91,7 +110,7 @@ final class Auth
         return self::user() !== null;
     }
 
-    /** @return array{id: int, nombre: string, email: string, perfil: string}|null */
+    /** @return array{id: int, nombre: string, email: string, perfil: string, docente?: bool, huella?: string}|null */
     public static function user(): ?array
     {
         $usuario = Session::get(self::CLAVE);
@@ -107,5 +126,11 @@ final class Auth
     public static function perfil(): ?string
     {
         return self::user()['perfil'] ?? null;
+    }
+
+    /** Solicita herramientas como docente: los docentes y el administrador marcado con tambien_docente. */
+    public static function esDocente(): bool
+    {
+        return (bool) (self::user()['docente'] ?? self::perfil() === 'docente');
     }
 }

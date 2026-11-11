@@ -4,7 +4,9 @@
    - Tras data-aviso segundos sin uso aparece la ventana, con la cuenta regresiva de data-respuesta segundos.
      «Sí, sigo aquí» avisa al servidor y cierra la ventana; «No», o que la cuenta llegue a 0, cierra la sesión.
    - Las pestañas comparten el último uso (localStorage): una pestaña quieta no cierra la sesión si en otra se trabaja.
-   - Si el computador estuvo suspendido más que todo ese tiempo, al volver la sesión se cierra de inmediato. */
+   - Si el computador estuvo suspendido más que todo ese tiempo, al volver la sesión se cierra de inmediato.
+   - Cada 10 segundos (y al volver a la pestaña) pregunta de fondo si la sesión sigue abierta: si la contraseña cambió,
+     la pestaña se va al login con el aviso «Contraseña cambiada. Ingrese nuevamente.». */
 import { ApiError, goToLogin, request } from "./api.js";
 
 const HTTP_FORBIDDEN = 403;
@@ -18,6 +20,7 @@ const HTTP_FORBIDDEN = 403;
   const AVISO = Number(ventana.dataset.aviso) * 1000;
   const RESPUESTA = Number(ventana.dataset.respuesta) * 1000;
   const CADA_AVISO_AL_SERVIDOR = 2 * 60 * 1000;
+  const REVISAR_SESION = 10 * 1000;
   const CLAVE = "bodega-ultimo-uso";
 
   const formulario = ventana.querySelector("[data-sesion-salir]");
@@ -99,6 +102,26 @@ const HTTP_FORBIDDEN = 403;
     }
   };
 
+  // ¿La sesión sigue abierta? Si la contraseña cambió o la cuenta se
+  // eliminó, el servidor ya la cerró: la pestaña se va al login, que dice por qué. Es de fondo: no cuenta como uso.
+  let preguntando = false;
+  const revisarSesion = async () => {
+    if (cerrando || preguntando || document.hidden) return;
+    preguntando = true;
+    try {
+      await request(ventana.dataset.estadoUrl, { background: true });
+    } catch (error) {
+      if (error instanceof ApiError && error.isUnauthenticated && !cerrando) {
+        cerrando = true;
+        avisarCierre();
+        goToLogin(error);
+      }
+      // Sin conexión: se pregunta de nuevo en la próxima vuelta.
+    } finally {
+      preguntando = false;
+    }
+  };
+
   sigo.addEventListener("click", () => {
     ultimoUso = Date.now();
     guardarCompartido(ultimoUso);
@@ -120,7 +143,10 @@ const HTTP_FORBIDDEN = 403;
 
   guardarCompartido(ultimoUso);
   window.setInterval(revisar, 1000);
+  window.setInterval(revisarSesion, REVISAR_SESION);
   document.addEventListener("visibilitychange", () => {
-    if (!document.hidden) revisar();
+    if (document.hidden) return;
+    revisar();
+    revisarSesion();
   });
 })();

@@ -75,7 +75,9 @@ final class Tareas
     {
         return $tarea['ruta'] !== null
             && Permission::can($tarea['permiso'])
-            && (!isset($tarea['perfiles']) || in_array(Auth::perfil(), $tarea['perfiles'], true));
+            && (!isset($tarea['perfiles']) || in_array(Auth::perfil(), $tarea['perfiles'], true)
+                // El administrador que también hace clases (tambien_docente) ve además las tareas del docente.
+                || (in_array('docente', $tarea['perfiles'], true) && Auth::esDocente()));
     }
 
     /** @return list<array{clave: string, texto: string, descripcion: string, ruta: ?string, icono: string, color: string, permiso: string, boton?: bool}> */

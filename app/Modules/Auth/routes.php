@@ -24,3 +24,4 @@ $router->get('/clave/{codigo}', [ClaveController::class, 'formulario'], Permissi
 $router->post('/clave/{codigo}', [ClaveController::class, 'guardar'], Permission::PUBLICO);
 $router->post('/logout', [LoginController::class, 'logout'], Permission::AUTENTICADO);
 $router->post('/sesion/seguir', [LoginController::class, 'seguir'], Permission::AUTENTICADO);
+$router->get('/sesion/estado', [LoginController::class, 'estado'], Permission::AUTENTICADO);

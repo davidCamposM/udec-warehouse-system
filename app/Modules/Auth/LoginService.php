@@ -27,7 +27,7 @@ final class LoginService
     }
 
     /**
-     * @return array{usuario: array{id: int, nombre: string, email: string, perfil: string}, acceso_anterior: ?string}
+     * @return array{usuario: array{id: int, nombre: string, email: string, perfil: string, docente: bool, huella: string}, acceso_anterior: ?string}
      * @throws LoginException con el mensaje para el usuario
      */
     public function autenticar(string $email, string $password, string $ip): array
@@ -61,7 +61,9 @@ final class LoginService
         $this->intentos->purgarAntiguos((int) Config::get('auth.retencion_intentos_dias', 90));
 
         return [
-            'usuario' => UsuarioService::datosSesion($usuario),
+            // Recargada: verificarPassword() puede haber renovado el hash, y la huella de la sesión debe ser la nueva
+            // (con la anterior, la sesión se cerraría como si hubieran cambiado la contraseña).
+            'usuario' => $this->usuarios->buscarParaSesion((int) $usuario['id']) ?? UsuarioService::datosSesion($usuario),
             'acceso_anterior' => $usuario['ultimo_acceso'],
         ];
     }

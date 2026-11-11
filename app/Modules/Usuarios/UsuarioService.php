@@ -179,7 +179,7 @@ final class UsuarioService
     /**
      * Datos vigentes para la sesión, o null si la cuenta ya no puede ingresar.
      *
-     * @return array{id: int, nombre: string, email: string, perfil: string}|null
+     * @return array{id: int, nombre: string, email: string, perfil: string, docente: bool, huella: string}|null
      */
     public function buscarParaSesion(int $id): ?array
     {
@@ -190,9 +190,12 @@ final class UsuarioService
 
     /**
      * Lo que se guarda del usuario en la sesión: nunca el hash ni otros datos que no se usen.
+     * - huella: un resumen de la contraseña guardada (no la contraseña ni su hash). Si cambia (la persona usó un enlace
+     *   o se cambió en phpMyAdmin), las sesiones abiertas con la contraseña anterior se cierran (Auth::refresh).
+     * - docente: también solicita herramientas (un docente, o un administrador marcado con tambien_docente).
      *
      * @param array<string, mixed> $usuario fila de `usuarios`
-     * @return array{id: int, nombre: string, email: string, perfil: string}
+     * @return array{id: int, nombre: string, email: string, perfil: string, docente: bool, huella: string}
      */
     public static function datosSesion(array $usuario): array
     {
@@ -201,6 +204,8 @@ final class UsuarioService
             'nombre' => (string) $usuario['nombre'],
             'email' => (string) $usuario['email'],
             'perfil' => (string) $usuario['perfil'],
+            'docente' => $usuario['perfil'] === 'docente' || (int) ($usuario['tambien_docente'] ?? 0) === 1,
+            'huella' => substr(hash('sha256', (string) ($usuario['password_hash'] ?? '')), 0, 16),
         ];
     }
 

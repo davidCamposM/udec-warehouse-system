@@ -82,4 +82,14 @@ final class LoginController
     {
         return Response::ok();
     }
+
+    /**
+     * La página pregunta, de fondo, si su sesión sigue abierta (sesion.js, cada pocos segundos). Basta con llegar aquí:
+     * si la contraseña cambió o la cuenta se eliminó, Auth::refresh() ya la cerró y la respuesta es 401, con la
+     * dirección del login. No renueva la actividad (es de fondo).
+     */
+    public function estado(Request $request): Response
+    {
+        return Response::ok();
+    }
 }

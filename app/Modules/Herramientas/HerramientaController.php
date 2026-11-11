@@ -40,7 +40,7 @@ final class HerramientaController
             'estado' => $estado,
             'conteo' => $this->herramientas->contarPorEstado(),
             'puedeAdministrar' => $administrar,
-            'puedeSolicitar' => Permission::can('herramientas.solicitar') && Auth::perfil() === 'docente',
+            'puedeSolicitar' => Permission::can('herramientas.solicitar') && Auth::esDocente(),
             'estilos' => ['css/pages/herramientas.css'],
             'scripts' => ['js/modules/herramientas.js'],
         ]);

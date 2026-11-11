@@ -38,6 +38,12 @@ final class App
         try {
             Session::start(!$request->isBackground());
             Auth::refresh();
+            // La contraseña cambió desde que se inició la sesión: se cerró, y el login lo dice en verde, como
+            // «Cerraste sesión correctamente». Va aquí y no solo al pedir el login, porque la petición que lo descubre
+            // puede ser una de fondo (sesion.js) o una página pública.
+            if (Auth::passwordChanged()) {
+                Session::flash('exito', 'Contraseña cambiada. Ingrese nuevamente.');
+            }
 
             $ruta = $this->router->match($request->method(), $request->path());
             $request = $request->withParams($ruta['parametros']);
@@ -132,6 +138,7 @@ final class App
         // Sin sesión: al login, recordando a dónde quería ir.
         if ($estado === 401) {
             $aviso = match (true) {
+                Auth::passwordChanged() => null,
                 Session::expired() => 'Tu sesión se cerró por inactividad. Vuelve a ingresar.',
                 Auth::revoked() => 'Tu cuenta fue desactivada. Habla con el encargado de bodega.',
                 // La raíz es la entrada natural al sistema: ahí el login no necesita explicación.

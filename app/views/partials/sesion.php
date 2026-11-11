@@ -14,7 +14,7 @@ $respuesta = max(10, (int) Config::get('session.respuesta_segundos', 60));
 ?>
 <dialog class="sesion" aria-labelledby="sesion-titulo" aria-describedby="sesion-texto"
     data-sesion data-aviso="<?= e($aviso) ?>" data-respuesta="<?= e($respuesta) ?>"
-    data-seguir-url="<?= e(url('sesion/seguir')) ?>">
+    data-seguir-url="<?= e(url('sesion/seguir')) ?>" data-estado-url="<?= e(url('sesion/estado')) ?>">
     <span class="sesion__icono"><?= icon('clock') ?></span>
     <h2 class="sesion__titulo" id="sesion-titulo">¿Sigues ahí?</h2>
     <p class="sesion__texto" id="sesion-texto">
