@@ -92,7 +92,10 @@ final class Response
     /** @return array<string, string> */
     private static function cabecerasSeguridad(): array
     {
-        return [
+        // Con HTTPS (app.https), el navegador recuerda por un año que el sistema solo se abre cifrado (HSTS).
+        $hsts = Config::get('app.https', false) ? ['Strict-Transport-Security' => 'max-age=31536000'] : [];
+
+        return $hsts + [
             'X-Content-Type-Options' => 'nosniff',
             'X-Frame-Options' => 'DENY',
             'Referrer-Policy' => 'same-origin',

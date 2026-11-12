@@ -3,6 +3,19 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
+    # En el servidor, toda petición por http:// pasa a https:// (la contraseña nunca viaja sin cifrar).
+    # En el equipo de desarrollo (localhost, e2e.localhost) no se redirige.
+    # Se usa la dirección original de la petición (THE_REQUEST, sin los
+    # parámetros, que Apache vuelve a agregar solo): el .htaccess de la raíz ya le agregó public/.
+    RewriteCond %{HTTPS} !=on
+    RewriteCond %{HTTP_HOST} !^(localhost|e2e\.localhost|127\.0\.0\.1)(:[0-9]+)?$ [NC]
+    RewriteCond %{THE_REQUEST} ^\S+\s+([^?\s]*)
+    RewriteRule ^ https://%{HTTP_HOST}%1 [R=301,L,NE]
+
+    # Las carpetas de assets/ no se listan: pedir una carpeta responde 404 (el servidor tiene el listado activo).
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^assets(/.*)?$ - [R=404,L]
+
     # Los scripts del sistema (módulos ES) se piden con la versión en la ruta: assets/v1731283200/js/core/ui.js es
     # assets/js/core/ui.js. Ver Url::modulo.
     RewriteRule ^assets/v[0-9]+/(js/.+\.js)$ assets/$1 [L]
@@ -10,4 +23,14 @@
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule ^ index.php [L]
+</IfModule>
+
+# Cabeceras de seguridad también para los archivos estáticos (CSS, JS, imágenes, fuentes), que Apache entrega sin
+# pasar por PHP. Las páginas del sistema ya las traen desde Response.php. Si el servidor no tiene mod_headers, este
+# bloque se ignora sin error.
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "DENY"
+    Header set Referrer-Policy "same-origin"
+    Header set Strict-Transport-Security "max-age=31536000" "expr=%{HTTPS} == 'on'"
 </IfModule>
