@@ -25,12 +25,14 @@
     RewriteRule ^ index.php [L]
 </IfModule>
 
-# Cabeceras de seguridad también para los archivos estáticos (CSS, JS, imágenes, fuentes), que Apache entrega sin
-# pasar por PHP. Las páginas del sistema ya las traen desde Response.php. Si el servidor no tiene mod_headers, este
-# bloque se ignora sin error.
+# Cabeceras de seguridad para los archivos estáticos (CSS, JS, imágenes, fuentes), que Apache entrega sin pasar por
+# PHP. Solo a ellos: las páginas del sistema ya las traen desde Response.php y, con PHP-FPM, repetirlas aquí las
+# duplicaba. Si el servidor no tiene mod_headers, este bloque se ignora sin error.
 <IfModule mod_headers.c>
-    Header set X-Content-Type-Options "nosniff"
-    Header set X-Frame-Options "DENY"
-    Header set Referrer-Policy "same-origin"
-    Header set Strict-Transport-Security "max-age=31536000" "expr=%{HTTPS} == 'on'"
+    <FilesMatch "\.(css|js|mjs|png|jpe?g|gif|svg|webp|ico|woff2?|ttf|otf|map)$">
+        Header set X-Content-Type-Options "nosniff"
+        Header set X-Frame-Options "DENY"
+        Header set Referrer-Policy "same-origin"
+        Header set Strict-Transport-Security "max-age=31536000" "expr=%{HTTPS} == 'on'"
+    </FilesMatch>
 </IfModule>
