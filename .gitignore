@@ -38,3 +38,13 @@ desktop.ini
 *.swp
 ~$*
 .~lock.*
+
+# Herramientas del computador de desarrollo y carpetas vacías: quedan solo en local
+/bin/empaquetar.sh
+/bin/cambiar-claves.sh
+/app/Modules/Avisos/.gitkeep
+/app/Modules/Codigos/.gitkeep
+/app/Modules/Configuracion/.gitkeep
+/app/Modules/Inventario/.gitkeep
+/public/assets/icons/.gitkeep
+/public/assets/sounds/.gitkeep
